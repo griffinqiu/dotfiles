@@ -19,6 +19,7 @@ Plugin 'vim-scripts/matchit.zip'
 Plugin 'vim-scripts/buftabs'
 Plugin 'scrooloose/nerdtree'
 Plugin 'scrooloose/nerdcommenter'
+Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'tpope/vim-commentary'
 Plugin 'Lokaltog/vim-easymotion'
 Plugin 'shawncplus/phpcomplete.vim'
@@ -32,7 +33,7 @@ Plugin 'vim-scripts/TwitVim'
 " Plugin 'marijnh/tern_for_vim'
 " Plugin 'OrangeT/vim-csharp'
 " Plugin 'scrooloose/syntastic'
-Plugin 'kien/ctrlp.vim'
+Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'dyng/ctrlsf.vim'
 Plugin 'groenewege/vim-less'
 Plugin 'uguu-org/vim-matrix-screensaver'
@@ -310,6 +311,20 @@ let g:NERDTreeMapPreviewVSplit = "<c-v>"
 let g:NERDTreeMapToggleHidden = "I"
 let g:NERDTreeIgnore=['\.meta$']
 let g:NERDSpaceDelims=1
+let g:NERDTreeDirArrowExpandable = '▸'
+let g:NERDTreeDirArrowCollapsible = '▾'
+
+let g:NERDTreeIndicatorMapCustom = {
+    \ "Modified"  : "✹",
+    \ "Staged"    : "✚",
+    \ "Untracked" : "✭",
+    \ "Renamed"   : "➜",
+    \ "Unmerged"  : "═",
+    \ "Deleted"   : "✖",
+    \ "Dirty"     : "✗",
+    \ "Clean"     : "✔︎",
+    \ "Unknown"   : "?"
+    \ }
 
 " Dash
 noremap <c-g> :call investigate#Investigate()<CR>
