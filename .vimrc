@@ -60,7 +60,6 @@ Plugin 'altercation/vim-colors-solarized'
 
 Plugin 'mileszs/ack.vim'
 Plugin 'yonchu/accelerated-smooth-scroll'
-Plugin 'ianva/vim-youdao-translater'
 Plugin 'fatih/vim-go'
 Plugin 'autowitch/hive.vim'
 
