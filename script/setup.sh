@@ -16,16 +16,18 @@ echo "Updating latest dot-files"
 git submodule init  &> /dev/null
 git submodule update  &> /dev/null
 
+DIR="$(dirname "$(readlink -f "$0")")"
 echo "Setup git dot-files..."
-rm -f ~/.gitconfig && ln -s .gitconfig ~/
-rm -f ~/.gitignore && ln -s .gitignore ~/
+rm -f ~/.gitconfig && ln -s $DIR/.gitconfig ~/
+rm -f ~/.gitignore_global && ln -s $DIR/.gitignore ~/.gitignore
 
 echo "Setup tmux dot-files..."
-rm -f ~/.tmux.conf && ln -s .tmux.conf ~/
+rm -f ~/.tmux.conf && ln -s $DIR/.tmux.conf ~/
 
 echo "Setup vim dot-files..."
-rm -f ~/.vimrc && ln -s .vimrc ~/
-rm -f ~/.gvimrc && ln -s .gvimrc ~/
+rm -f ~/.vim && ln -fs $DIR/.vim ~/
+rm -f ~/.vimrc && ln -s $DIR/.vimrc ~/
+rm -f ~/.gvimrc && ln -s $DIR/.gvimrc ~/
 
 echo "Updating latest vim plugins"
 vim +PluginInstall +qall
