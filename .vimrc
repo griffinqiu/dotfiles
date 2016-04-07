@@ -377,6 +377,7 @@ nnoremap N Nzzzv
 nnoremap g; g;zz
 nnoremap g, g,zz
 
+inoremap <C-e> <C-k>
 map <C-j> <C-w>j
 map <C-k> <C-w>k
 map <C-h> <C-w>h
@@ -386,7 +387,7 @@ inoremap <C-l> <right>
 inoremap <C-j> <C-o>gj
 inoremap <C-k> <C-o>gk
 
-" 强制将tab转换成空格
+" Convert all tabs to spaces
 map <leader>ct :retab<cr>
 
 " easymotion
