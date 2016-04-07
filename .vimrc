@@ -152,7 +152,7 @@ set backspace=indent,eol,start
 set matchpairs=(:),[:],{:},<:>
 set whichwrap=b,s
 
-set number
+set nonumber
 set numberwidth=4
 
 set foldmethod=marker

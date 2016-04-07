@@ -25,6 +25,9 @@ rm -f ~/.gitignore_global && ln -s $DIR/../.gitignore ~/.gitignore
 echo "Setup tmux dot-files..."
 rm -f ~/.tmux.conf && ln -s $DIR/../.tmux.conf ~/
 
+echo "Setup bashrc dot-files..."
+rm -f ~/.bashrc && ln -s $DIR/../.bashrc ~/
+
 echo "Setup vim dot-files..."
 rm -rf ~/.vim && ln -fs $DIR/../.vim ~/
 rm -f ~/.vimrc && ln -s $DIR/../.vimrc ~/
