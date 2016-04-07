@@ -5,6 +5,11 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
+# Resolve ctrl-d issue for putty
+set -o ignoreeof
+# Resolve ctrl-s issue for putty
+stty -ixon
+
 # User specific aliases and functions
 alias rm='rm -i'
 alias cp='cp -i'
