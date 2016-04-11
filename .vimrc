@@ -27,7 +27,6 @@ Plugin 'liangfeng/vimcdoc'
 Plugin 'mattn/emmet-vim'
 Plugin 'tpope/vim-surround'
 Plugin 'majutsushi/tagbar'
-Plugin 'vim-scripts/TwitVim'
 " Plugin 'tpope/vim-unimpaired'
 " Plugin 'Valloric/YouCompleteMe'
 " Plugin 'marijnh/tern_for_vim'
@@ -66,6 +65,9 @@ Plugin 'autowitch/hive.vim'
 
 " Plugin 'bling/vim-airline'
 Plugin 'edkolev/tmuxline.vim'
+if v:version >= 703
+    Plugin 'vim-scripts/TwitVim'
+endif
 
 
 call vundle#end()
@@ -330,7 +332,7 @@ let g:NERDTreeIndicatorMapCustom = {
 noremap <c-g> :call investigate#Investigate()<CR>
 let g:investigate_use_dash=1
 
-" Twitter 快捷键
+" Twitter
 let g:twitvim_browser_cmd='open'
 let g:twitvim_force_ssl=1
 nmap <silent> <leader>tt :FriendsTwitter<cr>
