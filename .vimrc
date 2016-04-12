@@ -4,13 +4,13 @@
 set nocompatible
 filetype off
 
-if (has("unix"))
-	set rtp+=~/.vim/bundle/Vundle.vim/
-	call vundle#rc()
-else
-	set rtp+=~/vimfiles/bundle/Vundle.vim/
-	call vundle#rc("~/vimfiles/bundle/")
-endif
+" if (has("unix"))
+set rtp+=~/.vim/bundle/Vundle.vim/
+call vundle#rc("~/.vim/bundle/")
+" else
+" 	set rtp+=~/vimfiles/bundle/Vundle.vim/
+" 	call vundle#rc("~/vimfiles/bundle/")
+" endif
 
 call vundle#begin()
 
