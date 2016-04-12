@@ -19,21 +19,22 @@ git submodule update
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 echo "Setup git dot-files..."
-rm -f ~/.gitconfig && ln -s $DIR/.gitconfig ~/
+rm -f ~/.gitconfig && ln -s $DIR/.gitconfig ~/.gitconfig
 rm -f ~/.gitignore_global && ln -s $DIR/.gitignore_global ~/.gitignore
 
 echo "Setup tmux dot-files.."
-rm -f ~/.tmux.conf && ln -s $DIR/.tmux.conf ~/
+rm -f ~/.tmux.conf && ln -s $DIR/.tmux.conf ~/.tmux.conf
+rm -f ~/.tmux-osx.conf && ln -s $DIR/.tmux-osx.conf ~/.tmux-osx.conf
 
 echo "Setup bashrc dot-files..."
-rm -f ~/.bashrc && ln -s $DIR/.bashrc ~/
+rm -f ~/.bashrc && ln -s $DIR/.bashrc ~/.bashrc
 
 echo "Setup vim dot-files..."
 mkdir -p ~/tmp/undofiles
 mkdir -p ~/tmp/backups
-rm -rf ~/.vim && ln -fs $DIR/.vim ~/
-rm -f ~/.vimrc && ln -s $DIR/.vimrc ~/
-rm -f ~/.gvimrc && ln -s $DIR/.gvimrc ~/
+rm -rf ~/.vim && ln -fs $DIR/.vim ~/.vim
+rm -f ~/.vimrc && ln -s $DIR/.vimrc ~/.vimrc
+rm -f ~/.gvimrc && ln -s $DIR/.gvimrc ~/.gvimrc
 
 echo "Updating latest vim plugins"
 vim +PluginInstall +qall
