@@ -22,6 +22,6 @@ alias ll='ls -l --color=auto'
 alias ls='ls --color=auto'
 alias which='alias | /usr/bin/which --tty-only --read-alias --show-dot --show-tilde'
 
-if [[ ! $TERM =~ screen ]]; then
-    exec tmux
+if command -v tmux>/dev/null; then
+    [[ ! $TERM =~ screen ]] && [ -z $TMUX ] && exec tmux
 fi
