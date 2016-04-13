@@ -1,13 +1,15 @@
-# .bashrc
+# .bash_profile
 
-# Source global definitions
-if [ -f /etc/bashrc ]; then
-	. /etc/bashrc
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+	. ~/.bashrc
 fi
 
-# Resolve ctrl-d issue for putty
+# User specific environment and startup programs
+PATH=$PATH:$HOME/bin
+export PATH
+
 set -o ignoreeof
-# Resolve ctrl-s issue for putty
 stty -ixon -ixoff
 
 # User specific aliases and functions

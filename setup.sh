@@ -26,8 +26,8 @@ echo "Setup tmux dot-files.."
 rm -f ~/.tmux.conf && ln -s $DIR/.tmux.conf ~/.tmux.conf
 rm -f ~/.tmux-osx.conf && ln -s $DIR/.tmux-osx.conf ~/.tmux-osx.conf
 
-echo "Setup bashrc dot-files..."
-rm -f ~/.bashrc && ln -s $DIR/.bashrc ~/.bashrc
+echo "Setup bash_profile dot-files..."
+rm -f ~/.bash_profile && ln -s $DIR/.bash_profile ~/.bash_profile
 
 echo "Setup vim dot-files..."
 mkdir -p ~/tmp/undofiles
