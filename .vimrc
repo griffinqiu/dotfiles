@@ -15,30 +15,39 @@ call vundle#rc("~/.vim/bundle/")
 call vundle#begin()
 
 Plugin 'gmarik/Vundle.vim'
-Plugin 'vim-scripts/matchit.zip'
-Plugin 'vim-scripts/buftabs'
+
+" Tools
 Plugin 'scrooloose/nerdtree'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'Xuyuanp/nerdtree-git-plugin'
-Plugin 'tpope/vim-commentary'
-Plugin 'Lokaltog/vim-easymotion'
-Plugin 'shawncplus/phpcomplete.vim'
-Plugin 'liangfeng/vimcdoc'
-Plugin 'mattn/emmet-vim'
-Plugin 'tpope/vim-surround'
 Plugin 'majutsushi/tagbar'
-" Plugin 'tpope/vim-unimpaired'
-" Plugin 'Valloric/YouCompleteMe'
-" Plugin 'marijnh/tern_for_vim'
-" Plugin 'OrangeT/vim-csharp'
-" Plugin 'scrooloose/syntastic'
+Plugin 'vim-scripts/buftabs'
+
+" For search 
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'dyng/ctrlsf.vim'
-Plugin 'groenewege/vim-less'
-Plugin 'uguu-org/vim-matrix-screensaver'
-" Plugin 'godlygeek/tabular'
+Plugin 'mileszs/ack.vim'
+Plugin 'terryma/vim-multiple-cursors'
 
+" Great plugins
+Plugin 'godlygeek/tabular'
+Plugin 'tpope/vim-unimpaired'
+Plugin 'Lokaltog/vim-easymotion'
+Plugin 'mattn/emmet-vim'
+Plugin 'tpope/vim-surround'
+
+" Syntax
 Plugin 'maksimr/vim-jsbeautify'
+Plugin 'groenewege/vim-less'
+Plugin 'plasticboy/vim-markdown'
+Plugin 'kchmck/vim-coffee-script'
+Plugin 'chase/vim-ansible-yaml'
+Plugin 'autowitch/hive.vim'
+Plugin 'fatih/vim-go'
+Plugin 'pangloss/vim-javascript'
+Plugin 'hynek/vim-python-pep8-indent'
+Plugin 'vim-scripts/matchit.zip'
+Plugin 'shawncplus/phpcomplete.vim'
 
 " Wiki
 Plugin 'mattn/calendar-vim'
@@ -46,31 +55,26 @@ Plugin 'vimwiki/vimwiki'
 Plugin 'neilagabriel/vim-geeknote'
 
 " Dash
-Plugin 'Keithbsmiley/investigate.vim'
-Plugin 'rizzatti/funcoo.vim'
 Plugin 'rizzatti/dash.vim'
 
-Plugin 'godlygeek/tabular'
-Plugin 'plasticboy/vim-markdown'
-Plugin 'kchmck/vim-coffee-script'
-Plugin 'chase/vim-ansible-yaml'
-
-"Plugin 'Lokaltog/vim-powerline'
+" Styles
 Plugin 'altercation/vim-colors-solarized'
-
-Plugin 'mileszs/ack.vim'
 Plugin 'yonchu/accelerated-smooth-scroll'
-Plugin 'fatih/vim-go'
-Plugin 'autowitch/hive.vim'
-Plugin 'hynek/vim-python-pep8-indent'
-Plugin 'pangloss/vim-javascript'
-
+" Plugin 'Lokaltog/vim-powerline'
 " Plugin 'bling/vim-airline'
-Plugin 'edkolev/tmuxline.vim'
-if v:version >= 703
-    Plugin 'vim-scripts/TwitVim'
-endif
+" Plugin 'edkolev/tmuxline.vim'
 
+
+" " Static language Complete
+" Plugin 'Valloric/YouCompleteMe'
+" Plugin 'marijnh/tern_for_vim'
+" Plugin 'OrangeT/vim-csharp'
+" Plugin 'scrooloose/syntastic'
+
+" Misc
+Plugin 'liangfeng/vimcdoc'
+Plugin 'vim-scripts/TwitVim'
+Plugin 'uguu-org/vim-matrix-screensaver'
 
 call vundle#end()
 filetype plugin indent on
@@ -92,11 +96,11 @@ let g:mapleader=" "
 
 if v:version >= 703
     "undo settings
-	exec "set undodir=~/tmp/undofiles"
+	exec "set undodir=/tmp/undofiles"
     set undofile
 endif
-exec "set backupdir=~/tmp/backups"
-exec "set directory=~/tmp/"
+exec "set backupdir=/tmp/backups"
+exec "set directory=/tmp/"
 
 if has("autocmd")
     autocmd FileType c set omnifunc=ccomplete#Complete
@@ -274,13 +278,11 @@ let g:tagbar_width=30
 let g:tagbar_sort=0
 let g:Tb_MaxSize=5
 
-" 取消flag:i来禁止打开文件时输出文件信息
-let g:proj_flags='mst'
-
 " Ctrl P
 let g:ctrlp_custom_ignore = {
-  \ 'dir':  '\.git$\|\.hg$\|\.svn$|Client',
-  \ 'file': '\.meta\|\.as$\|\.so$\|^tags$|\.exe$'
+  \ 'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic)$',
+  \ 'file': '\v\.(exe|so|dll|meta|pyc|as|so|tags)$',
+  \ 'link': 'some_bad_symbolic_links',
   \ }
 let g:ctrlp_prompt_mappings = {
   \ 'AcceptSelection("v")': ['<c-v>', '<RightMouse>'],
@@ -295,17 +297,23 @@ let g:ctrlsf_auto_close = 0
 let g:ctrlsf_open_left = 0
 "let g:ctrlsf_context = '-B 5 -A 3'
 
+" Ack
+if executable('ag')
+    let g:ackprg = 'ag --vimgrep'
+endif
+
+
 " vim-javascript
 let g:javascript_enable_domhtmlcss = 1
 let g:javascript_ignore_javaScriptdoc = 1
 
 " TargerBar
-map <silent> <leader>tb	<ESC>:Tagbar<CR>
+nmap <silent> <c-x> :TagbarToggle<CR>
 
 " NERDTree
 map <silent> <c-n>			<ESC>:NERDTreeToggle<CR>
 map <silent> <leader>nf		<ESC>:NERDTreeFind<CR>
-" 打开项目
+" Open 'Project'
 map <silent> <leader>no :NERDTreeFromBookmark<space>
 
 " Set opened dir to workspace dir
@@ -318,7 +326,6 @@ let g:NERDTreeMapOpenVSplit = "v"
 let g:NERDTreeMapPreviewVSplit = "<c-v>"
 let g:NERDTreeMapToggleHidden = "I"
 let g:NERDTreeIgnore=['\.meta$']
-let g:NERDSpaceDelims=1
 let g:NERDTreeDirArrowExpandable = '▸'
 let g:NERDTreeDirArrowCollapsible = '▾'
 
@@ -333,10 +340,16 @@ let g:NERDTreeIndicatorMapCustom = {
     \ "Clean"     : "✔︎",
     \ "Unknown"   : "?"
     \ }
+" NERDCommenter
+let g:NERDSpaceDelims=1
 
-" Dash
-noremap <c-g> :call investigate#Investigate()<CR>
-let g:investigate_use_dash=1
+" " Dash
+" noremap <c-g> :call investigate#Investigate()<CR>
+" let g:investigate_use_dash=1
+
+" vim-multiple-cursors
+let g:multi_cursor_start_key='<C-g>'
+let g:multi_cursor_start_word_key='g<C-g>'
 
 " Twitter
 let g:twitvim_browser_cmd='open'
@@ -351,6 +364,16 @@ nmap <silent> <leader>td :DMTwitter<cr>
 nmap <silent> <leader>tn :NextTwitter<cr>
 "nmap <silent> <leader>tl :PreviousTwitter<cr>
 
+" buftabs
+noremap <left> :bprev<CR> 
+noremap <right> :bnext<CR>
+noremap <up> :cprev<CR> 
+noremap <down> :cnext<CR>
+
+" easymotion
+let g:EasyMotion_leader_key = "'"
+
+" " YcmCompleter
 " noremap <c-]> :YcmCompleter GoToDefinitionElseDeclaration<CR>
 " set completeopt-=preview
 " let g:ycm_key_list_select_completion=['<Down>']
@@ -387,6 +410,9 @@ nmap <silent> <leader>tn :NextTwitter<cr>
   " \   'erlang' : [':'],
   " \ }
 
+" " Powerline
+" let g:Powerline_symbols = 'fancy'
+
 " }}}
 
 " Mapping {{{
@@ -413,20 +439,14 @@ inoremap <C-k> <C-o>gk
 " Convert all tabs to spaces
 map <leader>ct :retab<cr>
 
-" easymotion
-let g:EasyMotion_leader_key = "'"
-
-"map <silent> <M-1> <ESC>:tabp<CR>
-"map <silent> <M-2> <ESC>:tabn<CR>
-"map <silent> <M-3> <ESC>:tabnew<CR>
-"map <silent> <M-4> <ESC>:tabclose<CR>
-
-" Powerline
-" let g:Powerline_symbols = 'fancy'
+" map <silent> <M-1> <ESC>:tabp<CR>
+" map <silent> <M-2> <ESC>:tabn<CR>
+" map <silent> <M-3> <ESC>:tabnew<CR>
+" map <silent> <M-4> <ESC>:tabclose<CR>
 
 map <leader>co :botright cope<cr>
 
-" Move a line of text using ALT+[jk] or Comamnd+[jk] on mac
+" " Move a line of text using ALT+[jk] or Comamnd+[jk] on mac
 " nmap <M-j> mz:m+<cr>`z
 " nmap <M-k> mz:m-2<cr>`z
 " vmap <M-j> :m'>+<cr>`<my`>mzgv`yo`z
@@ -439,17 +459,17 @@ map <silent> <leader><cr> :nohlsearch<cr>
 map <silent> <leader><bs> :set noincsearch<cr>
 map <silent> <leader><leader><bs> :set incsearch<cr>
 
-" 自动补全
+" AutoComple
 inoremap <C-]>             <C-X><C-]>
 inoremap <C-F>             <C-X><C-F>
 inoremap <C-B>             <C-X><C-L>
 
-" 拼写检查
-"map <leader>ss :setlocal spell!<cr>
-"map <leader>sn ]s
-"map <leader>sp [s
-"map <leader>sa zg
-"map <leader>s? z=
+" " Spell
+" map <leader>ss :setlocal spell!<cr>
+" map <leader>sn ]s
+" map <leader>sp [s
+" map <leader>sa zg
+" map <leader>s? z=
 
 " Remove the Windows ^M - when the encodings gets messed up
 noremap <Leader>cm mmHmt:%s/<C-V><cr>//ge<cr>'tzt'm
@@ -457,9 +477,6 @@ noremap <Leader>cm mmHmt:%s/<C-V><cr>//ge<cr>'tzt'm
 nnoremap @p4a :!p4 add %:p<cr>
 nnoremap @p4e :!p4 edit %:p<cr>
 nnoremap @p4d :!p4 diff %<cr>
-
-" Youdao
-map <leader>yd :Ydc<CR>
 
 "Fast reloading of the _vimrc
 exec "map <leader><leader>l :source ~/.vimrc<cr>"
