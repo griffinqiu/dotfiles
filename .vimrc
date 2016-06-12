@@ -62,6 +62,8 @@ Plugin 'mileszs/ack.vim'
 Plugin 'yonchu/accelerated-smooth-scroll'
 Plugin 'fatih/vim-go'
 Plugin 'autowitch/hive.vim'
+Plugin 'hynek/vim-python-pep8-indent'
+Plugin 'pangloss/vim-javascript'
 
 " Plugin 'bling/vim-airline'
 Plugin 'edkolev/tmuxline.vim'
@@ -292,6 +294,10 @@ let g:ctrlsf_ackprg = 'ag'
 let g:ctrlsf_auto_close = 0
 let g:ctrlsf_open_left = 0
 "let g:ctrlsf_context = '-B 5 -A 3'
+
+" vim-javascript
+let g:javascript_enable_domhtmlcss = 1
+let g:javascript_ignore_javaScriptdoc = 1
 
 " TargerBar
 map <silent> <leader>tb	<ESC>:Tagbar<CR>
