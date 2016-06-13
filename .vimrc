@@ -24,6 +24,7 @@ Plugin 'majutsushi/tagbar'
 Plugin 'vim-scripts/buftabs'
 
 " For search 
+Plugin 'griffinqiu/star-search'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'dyng/ctrlsf.vim'
 Plugin 'mileszs/ack.vim'
@@ -96,11 +97,11 @@ let g:mapleader=" "
 
 if v:version >= 703
     "undo settings
-	exec "set undodir=/tmp/undofiles"
+	exec "set undodir=~/tmp/undofiles"
     set undofile
 endif
-exec "set backupdir=/tmp/backups"
-exec "set directory=/tmp/"
+exec "set backupdir=~/tmp/backups"
+exec "set directory=~/tmp/"
 
 if has("autocmd")
     autocmd FileType c set omnifunc=ccomplete#Complete
@@ -311,7 +312,7 @@ let g:javascript_ignore_javaScriptdoc = 1
 nmap <silent> <c-x> :TagbarToggle<CR>
 
 " NERDTree
-map <silent> <c-n>			<ESC>:NERDTreeToggle<CR>
+map <silent> <c-g>			<ESC>:NERDTreeToggle<CR>
 map <silent> <leader>nf		<ESC>:NERDTreeFind<CR>
 " Open 'Project'
 map <silent> <leader>no :NERDTreeFromBookmark<space>
@@ -348,8 +349,8 @@ let g:NERDSpaceDelims=1
 " let g:investigate_use_dash=1
 
 " vim-multiple-cursors
-let g:multi_cursor_start_key='<C-g>'
-let g:multi_cursor_start_word_key='g<C-g>'
+let g:multi_cursor_start_key='<c-n>'
+let g:multi_cursor_start_word_key='g<c-n>'
 
 " Twitter
 let g:twitvim_browser_cmd='open'
@@ -539,15 +540,6 @@ endfunc
 autocmd BufWrite *.php :call DeleteTrailingWS()
 map <leader>ds :call DeleteTrailingWS()<CR>
 
-function! s:VSetSearch()
-	let temp = @s
-	norm! gv"sy
-	let @/ = '\V' . substitute(escape(@s, '/\'), '\n', '\\n', 'g')
-	let @s =temp
-endfunction
-vnoremap * :<c-u>call <SID>VSetSearch()<CR>/<c-r>=@/<CR><CR>
-vnoremap # :<c-u>call <SID>VSetSearch()<CR>?<c-r>=@/<CR><CR>
-
 " Make sure Vim returns to the same line when you reopen a file.
 " Thanks, Amit
 augroup line_return
@@ -557,6 +549,5 @@ augroup line_return
 		\     execute 'normal! g`"zvzz' |
 		\ endif
 augroup END
-
 
 " }}}
