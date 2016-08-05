@@ -303,16 +303,32 @@ if executable('ag')
     let g:ackprg = 'ag --vimgrep'
 endif
 
+" CtrlSF
+nmap     <c-g>g <Plug>CtrlSFPrompt
+nmap     <c-g>G <Plug>CtrlSFCwordPath
+nmap     <c-g><c-g> <Plug>CtrlSFCwordExec
+vmap     <c-g>g <Plug>CtrlSFVwordPath
+vmap     <c-g>G <Plug>CtrlSFVwordPath
+vmap     <c-g><c-g> <Plug>CtrlSFVwordExec
+nmap     <c-g>p <Plug>CtrlSFPwordPath
+nmap     <c-g><c-p> <Plug>CtrlSFPwordExec
+nnoremap <c-g><c-o> :CtrlSFOpen<CR>
+nnoremap <c-g><c-t> :CtrlSFToggle<CR>
+inoremap <c-g><c-t> <Esc>:CtrlSFToggle<CR>
+nmap     <c-g>l <Plug>CtrlSFQuickfixPrompt
+vmap     <c-g>l <Plug>CtrlSFQuickfixVwordPath
+vmap     <c-g>L <Plug>CtrlSFQuickfixVwordPath
+vmap     <c-g><c-l> <Plug>CtrlSFQuickfixVwordExec
 
 " vim-javascript
 let g:javascript_enable_domhtmlcss = 1
 let g:javascript_ignore_javaScriptdoc = 1
 
 " TargerBar
-nmap <silent> <c-x> :TagbarToggle<CR>
+nmap <silent> <leader><c-x> :TagbarToggle<CR>
 
 " NERDTree
-map <silent> <c-g>			<ESC>:NERDTreeToggle<CR>
+map <silent> <c-x>			<ESC>:NERDTreeToggle<CR>
 map <silent> <leader>nf		<ESC>:NERDTreeFind<CR>
 " Open 'Project'
 map <silent> <leader>no :NERDTreeFromBookmark<space>
