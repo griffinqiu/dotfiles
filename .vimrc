@@ -41,7 +41,6 @@ Plugin 'tpope/vim-surround'
 Plugin 'maksimr/vim-jsbeautify'
 Plugin 'groenewege/vim-less'
 Plugin 'plasticboy/vim-markdown'
-Plugin 'kchmck/vim-coffee-script'
 Plugin 'chase/vim-ansible-yaml'
 Plugin 'autowitch/hive.vim'
 Plugin 'fatih/vim-go'
@@ -49,6 +48,11 @@ Plugin 'pangloss/vim-javascript'
 Plugin 'hynek/vim-python-pep8-indent'
 Plugin 'vim-scripts/matchit.zip'
 Plugin 'shawncplus/phpcomplete.vim'
+Plugin 'kchmck/vim-coffee-script'
+Plugin 'vim-ruby/vim-ruby'
+Plugin 'tpope/vim-rails'
+Plugin 'tpope/vim-endwise'
+Plugin 'thoughtbot/vim-rspec'
 
 " Wiki
 Plugin 'mattn/calendar-vim'
@@ -141,6 +145,17 @@ set softtabstop=4
 set tabstop=4
 set expandtab
 
+set textwidth=80
+set colorcolumn=+1
+" let &colorcolumn=join(range(81,999),",")
+highlight ColorColumn ctermbg=235 guibg=#2c2d27
+let &colorcolumn="80,".join(range(120,999),",")
+
+if has("autocmd")
+    autocmd Filetype eruby setlocal ts=2 sts=2 sw=2 
+    autocmd Filetype ruby setlocal ts=2 sts=2 sw=2
+endif
+
 set nolist
 set listchars=tab:▸\ ,trail:¶
 
@@ -200,7 +215,9 @@ set complete+=kspell
 set complete-=u
 set complete-=i
 
-set sessionoptions=blank,buffers,curdir,folds,globals,help,localoptions,options,tabpages,winsize,resize,winpos,winsize
+set sessionoptions=
+            \blank,buffers,curdir,folds,globals,help,localoptions,
+            \options,tabpages,winsize,resize,winpos,winsize
 
 set formatoptions+=mM
 set ttymouse=xterm2
@@ -220,11 +237,11 @@ let g:solarized_termcolors = 256
 " colorscheme solarized
 
 if exists('$TMUX')
-  let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
-  let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
+    let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
+    let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
 else
-  let &t_SI = "\<Esc>]50;CursorShape=1\x7"
-  let &t_EI = "\<Esc>]50;CursorShape=0\x7"
+    let &t_SI = "\<Esc>]50;CursorShape=1\x7"
+    let &t_EI = "\<Esc>]50;CursorShape=0\x7"
 endif
 
 " }}}
@@ -237,16 +254,18 @@ let g:GeeknoteExplorerNodeClosed = '+'
 let g:GeeknoteExplorerNodeOpened = '-'
 
 " Vimwiki
-let defualt_wiki = {'path': '~/Gits/vimwiki/_source/',
-\ 'path_html': '~/Gits/vimwiki/html/',
-\ 'template_path': '~/Gits/vimwiki/templates/',
-\ 'template_ext': '.tpl',
-\ 'template_default': 'default',
-\ 'nested_syntaxes': {'php': 'php', 'python': 'python', 'c++': 'cpp', 'js': 'javascript', 'bash': 'bash'},
-\ 'index': 'index',
-\ 'ext': '.wiki',
-\ 'syntax': 'default',
-\ 'auto_export': 1}
+let defualt_wiki = {
+    \'path': '~/Gits/vimwiki/_source/',
+    \'path_html': '~/Gits/vimwiki/html/',
+    \'template_path': '~/Gits/vimwiki/templates/',
+    \'template_ext': '.tpl',
+    \'template_default': 'default',
+    \'nested_syntaxes': {'php': 'php', 'python': 'python', 'c++': 'cpp', 'js': 'javascript', 'bash': 'bash'},
+    \'index': 'index',
+    \'ext': '.wiki',
+    \'syntax': 'default',
+    \'auto_export': 1
+\}
 let g:vimwiki_use_calendar = 1
 let g:vimwiki_use_mouse = 1
 let g:vimwiki_list = [defualt_wiki]
@@ -261,41 +280,53 @@ let g:vim_markdown_folding_disabled=1
 let g:vim_markdown_initial_foldlevel=1
 
 " Emmet
-let g:user_emmet_install_global = 0
-autocmd FileType html,css EmmetInstall
+" let g:user_emmet_install_global = 0
+" autocmd FileType html,css EmmetInstall
 
 " tagbar
-let g:tagbar_type_php  = {
-    \ 'ctagstype' : 'php',
-    \ 'kinds'     : [
-        \ 'i:interfaces',
-        \ 'c:classes',
-        \ 'd:constant definitions',
-        \ 'f:functions',
-        \ 'j:javascript functions:1'
-    \ ]
-  \ }"
-let g:tagbar_width=30
+let g:tagbar_type_php = {
+    \'ctagstype' : 'php',
+    \'kinds'     : [
+        \'i:interfaces',
+        \'c:classes',
+        \'d:constant definitions',
+        \'f:functions',
+        \'j:javascript functions:1'
+    \]
+\}"
+let g:tagbar_width=40
 let g:tagbar_sort=0
+let g:tagbar_autofocus=1
 let g:Tb_MaxSize=5
 
 " Ctrl P
+if executable('ag')
+    " Use Ag over Grep
+    set grepprg=ag\ --nogroup\ --nocolor
+    " Use ag in CtrlP for listing files.
+    let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+    " Ag is fast enough that CtrlP doesn't need to cache
+    let g:ctrlp_use_caching = 0
+endif
 let g:ctrlp_custom_ignore = {
-  \ 'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic)$',
-  \ 'file': '\v\.(exe|so|dll|meta|pyc|as|so|tags)$',
-  \ 'link': 'some_bad_symbolic_links',
-  \ }
+    \'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic)$',
+    \'file': '\v\.(exe|so|dll|meta|pyc|as|so|tags)$',
+    \'link': 'some_bad_symbolic_links'
+\}
 let g:ctrlp_prompt_mappings = {
-  \ 'AcceptSelection("v")': ['<c-v>', '<RightMouse>'],
-  \ 'AcceptSelection("h")': ['<c-s>', '<c-cr>'],
-  \ 'PrtClearCache()':      ['<F6>'],
-  \ }
+    \'AcceptSelection("v")': ['<c-v>', '<RightMouse>'],
+    \'AcceptSelection("h")': ['<c-s>', '<c-cr>'],
+    \'PrtClearCache()':      ['<F6>']
+\}
 
 " CtrlSF
 " CtrlSF -i -C 1 [pattern] /restrict/to/some/dir
-let g:ctrlsf_ackprg = 'ag'
+if executable('ag')
+    let g:ctrlsf_ackprg = 'ag'
+endif
 let g:ctrlsf_auto_close = 0
 let g:ctrlsf_open_left = 0
+let g:ctrlsf_winsize = '80' 
 "let g:ctrlsf_context = '-B 5 -A 3'
 
 " Ack
@@ -334,7 +365,9 @@ map <silent> <leader>nf		<ESC>:NERDTreeFind<CR>
 map <silent> <leader>no :NERDTreeFromBookmark<space>
 
 " Set opened dir to workspace dir
-let NERDTreeChDirMode=1
+let NERDTreeChDirMode=2
+let NERDTreeShowBookmarks=1
+let NERDTreeWinSize=40
 " NERDTree mapping
 let g:NERDTreeMapPreview = "<c-o>"
 let g:NERDTreeMapOpenSplit = "s"
@@ -342,21 +375,27 @@ let g:NERDTreeMapPreviewSplit = "<c-s>"
 let g:NERDTreeMapOpenVSplit = "v"
 let g:NERDTreeMapPreviewVSplit = "<c-v>"
 let g:NERDTreeMapToggleHidden = "I"
-let g:NERDTreeIgnore=['\.meta$']
+let g:NERDTreeIgnore=['\.meta$', '\.pyc$']
 let g:NERDTreeDirArrowExpandable = '▸'
 let g:NERDTreeDirArrowCollapsible = '▾'
 
+" " Automatically open a NERDTree if no files where specified
+" autocmd vimenter * if !argc() | NERDTree | endif
+" " Close vim if the only window left open is a NERDTree
+" autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") 
+            " \ && b:NERDTreeType == "primary") | q | endif
+
 let g:NERDTreeIndicatorMapCustom = {
-    \ "Modified"  : "✹",
-    \ "Staged"    : "✚",
-    \ "Untracked" : "✭",
-    \ "Renamed"   : "➜",
-    \ "Unmerged"  : "═",
-    \ "Deleted"   : "✖",
-    \ "Dirty"     : "✗",
-    \ "Clean"     : "✔︎",
-    \ "Unknown"   : "?"
-    \ }
+    \"Modified"  : "✹",
+    \"Staged"    : "✚",
+    \"Untracked" : "✭",
+    \"Renamed"   : "➜",
+    \"Unmerged"  : "═",
+    \"Deleted"   : "✖",
+    \"Dirty"     : "✗",
+    \"Clean"     : "✔︎",
+    \"Unknown"   : "?"
+\}
 " NERDCommenter
 let g:NERDSpaceDelims=1
 
