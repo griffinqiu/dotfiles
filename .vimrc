@@ -314,8 +314,8 @@ let g:ctrlp_custom_ignore = {
     \'link': 'some_bad_symbolic_links'
 \}
 let g:ctrlp_prompt_mappings = {
-    \'AcceptSelection("v")': ['<c-v>', '<RightMouse>'],
-    \'AcceptSelection("h")': ['<c-s>', '<c-cr>'],
+    \'AcceptSelection("v")': ['<C-V>', '<RightMouse>'],
+    \'AcceptSelection("h")': ['<C-S>', '<C-CR>'],
     \'PrtClearCache()':      ['<F6>']
 \}
 
@@ -335,34 +335,34 @@ if executable('ag')
 endif
 
 " CtrlSF
-nmap     <c-g>g <Plug>CtrlSFPrompt
-nmap     <c-g>G <Plug>CtrlSFCwordPath
-nmap     <c-g><c-g> <Plug>CtrlSFCwordExec
-vmap     <c-g>g <Plug>CtrlSFVwordPath
-vmap     <c-g>G <Plug>CtrlSFVwordPath
-vmap     <c-g><c-g> <Plug>CtrlSFVwordExec
-nmap     <c-g>p <Plug>CtrlSFPwordPath
-nmap     <c-g><c-p> <Plug>CtrlSFPwordExec
-nnoremap <c-g><c-o> :CtrlSFOpen<CR>
-nnoremap <c-g><c-t> :CtrlSFToggle<CR>
-inoremap <c-g><c-t> <Esc>:CtrlSFToggle<CR>
-nmap     <c-g>l <Plug>CtrlSFQuickfixPrompt
-vmap     <c-g>l <Plug>CtrlSFQuickfixVwordPath
-vmap     <c-g>L <Plug>CtrlSFQuickfixVwordPath
-vmap     <c-g><c-l> <Plug>CtrlSFQuickfixVwordExec
+nmap     <C-G>g <Plug>CtrlSFPrompt
+nmap     <C-G>G <Plug>CtrlSFCwordPath
+nmap     <C-G><C-G> <Plug>CtrlSFCwordExec
+vmap     <C-G>g <Plug>CtrlSFVwordPath
+vmap     <C-G>G <Plug>CtrlSFVwordPath
+vmap     <C-G><C-G> <Plug>CtrlSFVwordExec
+nmap     <C-G>p <Plug>CtrlSFPwordPath
+nmap     <C-G><C-P> <Plug>CtrlSFPwordExec
+nnoremap <C-G><C-O> :CtrlSFOpen<CR>
+nnoremap <C-G><C-T> :CtrlSFToggle<CR>
+inoremap <C-G><C-T> <Esc>:CtrlSFToggle<CR>
+nmap     <C-G>l <Plug>CtrlSFQuickfixPrompt
+vmap     <C-G>l <Plug>CtrlSFQuickfixVwordPath
+vmap     <C-G>L <Plug>CtrlSFQuickfixVwordPath
+vmap     <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
 
 " vim-javascript
 let g:javascript_enable_domhtmlcss = 1
 let g:javascript_ignore_javaScriptdoc = 1
 
-" TargerBar
-nmap <silent> <leader><c-x> :TagbarToggle<CR>
-
 " NERDTree
-map <silent> <c-x>			<ESC>:NERDTreeToggle<CR>
-map <silent> <leader>nf		<ESC>:NERDTreeFind<CR>
+nmap <silent> <leader>1			:NERDTreeToggle<CR>
+nmap <silent> <leader>nf		:NERDTreeFind<CR>
 " Open 'Project'
-map <silent> <leader>no :NERDTreeFromBookmark<space>
+nmap <silent> <leader>no        :NERDTreeFromBookmark<space>
+
+" TargerBar
+nmap <silent> <leader>2         :TagbarToggle<CR>
 
 " Set opened dir to workspace dir
 let NERDTreeChDirMode=2
@@ -428,6 +428,17 @@ noremap <down> :cnext<CR>
 
 " easymotion
 let g:EasyMotion_leader_key = "'"
+
+" emmet-vim
+let g:user_emmet_leader_key='<C-V>'
+let g:user_emmet_expandabbr_key='<C-V><C-V>'
+let g:user_emmet_expandword_key = '<C-V>v'
+let g:user_emmet_update_tag = '<C-V>u'                                                                                                                                                                                               
+let g:user_emmet_next_key='<C-V>n'
+let g:user_emmet_prev_key='<C-V>p'
+let g:user_emmet_togglecomment_key = '<C-V>/'
+let g:user_emmet_install_global=1 
+autocmd FileType html,css,eruby EmmetInstall
 
 " " YcmCompleter
 " noremap <c-]> :YcmCompleter GoToDefinitionElseDeclaration<CR>
