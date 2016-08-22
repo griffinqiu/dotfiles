@@ -369,7 +369,7 @@ let NERDTreeChDirMode=2
 let NERDTreeShowBookmarks=1
 let NERDTreeWinSize=40
 " NERDTree mapping
-let g:NERDTreeMapPreview = "<c-o>"
+let g:NERDTreeMapPreview = "p"
 let g:NERDTreeMapOpenSplit = "s"
 let g:NERDTreeMapPreviewSplit = "<c-s>"
 let g:NERDTreeMapOpenVSplit = "v"
@@ -493,11 +493,15 @@ nnoremap N Nzzzv
 nnoremap g; g;zz
 nnoremap g, g,zz
 
+nmap <leader><c-g> <c-g>
+nmap <leader><c-l> <c-l>
+
 inoremap <C-e> <C-k>
 map <C-j> <C-w>j
 map <C-k> <C-w>k
 map <C-h> <C-w>h
 map <C-l> <C-w>l
+map <C-w>; <C-w>p
 inoremap <C-h> <left>
 inoremap <C-l> <right>
 inoremap <C-j> <C-o>gj
@@ -546,7 +550,7 @@ nnoremap @p4e :!p4 edit %:p<cr>
 nnoremap @p4d :!p4 diff %<cr>
 
 "Fast reloading of the _vimrc
-exec "map <leader><leader>l :source ~/.vimrc<cr>"
+exec "map <leader><leader>r :source ~/.vimrc<cr>"
 "Fast editing of _vimrc
 function! SwitchToBuf(filename)
     let fullfn = a:filename
