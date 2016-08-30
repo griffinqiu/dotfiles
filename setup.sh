@@ -28,6 +28,9 @@ rm -f ~/.tmux-osx.conf && ln -s $DIR/.tmux-osx.conf ~/.tmux-osx.conf
 
 echo "Setup bash_profile dot-files..."
 rm -f ~/.bash_profile && ln -s $DIR/.bash_profile ~/.bash_profile
+j
+echo "Setup zsh dot-files..."
+rm -f ~/.zshrc && ln -s $DIR/.zshrc ~/.zshrc
 
 echo "Setup vim dot-files..."
 mkdir -p ~/tmp/undofiles
