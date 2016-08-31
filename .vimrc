@@ -21,7 +21,7 @@ Plugin 'scrooloose/nerdtree'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'majutsushi/tagbar'
-Plugin 'vim-scripts/buftabs'
+" Plugin 'vim-scripts/buftabs'
 
 " For search 
 Plugin 'griffinqiu/star-search'
@@ -309,7 +309,7 @@ if executable('ag')
     let g:ctrlp_use_caching = 0
 endif
 let g:ctrlp_custom_ignore = {
-    \'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic)$',
+    \'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic|build)$',
     \'file': '\v\.(exe|so|dll|meta|pyc|as|so|tags)$',
     \'link': 'some_bad_symbolic_links'
 \}
@@ -328,7 +328,7 @@ let g:ctrlsf_auto_close = 0
 let g:ctrlsf_open_left = 0
 let g:ctrlsf_winsize = '80' 
 "let g:ctrlsf_context = '-B 5 -A 3'
-
+let g:ctrlsf_ignore_dir = ['node_modules', 'build']
 " Ack
 if executable('ag')
     let g:ackprg = 'ag --vimgrep'
