@@ -22,19 +22,23 @@ echo "Setup git dot-files..."
 rm -f ~/.gitconfig && ln -s $DIR/.gitconfig ~/.gitconfig
 rm -f ~/.gitignore_global && ln -s $DIR/.gitignore_global ~/.gitignore
 
-echo "Setup tmux dot-files.."
+echo "Setup tmux dot-file.."
 rm -f ~/.tmux.conf && ln -s $DIR/.tmux.conf ~/.tmux.conf
 rm -f ~/.tmux-osx.conf && ln -s $DIR/.tmux-osx.conf ~/.tmux-osx.conf
 
-echo "Setup bash_profile dot-files..."
+echo "Setup bash_profile dot-file..."
 rm -f ~/.bash_profile && ln -s $DIR/.bash_profile ~/.bash_profile
-j
-echo "Setup zsh dot-files..."
+
+echo "Setup zsh dot-file..."
 rm -f ~/.zshrc && ln -s $DIR/.zshrc ~/.zshrc
 
-echo "Setup vim dot-files..."
+echo "Setup ctags dot-file..."
+rm -f ~/.ctags && ln -s $DIR/.ctags ~/.ctags
+
+echo "Setup vim dot-file..."
 mkdir -p ~/tmp/undofiles
 mkdir -p ~/tmp/backups
+
 rm -rf ~/.vim && ln -fs $DIR/.vim ~/.vim
 rm -f ~/.vimrc && ln -s $DIR/.vimrc ~/.vimrc
 rm -f ~/.gvimrc && ln -s $DIR/.gvimrc ~/.gvimrc

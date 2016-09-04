@@ -145,7 +145,7 @@ set softtabstop=4
 set tabstop=4
 set expandtab
 
-set textwidth=80
+" set textwidth=80
 set colorcolumn=+1
 " let &colorcolumn=join(range(81,999),",")
 highlight ColorColumn ctermbg=235 guibg=#2c2d27
@@ -229,8 +229,10 @@ set shortmess=atI
 set nrformats=
 set cinwords=if,else,while,do,for,switch,case
 
+set tagcase=match
+
 " tags
-set tags=.tags;
+" set tags=.tags;
 
 let g:solarized_termcolors = 256
 " set background=dark
@@ -294,7 +296,7 @@ let g:tagbar_type_php = {
         \'j:javascript functions:1'
     \]
 \}"
-let g:tagbar_width=40
+let g:tagbar_width=30
 let g:tagbar_sort=0
 let g:tagbar_autofocus=1
 let g:Tb_MaxSize=5
@@ -309,7 +311,7 @@ if executable('ag')
     let g:ctrlp_use_caching = 0
 endif
 let g:ctrlp_custom_ignore = {
-    \'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic|build)$',
+    \'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic|build|vendor)$',
     \'file': '\v\.(exe|so|dll|meta|pyc|as|so|tags)$',
     \'link': 'some_bad_symbolic_links'
 \}
@@ -328,7 +330,7 @@ let g:ctrlsf_auto_close = 0
 let g:ctrlsf_open_left = 0
 let g:ctrlsf_winsize = '80' 
 "let g:ctrlsf_context = '-B 5 -A 3'
-let g:ctrlsf_ignore_dir = ['node_modules', 'build']
+let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'vendor']
 " Ack
 if executable('ag')
     let g:ackprg = 'ag --vimgrep'
@@ -367,7 +369,7 @@ nmap <silent> <leader>2         :TagbarToggle<CR>
 " Set opened dir to workspace dir
 let NERDTreeChDirMode=2
 let NERDTreeShowBookmarks=1
-let NERDTreeWinSize=40
+let NERDTreeWinSize=30
 " NERDTree mapping
 let g:NERDTreeMapPreview = "p"
 let g:NERDTreeMapOpenSplit = "s"
