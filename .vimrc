@@ -36,6 +36,7 @@ Plugin 'tpope/vim-unimpaired'
 Plugin 'Lokaltog/vim-easymotion'
 Plugin 'mattn/emmet-vim'
 Plugin 'tpope/vim-surround'
+Plugin 'skywind3000/asyncrun.vim'
 
 " Syntax
 Plugin 'maksimr/vim-jsbeautify'
@@ -320,6 +321,13 @@ let g:ctrlp_prompt_mappings = {
     \'AcceptSelection("h")': ['<C-S>', '<C-CR>'],
     \'PrtClearCache()':      ['<F6>']
 \}
+let g:ctrlp_by_filename = 0
+let g:ctrlp_mruf_case_sensitive = 0
+let g:ctrlp_use_caching = 1
+let g:ctrlp_cache_dir = '~/tmp/ctrlp'
+let g:ctrlp_user_command = 'find %s -type f'
+let g:ctrlp_working_path_mode = 'rw'
+let g:ctrlp_tabpage_position = 'f'
 
 " CtrlSF
 " CtrlSF -i -C 1 [pattern] /restrict/to/some/dir
@@ -328,7 +336,12 @@ if executable('ag')
 endif
 let g:ctrlsf_auto_close = 0
 let g:ctrlsf_open_left = 0
-let g:ctrlsf_winsize = '80' 
+let g:ctrlsf_winsize = '15' 
+let g:ctrlsf_position = 'bottom'
+let g:ctrlsf_mapping = {
+    \ "next": "<c-d>",
+    \ "prev": "<c-u>",
+    \ }
 "let g:ctrlsf_context = '-B 5 -A 3'
 let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'vendor']
 " Ack
@@ -367,9 +380,10 @@ nmap <silent> <leader>no        :NERDTreeFromBookmark<space>
 nmap <silent> <leader>2         :TagbarToggle<CR>
 
 " Set opened dir to workspace dir
-let NERDTreeChDirMode=2
-let NERDTreeShowBookmarks=1
-let NERDTreeWinSize=30
+let NERDTreeChDirMode = 2
+" let NERDTreeWinPos = 'right'
+let NERDTreeShowBookmarks = 1
+let NERDTreeWinSize = 30
 " NERDTree mapping
 let g:NERDTreeMapPreview = "p"
 let g:NERDTreeMapOpenSplit = "s"
@@ -380,6 +394,8 @@ let g:NERDTreeMapToggleHidden = "I"
 let g:NERDTreeIgnore=['\.meta$', '\.pyc$']
 let g:NERDTreeDirArrowExpandable = '▸'
 let g:NERDTreeDirArrowCollapsible = '▾'
+let g:NERDTreeMapJumpNextSibling = '<c-d>'
+let g:NERDTreeMapJumpPrevSibling = '<c-u>'
 
 " " Automatically open a NERDTree if no files where specified
 " autocmd vimenter * if !argc() | NERDTree | endif

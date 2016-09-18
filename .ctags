@@ -9,9 +9,4 @@
 --exclude="*/_*data/*"
 --totals=yes
 --tag-relative=yes
---regex-PHP=/^[ \t]*abstract class [ \t]+([a-z0_9_]+)/\1/c/
---regex-PHP=/^[ \t]*interface[ \t]+([a-z0_9_]+)/\1/i/
---regex-PHP=/^[ \t]*trait[ \t]+([a-z0_9_]+)/\1/t,traits/
---regex-php=/^[ \t]*[(private|public|static)( \t)]*function[ \t]+([A-Za-z0-9_]+)[ \t]*\(/\1/f, function, functions/
---regex-php=/^[ \t]*(const)[ \t]+([A-Za-z0-9_]+)[ \t]*/\2/d, const, constants/
---PHP-kinds=cft
+--PHP-kinds=cf
