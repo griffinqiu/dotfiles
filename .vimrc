@@ -37,6 +37,7 @@ Plugin 'Lokaltog/vim-easymotion'
 Plugin 'mattn/emmet-vim'
 Plugin 'tpope/vim-surround'
 Plugin 'skywind3000/asyncrun.vim'
+Plugin 'msanders/snipmate.vim'
 
 " Syntax
 Plugin 'maksimr/vim-jsbeautify'
@@ -104,6 +105,8 @@ if v:version >= 703
     "undo settings
 	exec "set undodir=~/tmp/undofiles"
     set undofile
+else
+    set tagcase=match
 endif
 exec "set backupdir=~/tmp/backups"
 exec "set directory=~/tmp/"
@@ -230,8 +233,6 @@ set shortmess=atI
 set nrformats=
 set cinwords=if,else,while,do,for,switch,case
 
-set tagcase=match
-
 " tags
 " set tags=.tags;
 
@@ -321,13 +322,11 @@ let g:ctrlp_prompt_mappings = {
     \'AcceptSelection("h")': ['<C-S>', '<C-CR>'],
     \'PrtClearCache()':      ['<F6>']
 \}
-let g:ctrlp_by_filename = 0
 let g:ctrlp_mruf_case_sensitive = 0
 let g:ctrlp_use_caching = 1
 let g:ctrlp_cache_dir = '~/tmp/ctrlp'
-let g:ctrlp_user_command = 'find %s -type f'
 let g:ctrlp_working_path_mode = 'rw'
-let g:ctrlp_tabpage_position = 'f'
+let g:ctrlp_reuse_window = 'nerdtree\|help\|quickfix'
 
 " CtrlSF
 " CtrlSF -i -C 1 [pattern] /restrict/to/some/dir
@@ -365,6 +364,7 @@ nmap     <C-G>l <Plug>CtrlSFQuickfixPrompt
 vmap     <C-G>l <Plug>CtrlSFQuickfixVwordPath
 vmap     <C-G>L <Plug>CtrlSFQuickfixVwordPath
 vmap     <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
+nmap <silent> <leader>3         :CtrlSFToggle<CR>
 
 " vim-javascript
 let g:javascript_enable_domhtmlcss = 1

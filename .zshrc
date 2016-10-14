@@ -87,3 +87,5 @@ source $ZSH/oh-my-zsh.sh
 stty -ixon -ixoff
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
+
+export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting

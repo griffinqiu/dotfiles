@@ -9,4 +9,5 @@
 --exclude="*/_*data/*"
 --totals=yes
 --tag-relative=yes
---PHP-kinds=cf
+--regex-php=/^[ \t]*trait[ \t]+([a-z0_9_]+)/\1/t,traits/i
+--PHP-kinds=+cf
