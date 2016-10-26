@@ -9,6 +9,17 @@ echo " | (_| | (_) | ||_____|  _| | |  __/\__ \\"
 echo "  \__,_|\___/ \__|    |_| |_|_|\___||___/"
 echo ""
 
+if which apt-get >/dev/null; then
+	sudo apt-get install -y vim vim-gnome ctags xclip astyle git
+elif which yum >/dev/null; then
+	sudo yum install -y gcc vim git ctags xclip astyle
+fi
+
+if which brew >/dev/null;then
+    echo "You are using HomeBrew tool"
+    brew install vim ctags git astyle reattach-to-user-namespace
+fi
+
 echo "Pulling latest dot-files"
 git pull
 
@@ -16,32 +27,45 @@ echo "Updating latest dot-files"
 git submodule init
 git submodule update
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+BACKUP_DIR="$HOME/dot-files-backups/`date +%Y%m%d%H%M%S`/"
+echo "Backup dot-files to $BACKUP_DIR"
+mkdir -p $BACKUP_DIR
+mv -f $HOME/.gitconfig $BACKUP_DIR
+mv -f $HOME/.gitignore $BACKUP_DIR
+mv -f $HOME/.tmux.conf $BACKUP_DIR
+mv -f $HOME/.tmux-osx.conf $BACKUP_DIR
+mv -f $HOME/.bash_profile $BACKUP_DIR
+mv -f $HOME/.zshrc $BACKUP_DIR 
+mv -f $HOME/.ctags $BACKUP_DIR
+mv -f $HOME/.vim $BACKUP_DIR
+mv -f $HOME/.vimrc $BACKUP_DIR
+mv -f $HOME/.gvimrc $BACKUP_DIR
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo "Setup git dot-files..."
-rm -f ~/.gitconfig && ln -s $DIR/.gitconfig ~/.gitconfig
-rm -f ~/.gitignore_global && ln -s $DIR/.gitignore_global ~/.gitignore
+ln -s $DIR/.gitconfig $HOME/.gitconfig
+ln -s $DIR/.gitignore_global $HOME/.gitignore
 
 echo "Setup tmux dot-file.."
-rm -f ~/.tmux.conf && ln -s $DIR/.tmux.conf ~/.tmux.conf
-rm -f ~/.tmux-osx.conf && ln -s $DIR/.tmux-osx.conf ~/.tmux-osx.conf
+ln -s $DIR/.tmux.conf $HOME/.tmux.conf
+ln -s $DIR/.tmux-osx.conf $HOME/.tmux-osx.conf
 
 echo "Setup bash_profile dot-file..."
-rm -f ~/.bash_profile && ln -s $DIR/.bash_profile ~/.bash_profile
+ln -s $DIR/.bash_profile $HOME/.bash_profile
 
 echo "Setup zsh dot-file..."
-rm -f ~/.zshrc && ln -s $DIR/.zshrc ~/.zshrc
+ln -s $DIR/.zshrc $HOME/.zshrc
 
 echo "Setup ctags dot-file..."
-rm -f ~/.ctags && ln -s $DIR/.ctags ~/.ctags
+ln -s $DIR/.ctags $HOME/.ctags
 
 echo "Setup vim dot-file..."
-mkdir -p ~/tmp/undofiles
-mkdir -p ~/tmp/backups
+mkdir -p $HOME/tmp/undofiles
+mkdir -p $HOME/tmp/backups
 
-rm -rf ~/.vim && ln -fs $DIR/.vim ~/.vim
-rm -f ~/.vimrc && ln -s $DIR/.vimrc ~/.vimrc
-rm -f ~/.gvimrc && ln -s $DIR/.gvimrc ~/.gvimrc
+ln -fs $DIR/.vim $HOME/.vim
+ln -s $DIR/.vimrc $HOME/.vimrc
+ln -s $DIR/.gvimrc $HOME/.gvimrc
 
 echo "Updating latest vim plugins"
 vim +PluginInstall +qall
