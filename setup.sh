@@ -10,9 +10,9 @@ echo "  \__,_|\___/ \__|    |_| |_|_|\___||___/"
 echo ""
 
 if which apt-get >/dev/null; then
-	sudo apt-get install -y vim vim-gnome ctags xclip astyle git
+    sudo apt-get install -y vim vim-gnome ctags xclip astyle git
 elif which yum >/dev/null; then
-	sudo yum install -y gcc vim git ctags xclip astyle
+    sudo yum install -y gcc vim git ctags xclip astyle
 fi
 
 if which brew >/dev/null;then
