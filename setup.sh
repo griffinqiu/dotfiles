@@ -10,14 +10,14 @@ echo "  \__,_|\___/ \__|    |_| |_|_|\___||___/"
 echo ""
 
 if which apt-get >/dev/null; then
-    sudo apt-get install -y vim vim-gnome ctags xclip astyle git
+    sudo apt-get install -y vim vim-gnome ctags xclip tmux astyle git
 elif which yum >/dev/null; then
-    sudo yum install -y gcc vim git ctags xclip astyle
+    sudo yum install -y gcc vim git ctags xclip tmux astyle
 fi
 
 if which brew >/dev/null;then
     echo "You are using HomeBrew tool"
-    brew install vim ctags git astyle reattach-to-user-namespace
+    brew install vim ctags git astyle tmux reattach-to-user-namespace
 fi
 
 echo "Pulling latest dot-files"
