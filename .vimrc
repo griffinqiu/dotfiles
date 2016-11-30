@@ -54,6 +54,7 @@ Plugin 'vim-ruby/vim-ruby'
 Plugin 'tpope/vim-rails'
 Plugin 'tpope/vim-endwise'
 Plugin 'thoughtbot/vim-rspec'
+Plugin 'cakebaker/scss-syntax.vim'
 
 " Wiki
 Plugin 'mattn/calendar-vim'
@@ -118,12 +119,12 @@ if has("autocmd")
     autocmd FileType css set omnifunc=csscomplete#CompleteCSS
     autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
     autocmd FileType php set omnifunc=phpcomplete#CompletePHP
-	autocmd FileType tpl set omnifunc=htmlcomplete#CompleteTags
+    autocmd FileType tpl set omnifunc=htmlcomplete#CompleteTags
     autocmd FileType ruby set omnifunc=rubycomplete#Completeruby
     autocmd FileType sql set omnifunc=sqlcomplete#Completesql
-	autocmd BufNewFile,BufRead *.hql set filetype=hive expandtab
-	autocmd BufNewFile,BufRead *.q set filetype=hive expandtab
-	" au BufRead,BufNewFile *.{md,mdown,mkd,mkdn,markdown,mdwn}   set filetype=mkd
+    autocmd BufNewFile,BufRead *.hql set filetype=hive expandtab
+    autocmd BufNewFile,BufRead *.q set filetype=hive expandtab
+    " au BufRead,BufNewFile *.{md,mdown,mkd,mkdn,markdown,mdwn}   set filetype=mkd
 endif
 
 set hidden
@@ -141,16 +142,16 @@ set nowrap
 set linebreak
 "set colorcolumn=120
 
-set shiftwidth=4
-set softtabstop=4
-set tabstop=4
+set shiftwidth=2
+set softtabstop=2
+set tabstop=2
 set expandtab
 
 " set textwidth=80
 set colorcolumn=+1
 " let &colorcolumn=join(range(81,999),",")
-highlight ColorColumn ctermbg=235 guibg=#2c2d27
-let &colorcolumn="80,".join(range(120,999),",")
+" highlight ColorColumn ctermbg=grey guibg=#2c2d27
+" let &colorcolumn="80,".join(range(120,999),",")
 
 if has("autocmd")
     autocmd Filetype eruby setlocal ts=2 sts=2 sw=2 
@@ -307,7 +308,7 @@ if executable('ag')
     " Use Ag over Grep
     set grepprg=ag\ --nogroup\ --nocolor
     " Use ag in CtrlP for listing files.
-    let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+    " let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
     " Ag is fast enough that CtrlP doesn't need to cache
     let g:ctrlp_use_caching = 0
 endif
@@ -325,7 +326,7 @@ let g:ctrlp_by_filename = 0
 let g:ctrlp_mruf_case_sensitive = 0
 let g:ctrlp_use_caching = 1
 let g:ctrlp_cache_dir = '~/tmp/ctrlp'
-let g:ctrlp_user_command = 'find %s -type f'
+" let g:ctrlp_user_command = 'find %s -type f'
 let g:ctrlp_working_path_mode = 'rw'
 let g:ctrlp_tabpage_position = 'f'
 
@@ -359,12 +360,13 @@ vmap     <C-G><C-G> <Plug>CtrlSFVwordExec
 nmap     <C-G>p <Plug>CtrlSFPwordPath
 nmap     <C-G><C-P> <Plug>CtrlSFPwordExec
 nnoremap <C-G><C-O> :CtrlSFOpen<CR>
-nnoremap <C-G><C-T> :CtrlSFToggle<CR>
+" nnoremap <C-G><C-T> :CtrlSFToggle<CR>
 inoremap <C-G><C-T> <Esc>:CtrlSFToggle<CR>
 nmap     <C-G>l <Plug>CtrlSFQuickfixPrompt
 vmap     <C-G>l <Plug>CtrlSFQuickfixVwordPath
 vmap     <C-G>L <Plug>CtrlSFQuickfixVwordPath
 vmap     <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
+nmap     <silent><leader>3 :CtrlSFToggle<CR>
 
 " vim-javascript
 let g:javascript_enable_domhtmlcss = 1
@@ -444,6 +446,12 @@ noremap <right> :bnext<CR>
 noremap <up> :cprev<CR> 
 noremap <down> :cnext<CR>
 
+" ctags
+nnoremap <c-]> g<c-]>
+vnoremap <c-]> g<c-]>
+nnoremap g<c-]> <c-]>
+vnoremap g<c-]> <c-]>
+
 " easymotion
 let g:EasyMotion_leader_key = "'"
 
@@ -456,7 +464,7 @@ let g:user_emmet_next_key='<C-V>n'
 let g:user_emmet_prev_key='<C-V>p'
 let g:user_emmet_togglecomment_key = '<C-V>/'
 let g:user_emmet_install_global=1 
-autocmd FileType html,css,eruby EmmetInstall
+autocmd FileType html,css,eruby,erb EmmetInstall
 
 " " YcmCompleter
 " noremap <c-]> :YcmCompleter GoToDefinitionElseDeclaration<CR>
@@ -626,6 +634,7 @@ func! DeleteTrailingWS()
   exe "normal `z"
 endfunc
 autocmd BufWrite *.php :call DeleteTrailingWS()
+autocmd BufWrite *.rb :call DeleteTrailingWS()
 map <leader>ds :call DeleteTrailingWS()<CR>
 
 " Make sure Vim returns to the same line when you reopen a file.

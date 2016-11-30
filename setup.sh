@@ -32,9 +32,6 @@ rm -f ~/.bash_profile && ln -s $DIR/.bash_profile ~/.bash_profile
 echo "Setup zsh dot-file..."
 rm -f ~/.zshrc && ln -s $DIR/.zshrc ~/.zshrc
 
-echo "Setup ctags dot-file..."
-rm -f ~/.ctags && ln -s $DIR/.ctags ~/.ctags
-
 echo "Setup vim dot-file..."
 mkdir -p ~/tmp/undofiles
 mkdir -p ~/tmp/backups
