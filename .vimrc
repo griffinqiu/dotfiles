@@ -25,18 +25,23 @@ Plugin 'majutsushi/tagbar'
 
 " For search 
 Plugin 'griffinqiu/star-search'
-Plugin 'ctrlpvim/ctrlp.vim'
+" Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'dyng/ctrlsf.vim'
 Plugin 'mileszs/ack.vim'
 Plugin 'terryma/vim-multiple-cursors'
+" Plugin 'SirVer/ultisnips'
+" Plugin 'honza/vim-snippets'
+Plugin 'tpope/vim-fugitive'
+Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plugin 'junegunn/fzf.vim'
 
 " Great plugins
 Plugin 'godlygeek/tabular'
-Plugin 'tpope/vim-unimpaired'
 Plugin 'Lokaltog/vim-easymotion'
 Plugin 'mattn/emmet-vim'
-Plugin 'tpope/vim-surround'
 Plugin 'skywind3000/asyncrun.vim'
+" Plugin 'tpope/vim-unimpaired'
+" Plugin 'tpope/vim-surround'
 
 " Syntax
 Plugin 'maksimr/vim-jsbeautify'
@@ -122,6 +127,7 @@ if has("autocmd")
     autocmd FileType tpl set omnifunc=htmlcomplete#CompleteTags
     autocmd FileType ruby set omnifunc=rubycomplete#Completeruby
     autocmd FileType sql set omnifunc=sqlcomplete#Completesql
+    autocmd FileType css,scss,less,html setl iskeyword+=-
     autocmd BufNewFile,BufRead *.hql set filetype=hive expandtab
     autocmd BufNewFile,BufRead *.q set filetype=hive expandtab
     " au BufRead,BufNewFile *.{md,mdown,mkd,mkdn,markdown,mdwn}   set filetype=mkd
@@ -138,7 +144,7 @@ set noswapfile
 set nowritebackup
 set novisualbell
 
-set nowrap
+set wrap
 set linebreak
 "set colorcolumn=120
 
@@ -303,32 +309,33 @@ let g:tagbar_sort=0
 let g:tagbar_autofocus=1
 let g:Tb_MaxSize=5
 
-" Ctrl P
-if executable('ag')
-    " Use Ag over Grep
-    set grepprg=ag\ --nogroup\ --nocolor
-    " Use ag in CtrlP for listing files.
-    " let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
-    " Ag is fast enough that CtrlP doesn't need to cache
-    let g:ctrlp_use_caching = 0
-endif
-let g:ctrlp_custom_ignore = {
-    \'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic|build|vendor)$',
-    \'file': '\v\.(exe|so|dll|meta|pyc|as|so|tags)$',
-    \'link': 'some_bad_symbolic_links'
-\}
-let g:ctrlp_prompt_mappings = {
-    \'AcceptSelection("v")': ['<C-V>', '<RightMouse>'],
-    \'AcceptSelection("h")': ['<C-S>', '<C-CR>'],
-    \'PrtClearCache()':      ['<F6>']
-\}
-let g:ctrlp_by_filename = 0
-let g:ctrlp_mruf_case_sensitive = 0
-let g:ctrlp_use_caching = 1
-let g:ctrlp_cache_dir = '~/tmp/ctrlp'
-" let g:ctrlp_user_command = 'find %s -type f'
-let g:ctrlp_working_path_mode = 'rw'
-let g:ctrlp_tabpage_position = 'f'
+" " Ctrl P
+" if executable('ag')
+    " " Use Ag over Grep
+    " " set grepprg=ag\ --nogroup\ --nocolor
+    " " Use ag in CtrlP for listing files.
+    " " let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+    " " Ag is fast enough that CtrlP doesn't need to cache
+    " let g:ctrlp_use_caching = 0
+" endif
+" let g:ctrlp_custom_ignore = {
+    " \'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic|build|vendor)$',
+    " \'file': '\v\.(exe|so|dll|meta|pyc|as|so|tags)$',
+    " \'link': 'some_bad_symbolic_links'
+" \}
+" let g:ctrlp_prompt_mappings = {
+    " \'AcceptSelection("v")': ['<C-V>', '<RightMouse>'],
+    " \'AcceptSelection("h")': ['<C-S>', '<C-CR>'],
+    " \'PrtClearCache()':      ['<F6>'],
+    " \'PrtCurLeft()': ['<left>', '<c-h>'] 
+" \}
+" " let g:ctrlp_user_command = 'find %s -type f'
+" let g:ctrlp_by_filename = 1
+" let g:ctrlp_mruf_case_sensitive = 0
+" let g:ctrlp_use_caching = 1
+" let g:ctrlp_cache_dir = '~/tmp/ctrlp'
+" let g:ctrlp_working_path_mode = 'w'
+" let g:ctrlp_tabpage_position = 'f'
 
 " CtrlSF
 " CtrlSF -i -C 1 [pattern] /restrict/to/some/dir
@@ -344,10 +351,11 @@ let g:ctrlsf_mapping = {
     \ "prev": "<c-u>",
     \ }
 "let g:ctrlsf_context = '-B 5 -A 3'
-let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'vendor']
+let g:ctrlsf_ignore_dir = ['node_modules', 'build']
 " Ack
 if executable('ag')
-    let g:ackprg = 'ag --vimgrep'
+  let g:ackprg = 'ag --vimgrep'
+" let g:ackprg = 'ag --nogroup --nocolor --column'
 endif
 
 " CtrlSF
@@ -509,6 +517,11 @@ autocmd FileType html,css,eruby,erb EmmetInstall
 " }}}
 
 " Mapping {{{
+nnoremap k gk
+nnoremap gk k
+nnoremap j gj
+nnoremap gj j
+
 noremap <silent> <C-s> :update!<CR>
 vnoremap <silent> <C-s> <C-c>:update!<CR>
 inoremap <silent> <C-s> <C-o>:update!<CR>
@@ -648,3 +661,99 @@ augroup line_return
 augroup END
 
 " }}}
+
+
+
+
+
+" This is the default extra key bindings
+let g:fzf_action = {
+  \ 'ctrl-t': 'tab split',
+  \ 'ctrl-x': 'split',
+  \ 'ctrl-v': 'vsplit' }
+
+" " Default fzf layout
+" " - down / up / left / right
+" let g:fzf_layout = { 'down': '~40%' }
+
+" " In Neovim, you can set up fzf window using a Vim command
+" let g:fzf_layout = { 'window': 'enew' }
+" let g:fzf_layout = { 'window': '-tabnew' }
+
+" " Customize fzf colors to match your color scheme
+" let g:fzf_colors =
+" \ { 'fg':      ['fg', 'Normal'],
+  " \ 'bg':      ['bg', 'Normal'],
+  " \ 'hl':      ['fg', 'Comment'],
+  " \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+  " \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+  " \ 'hl+':     ['fg', 'Statement'],
+  " \ 'info':    ['fg', 'PreProc'],
+  " \ 'prompt':  ['fg', 'Conditional'],
+  " \ 'pointer': ['fg', 'Exception'],
+  " \ 'marker':  ['fg', 'Keyword'],
+  " \ 'spinner': ['fg', 'Label'],
+  " \ 'header':  ['fg', 'Comment'] }
+
+" " [Files] Extra options for fzf
+" "   e.g. File preview using Highlight
+" "        (http://www.andre-simon.de/doku/highlight/en/highlight.html)
+" let g:fzf_files_options =
+  " \ '--preview "(highlight -O ansi {} || cat {}) 2> /dev/null | head -'.&lines.'"'
+
+" " [Buffers] Jump to the existing window if possible
+" let g:fzf_buffers_jump = 1
+
+" " [[B]Commits] Customize the options used by 'git log':
+" let g:fzf_commits_log_options = '--graph --color=always --format="%C(auto)%h%d %s %C(black)%C(bold)%cr"'
+
+" " [Tags] Command to generate tags file
+" let g:fzf_tags_command = 'ctags -R'
+
+" " [Commands] --expect expression for directly executing the command
+" let g:fzf_commands_expect = 'alt-enter,ctrl-x'
+
+" " Command for git grep
+" " - fzf#vim#grep(command, with_column, [options], [fullscreen])
+" command! -bang -nargs=* GGrep
+  " \ call fzf#vim#grep('git grep --line-number '.shellescape(<q-args>), 0, <bang>0)
+
+" " We use VimEnter event so that the code is run after fzf.vim is loaded
+" autocmd VimEnter * command! -bang Colors
+  " \ call fzf#vim#colors({'left': '15%', 'options': '--reverse --margin 30%,0'}, <bang>0)
+
+" " Augmenting Ag command using fzf#vim#with_preview function
+" "   * fzf#vim#with_preview([[options], preview window, [toggle keys...]])
+" "   * Preview script requires Ruby
+" "   * Install Highlight or CodeRay to enable syntax highlighting
+" "
+" "   :Ag  - Start fzf with hidden preview window that can be enabled with "?" key
+" "   :Ag! - Start fzf in fullscreen and display the preview window above
+" autocmd VimEnter * command! -bang -nargs=* Ag
+  " \ call fzf#vim#ag(<q-args>,
+  " \                 <bang>0 ? fzf#vim#with_preview('up:60%')
+  " \                         : fzf#vim#with_preview('right:50%:hidden', '?'),
+  " \                 <bang>0)
+
+" " Similarly, we can apply it to fzf#vim#grep. To use ripgrep instead of ag:
+" command! -bang -nargs=* Rg
+  " \ call fzf#vim#grep(
+  " \   'rg --column --line-number --no-heading --color=always '.shellescape(<q-args>), 1,
+  " \   <bang>0 ? fzf#vim#with_preview('up:60%')
+  " \           : fzf#vim#with_preview('right:50%:hidden', '?'),
+  " \   <bang>0)
+
+" Mapping selecting mappings
+nmap <c-p> :Files <cr>
+nmap <leader><tab> <plug>(fzf-maps-n)
+xmap <leader><tab> <plug>(fzf-maps-x)
+omap <leader><tab> <plug>(fzf-maps-o)
+
+" Insert mode completion
+imap <c-x><c-k> <plug>(fzf-complete-word)
+imap <c-x><c-f> <plug>(fzf-complete-path)
+imap <c-x><c-j> <plug>(fzf-complete-file-ag)
+imap <c-x><c-l> <plug>(fzf-complete-line)
+
+" " Advanced customization using autoload functions
+" inoremap <expr> <c-x><c-k> fzf#vim#complete#word({'left': '15%'})
