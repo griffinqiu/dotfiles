@@ -32,4 +32,4 @@
     changed = green
     untracked = blue
 [push]
-	default = matching
+    default = matching

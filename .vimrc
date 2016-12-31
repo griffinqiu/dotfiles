@@ -8,8 +8,8 @@ filetype off
 set rtp+=~/.vim/bundle/Vundle.vim/
 call vundle#rc("~/.vim/bundle/")
 " else
-" 	set rtp+=~/vimfiles/bundle/Vundle.vim/
-" 	call vundle#rc("~/vimfiles/bundle/")
+"   set rtp+=~/vimfiles/bundle/Vundle.vim/
+"   call vundle#rc("~/vimfiles/bundle/")
 " endif
 
 call vundle#begin()
@@ -23,7 +23,7 @@ Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'majutsushi/tagbar'
 " Plugin 'vim-scripts/buftabs'
 
-" For search 
+" For search
 Plugin 'griffinqiu/star-search'
 " Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'dyng/ctrlsf.vim'
@@ -40,8 +40,7 @@ Plugin 'godlygeek/tabular'
 Plugin 'Lokaltog/vim-easymotion'
 Plugin 'mattn/emmet-vim'
 Plugin 'skywind3000/asyncrun.vim'
-" Plugin 'tpope/vim-unimpaired'
-" Plugin 'tpope/vim-surround'
+Plugin 'msanders/snipmate.vim'
 
 " Syntax
 Plugin 'maksimr/vim-jsbeautify'
@@ -108,8 +107,10 @@ let g:mapleader=" "
 
 if v:version >= 703
     "undo settings
-	exec "set undodir=~/tmp/undofiles"
+    exec "set undodir=~/tmp/undofiles"
     set undofile
+else
+    set tagcase=match
 endif
 exec "set backupdir=~/tmp/backups"
 exec "set directory=~/tmp/"
@@ -160,7 +161,7 @@ set colorcolumn=+1
 " let &colorcolumn="80,".join(range(120,999),",")
 
 if has("autocmd")
-    autocmd Filetype eruby setlocal ts=2 sts=2 sw=2 
+    autocmd Filetype eruby setlocal ts=2 sts=2 sw=2
     autocmd Filetype ruby setlocal ts=2 sts=2 sw=2
 endif
 
@@ -236,8 +237,6 @@ set shortmess=atI
 
 set nrformats=
 set cinwords=if,else,while,do,for,switch,case
-
-set tagcase=match
 
 " tags
 " set tags=.tags;
@@ -344,7 +343,7 @@ if executable('ag')
 endif
 let g:ctrlsf_auto_close = 0
 let g:ctrlsf_open_left = 0
-let g:ctrlsf_winsize = '15' 
+let g:ctrlsf_winsize = '15'
 let g:ctrlsf_position = 'bottom'
 let g:ctrlsf_mapping = {
     \ "next": "<c-d>",
@@ -381,8 +380,8 @@ let g:javascript_enable_domhtmlcss = 1
 let g:javascript_ignore_javaScriptdoc = 1
 
 " NERDTree
-nmap <silent> <leader>1			:NERDTreeToggle<CR>
-nmap <silent> <leader>nf		:NERDTreeFind<CR>
+nmap <silent> <leader>1         :NERDTreeToggle<CR>
+nmap <silent> <leader>nf        :NERDTreeFind<CR>
 " Open 'Project'
 nmap <silent> <leader>no        :NERDTreeFromBookmark<space>
 
@@ -410,7 +409,7 @@ let g:NERDTreeMapJumpPrevSibling = '<c-u>'
 " " Automatically open a NERDTree if no files where specified
 " autocmd vimenter * if !argc() | NERDTree | endif
 " " Close vim if the only window left open is a NERDTree
-" autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") 
+" autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType")
             " \ && b:NERDTreeType == "primary") | q | endif
 
 let g:NERDTreeIndicatorMapCustom = {
@@ -449,9 +448,9 @@ nmap <silent> <leader>tn :NextTwitter<cr>
 "nmap <silent> <leader>tl :PreviousTwitter<cr>
 
 " buftabs
-noremap <left> :bprev<CR> 
+noremap <left> :bprev<CR>
 noremap <right> :bnext<CR>
-noremap <up> :cprev<CR> 
+noremap <up> :cprev<CR>
 noremap <down> :cnext<CR>
 
 " ctags
@@ -467,7 +466,7 @@ let g:EasyMotion_leader_key = "'"
 let g:user_emmet_leader_key='<C-V>'
 let g:user_emmet_expandabbr_key='<C-V><C-V>'
 let g:user_emmet_expandword_key = '<C-V>v'
-let g:user_emmet_update_tag = '<C-V>u'                                                                                                                                                                                               
+let g:user_emmet_update_tag = '<C-V>u'
 let g:user_emmet_next_key='<C-V>n'
 let g:user_emmet_prev_key='<C-V>p'
 let g:user_emmet_togglecomment_key = '<C-V>/'
@@ -626,17 +625,17 @@ map <silent> <leader><leader>e :call SwitchToBuf("~/.vimrc")<cr>
 "map <M-F12> :call RefreshCtags()<CR>
 
 " Close other Buffers
-command! BcloseOthers call <SID>BufCloseOthers()  
-function! <SID>BufCloseOthers()  
-   let l:currentBufNum   = bufnr("%")  
-   let l:alternateBufNum = bufnr("#")  
-   for i in range(1,bufnr("$"))  
-     if buflisted(i)  
-       if i!=l:currentBufNum  
-         execute("bdelete ".i)  
-       endif  
-     endif  
-   endfor  
+command! BcloseOthers call <SID>BufCloseOthers()
+function! <SID>BufCloseOthers()
+   let l:currentBufNum   = bufnr("%")
+   let l:alternateBufNum = bufnr("#")
+   for i in range(1,bufnr("$"))
+     if buflisted(i)
+       if i!=l:currentBufNum
+         execute("bdelete ".i)
+       endif
+     endif
+   endfor
 endfunction
 map <leader>bdo :BcloseOthers<cr>
 
@@ -653,11 +652,11 @@ map <leader>ds :call DeleteTrailingWS()<CR>
 " Make sure Vim returns to the same line when you reopen a file.
 " Thanks, Amit
 augroup line_return
-	au!
-	au BufReadPost *
-		\ if line("'\"") > 0 && line("'\"") <= line("$") |
-		\     execute 'normal! g`"zvzz' |
-		\ endif
+    au!
+    au BufReadPost *
+        \ if line("'\"") > 0 && line("'\"") <= line("$") |
+        \     execute 'normal! g`"zvzz' |
+        \ endif
 augroup END
 
 " }}}
