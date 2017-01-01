@@ -1,4 +1,4 @@
-Griffin's dot-files
+Griffin's dotfiles
 ===================
 
 This project structure refers to [thoughtbot dotfiles](https://github.com/thoughtbot/dotfiles)

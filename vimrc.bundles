@@ -138,9 +138,39 @@ Plug 'scrooloose/nerdcommenter'
 
 Plug 'griffinqiu/star-search'
 Plug 'dyng/ctrlsf.vim'
-Plug 'terryma/vim-multiple-cursors', { 'on': 'CtrlSF' }
-    let g:multi_cursor_start_key='<c-n>'
-    let g:multi_cursor_start_word_key='g<c-n>'
+    nmap     <C-G>g <Plug>CtrlSFPrompt
+    nmap     <C-G>G <Plug>CtrlSFCwordPath
+    nmap     <C-G><C-G> <Plug>CtrlSFCwordExec
+    vmap     <C-G>g <Plug>CtrlSFVwordPath
+    vmap     <C-G>G <Plug>CtrlSFVwordPath
+    vmap     <C-G><C-G> <Plug>CtrlSFVwordExec
+    nmap     <C-G>p <Plug>CtrlSFPwordPath
+    nmap     <C-G><C-P> <Plug>CtrlSFPwordExec
+    nnoremap <C-G><C-O> :CtrlSFOpen<CR>
+    " nnoremap <C-G><C-T> :CtrlSFToggle<CR>
+    inoremap <C-G><C-T> <Esc>:CtrlSFToggle<CR>
+    nmap     <C-G>l <Plug>CtrlSFQuickfixPrompt
+    vmap     <C-G>l <Plug>CtrlSFQuickfixVwordPath
+    vmap     <C-G>L <Plug>CtrlSFQuickfixVwordPath
+    vmap     <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
+    nmap     <silent><leader>3 :CtrlSFToggle<CR>
+    let g:ctrlsf_mapping = {
+        \ "next": "<c-d>",
+        \ "prev": "<c-u>",
+        \ }
+    let g:ctrlsf_auto_close = 0
+    let g:ctrlsf_open_left = 0
+    let g:ctrlsf_winsize = '15' 
+    let g:ctrlsf_position = 'bottom'
+    "let g:ctrlsf_context = '-B 5 -A 3'
+    let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'vendor']
+    " Ack
+    if executable('ag')
+        let g:ackprg = 'ag --vimgrep'
+    endif
+    Plug 'terryma/vim-multiple-cursors', { 'on': 'CtrlSF' }
+        let g:multi_cursor_start_key='<c-n>'
+        let g:multi_cursor_start_word_key='g<c-n>'
 
 Plug 'mileszs/ack.vim'
     if executable('ag')

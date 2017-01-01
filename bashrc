@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # User specific environment and startup programs
-export PATH=$PATH:$HOME/bin:$HOME/.rvm/bin
+export PATH=$PATH:$HOME/bin:$HOME/.rvm/bin:$HOME/.bin
 
 set -o ignoreeof
 stty -ixon -ixoff

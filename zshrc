@@ -58,7 +58,7 @@ source $ZSH/oh-my-zsh.sh
 # User configuration
 
 # Add RVM to PATH for scripting
-export PATH="$PATH:$HOME/.rvm/bin"
+export PATH=$PATH:$HOME/.rvm/bin:$HOME/.bin
 
 # You may need to manually set your language environment
 stty -ixon -ixoff
