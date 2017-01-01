@@ -1,3 +1,5 @@
+[init]
+    templatedir = ~/.git_template
 [user]
     name  = Griffin Qiu
     email = griffinqiu@gmail.com
@@ -6,17 +8,18 @@
 [hub]
     protocol = https
 [core]
+    excludesfile = ~/.gitignore
     pager = less -FRSX
     whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
     editor = vim -f
     autocrlf = input
     safecrlf = true
 [color]
+    ui = auto
     diff = auto
     status = auto
     branch = auto
     interactive = auto
-    ui = true
     pager = true
 [color "branch"]
     current = yellow reverse
@@ -31,5 +34,23 @@
     added = yellow
     changed = green
     untracked = blue
+[commit]
+    template = ~/.gitmessage
+[fetch]
+    prune = true
 [push]
-    default = matching
+    default = current
+[rebase]
+    autosquash = true
+[merge]
+    ff = only
+[alias]
+  aa = add --all
+  ap = add --patch
+  branches = for-each-ref --sort=-committerdate --format=\"%(color:blue)%(authordate:relative)\t%(color:red)%(authorname)\t%(color:white)%(color:bold)%(refname:short)\" refs/remotes
+  ci = commit -v
+  co = checkout
+  pf = push --force-with-lease
+  st = status
+[include]
+    path = ~/.gitconfig.local

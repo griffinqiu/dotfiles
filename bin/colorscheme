@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #  Echoes a bunch of color codes to the terminal.
 #  Each line is the color code of one forground color, out of 17 (default + 16

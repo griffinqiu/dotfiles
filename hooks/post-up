@@ -1,0 +1,30 @@
+#!/bin/bash
+
+echo "      _       _         __ _ _"
+echo "   __| | ___ | |_      / _(_) | ___  ___"
+echo "  / _\` |/ _ \| __|____| |_| | |/ _ \/ __|"
+echo " | (_| | (_) | ||_____|  _| | |  __/\__ \\"
+echo "  \__,_|\___/ \__|    |_| |_|_|\___||___/"
+echo ""
+
+if which apt-get >/dev/null; then
+    sudo apt-get install -y vim vim-gnome ctags xclip tmux astyle git
+elif which yum >/dev/null; then
+    sudo yum install -y gcc vim git ctags xclip tmux astyle
+fi
+
+if which brew >/dev/null;then
+    echo "You are using HomeBrew tool"
+    brew install vim ctags git astyle tmux reattach-to-user-namespace
+fi
+
+if [ ! -e "$HOME"/.vim/autoload/plug.vim ]; then
+    curl -fLo "$HOME"/.vim/autoload/plug.vim --create-dirs \
+        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+fi
+vim -u "$HOME"/.vimrc.bundles +PlugInstall +PlugClean! +qa
+
+if [ ! -e "$HOME"/.oh-my-zsh ]; then
+    sh -c "$(curl -fsSL \
+        https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+fi

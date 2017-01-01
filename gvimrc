@@ -72,6 +72,11 @@ else
     set gfn=Menlo:h14
 endif
 
+" No audible bell
+set visualbell
+
+" Use console dialogs
+set guioptions+=c
 set winaltkeys=no
 set guioptions-=b
 set guioptions-=R
@@ -82,9 +87,9 @@ set guioptions-=L
 set guioptions-=T
 
 set t_Co=256
-colorscheme desert
-"set background=dark
-"colorscheme solarized
+" colorscheme desert
+set background=dark
+colorscheme solarized
 set mouse+=a
 set mousehide
 
@@ -124,3 +129,8 @@ endif
 set noimdisable
 set iminsert=2
 set imsearch=2
+
+" Local config
+if filereadable($HOME . "/.gvimrc.local")
+  source ~/.gvimrc.local
+endif

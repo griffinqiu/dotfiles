@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Unix
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias grep='grep --color=auto'
+alias l.='ls -d .* -FHG'
+alias ll='ls -l -FHG'
+alias ls='ls -FHG'
+alias which='alias | /usr/bin/which --tty-only --read-alias --show-dot --show-tilde'
+alias ln="ln -v"
+alias mkdir="mkdir -p"
+alias e="$EDITOR"
+alias v="$VISUAL"
+
+# Bundler
+alias b="bundle"
+
+# Rails
+alias migrate="rake db:migrate db:rollback && rake db:migrate db:test:prepare"
+alias s="rspec"
+
+# Pretty print the path
+alias path='echo $PATH | tr -s ":" "\n"'
+
+# Include custom aliases
+[[ -f ~/.aliases.local ]] && source ~/.aliases.local

@@ -1,0 +1,311 @@
+if &compatible
+  set nocompatible
+end
+
+" Shim command and function to allow migration from Vundle to vim-plug. {{{
+function! VundleToPlug(vundle_command, arg, ...)
+  echom "You are using Vundle's `".a:vundle_command."` command to declare plugins. Dotfiles now uses vim-plug for plugin management. Please rename uses of `".a:vundle_command."` to `Plug`. Plugin was '".a:arg."'."
+  let vim_plug_options = {}
+
+  if a:0 > 0
+    if has_key(a:1, 'name')
+      let name = a:1.name
+      let vim_plug_options.dir = "$HOME/.vim/bundle/".a:1.name
+    endif
+
+    if has_key(a:1, 'rtp')
+      let vim_plug_options.rtp = a:1.rtp
+    endif
+  endif
+
+  Plug a:arg, vim_plug_options
+endfunction
+
+com! -nargs=+  -bar Plugin call VundleToPlug("Plugin", <args>)
+com! -nargs=+  -bar Bundle call VundleToPlug("Bundle", <args>)
+
+" }}}
+
+call plug#begin()
+
+" Tpopes' :) {{{
+Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-rails'
+Plug 'tpope/vim-endwise'
+" }}}
+
+" Tools, Such as nerdtree, vimwiki {{{
+Plug 'majutsushi/tagbar'
+    nnoremap <silent> <leader>2 :TagbarToggle<CR>
+    let g:tagbar_type_php = {
+        \'ctagstype' : 'php',
+        \'kinds'     : [
+            \'i:interfaces',
+            \'c:classes',
+            \'d:constant definitions',
+            \'f:functions',
+            \'j:javascript functions:1'
+        \]
+    \}"
+    let g:tagbar_width=30
+    let g:tagbar_sort=0
+    let g:tagbar_autofocus=1
+    let g:Tb_MaxSize=5
+
+Plug 'vimwiki/vimwiki'
+    let defualt_wiki = {
+        \'path': '~/github/vimwiki/_source/',
+        \'path_html': '~/github/vimwiki/html/',
+        \'template_path': '~/github/vimwiki/templates/',
+        \'template_ext': '.tpl',
+        \'template_default': 'default',
+        \'nested_syntaxes': {'php': 'php', 'python': 'python', 'c++': 'cpp', 'js': 'javascript', 'bash': 'bash'},
+        \'index': 'index',
+        \'ext': '.wiki',
+        \'syntax': 'default',
+        \'auto_export': 1
+    \}
+    let g:vimwiki_use_calendar = 1
+    let g:vimwiki_use_mouse = 1
+    let g:vimwiki_list = [defualt_wiki]
+    " nnoremap <S-Space> <Plug>VimwikiToggleListItem
+    " let g:vimwiki_hl_cb_checked = 1
+    " let g:vimwiki_valid_html_tags='strong,em,del,blockquote,ins,code'
+    " let g:vimwiki_file_exts = 'php, c'
+    " let g:vimwiki_browsers = ['google-chrome']
+
+Plug 'rizzatti/dash.vim'
+		" noremap <c-g> :call investigate#Investigate()<CR>
+		" let g:investigate_use_dash=1
+
+Plug 'vim-scripts/TwitVim'
+    let g:twitvim_browser_cmd='open'
+    let g:twitvim_force_ssl=1
+    nnoremap <silent> <leader>tt :FriendsTwitter<cr>
+    nnoremap <silent> <leader>tp :PosttoTwitter<cr>
+    vnoremap <silent> <leader>tp <Plug>TwitvimVisual<cr>
+    nnoremap <silent> <leader>tcp :CPosttoTwitter<cr>
+    nnoremap <silent> <leader>tu :UserTwitter<cr>
+    nnoremap <silent> <leader>tm :MentionsTwitter<cr>
+    nnoremap <silent> <leader>td :DMTwitter<cr>
+    nnoremap <silent> <leader>tn :NextTwitter<cr>
+    " nnoremap <silent> <leader>tl :PreviousTwitter<cr>
+
+Plug 'mattn/emmet-vim'
+    autocmd FileType html,css,eruby,erb EmmetInstall
+    let g:user_emmet_leader_key='<C-V>'
+    let g:user_emmet_expandabbr_key='<C-V><C-V>'
+    let g:user_emmet_expandword_key = '<C-V>v'
+    let g:user_emmet_update_tag = '<C-V>u'
+    let g:user_emmet_next_key='<C-V>n'
+    let g:user_emmet_prev_key='<C-V>p'
+    let g:user_emmet_togglecomment_key = '<C-V>/'
+    let g:user_emmet_install_global=1
+
+Plug 'vim-scripts/matchit.zip'
+Plug 'msanders/snipmate.vim'
+Plug 'godlygeek/tabular'
+Plug 'liangfeng/vimcdoc'
+Plug 'uguu-org/vim-matrix-screensaver'
+" }}}
+
+" Browse, Jump, motion {{{
+Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+    nnoremap <silent> <leader>1 :NERDTreeToggle<CR>
+    nnoremap <silent> <leader>nf :NERDTreeFind<CR>
+    let g:NERDTreeMapPreview = "p"
+    let g:NERDTreeMapOpenSplit = "s"
+    let g:NERDTreeMapPreviewSplit = "<c-s>"
+    let g:NERDTreeMapOpenVSplit = "v"
+    let g:NERDTreeMapPreviewVSplit = "<c-v>"
+    let g:NERDTreeMapToggleHidden = "I"
+    let g:NERDTreeIgnore=['\.meta$', '\.pyc$']
+    let g:NERDTreeMapJumpNextSibling = '<c-d>'
+    let g:NERDTreeMapJumpPrevSibling = '<c-u>'
+    " Set opened dir to workspace dir
+    let NERDTreeChDirMode = 2
+    " let NERDTreeWinPos = 'right'
+    let NERDTreeShowBookmarks = 1
+    let NERDTreeWinSize = 30
+    " " Automatically open a NERDTree if no files where specified
+    " autocmd vimenter * if !argc() | NERDTree | endif
+    " " Close vim if the only window left open is a NERDTree
+    " autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType")
+            " \ && b:NERDTreeType == "primary") | q | endif
+Plug 'Xuyuanp/nerdtree-git-plugin', { 'on': 'NERDTreeToggle' }
+Plug 'scrooloose/nerdcommenter'
+    let g:NERDSpaceDelims=1
+
+Plug 'griffinqiu/star-search'
+Plug 'dyng/ctrlsf.vim'
+Plug 'terryma/vim-multiple-cursors', { 'on': 'CtrlSF' }
+    let g:multi_cursor_start_key='<c-n>'
+    let g:multi_cursor_start_word_key='g<c-n>'
+
+Plug 'mileszs/ack.vim'
+    if executable('ag')
+      let g:ackprg = 'ag --vimgrep'
+      " let g:ackprg = 'ag --nogroup --nocolor --column'
+    endif
+
+Plug 'Lokaltog/vim-easymotion'
+    let g:EasyMotion_leader_key = "'"
+
+" }}}
+
+" CtrlP or FZF {{{
+if has('gui_running')
+  " for ctrlp plugin
+  " Define bundles via Github repos
+  Plug 'ctrlpvim/ctrlp.vim'
+      let g:ctrlp_custom_ignore = {
+        \'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic|build|vendor)$',
+        \'file': '\v\.(exe|so|dll|meta|pyc|as|so|tags)$',
+        \'link': 'some_bad_symbolic_links'
+      \}
+      let g:ctrlp_prompt_mappings = {
+        \'AcceptSelection("v")': ['<C-V>', '<RightMouse>'],
+        \'AcceptSelection("h")': ['<C-S>', '<C-CR>'],
+        \'PrtClearCache()':      ['<F6>'],
+        \'PrtCurLeft()': ['<left>', '<c-h>'] 
+      \}
+      " let g:ctrlp_user_command = 'find %s -type f'
+      let g:ctrlp_by_filename = 1
+      let g:ctrlp_mruf_case_sensitive = 0
+      let g:ctrlp_use_caching = 1
+      let g:ctrlp_cache_dir = '~/tmp/ctrlp'
+      let g:ctrlp_working_path_mode = 'w'
+      let g:ctrlp_tabpage_position = 'f'
+      " nnoremap <leader>b :CtrlPBuffer<CR>
+      " nnoremap <leader>h :CtrlPMRU<CR>
+      " nnoremap <leader>e :CtrlPRegister<CR>
+      " nnoremap <leader>m :CtrlPMark<CR>
+      " nnoremap <leader>g :CtrlPTag<CR>
+      " nnoremap <leader>f :CtrlPFunky<Cr>
+      " nnoremap <Leader>u :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
+else
+    " for fzf plugin
+    Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+    Plug 'junegunn/fzf.vim'
+        nnoremap <c-p> :Files <cr>
+        let g:fzf_action = {
+          \ 'ctrl-t': 'tab split',
+          \ 'ctrl-x': 'split',
+          \ 'ctrl-v': 'vsplit' }
+        nnoremap <C-p> :GitFiles<CR>
+        " nnoremap <leader>f :Files<CR>
+        " nnoremap <leader>b :Buffers<CR>
+        " nnoremap <leader>h :History<CR>
+        " nnoremap <leader>m :Marks<CR>
+        " nnoremap <leader>cc :Colors<CR>
+        " nnoremap <leader>bc :BCommits<CR>
+        " nnoremap <silent> <Leader>ag :Ag <C-R><C-W><CR>
+        " imap <c-x><c-k> <plug>(fzf-complete-word)
+        " imap <c-x><c-f> <plug>(fzf-complete-path)
+        " imap <c-x><c-j> <plug>(fzf-complete-file-ag)
+        " imap <c-x><c-l> <plug>(fzf-complete-line)
+        " nmap <leader><tab> <plug>(fzf-maps-n)
+        " xmap <leader><tab> <plug>(fzf-maps-x)
+        " omap <leader><tab> <plug>(fzf-maps-o)
+endif
+" }}}
+
+" Syntax {{{
+Plug 'maksimr/vim-jsbeautify', { 'for': 'js' }
+Plug 'kchmck/vim-coffee-script', { 'for': 'coffee' }
+Plug 'pangloss/vim-javascript', { 'for': 'js' }
+		let g:javascript_enable_domhtmlcss = 1
+		let g:javascript_ignore_javaScriptdoc = 1
+
+Plug 'gorodinskiy/vim-coloresque', { 'for': ['css', 'scss', 'less'] }
+Plug 'hail2u/vim-css3-syntax', { 'for': ['css', 'scss', 'less'] }
+Plug 'cakebaker/scss-syntax.vim', { 'for': 'scss' }
+Plug 'groenewege/vim-less', { 'for': 'less' }
+
+Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
+Plug 'tpope/vim-bundler', { 'for': 'ruby' }
+Plug 'tpope/vim-endwise', { 'for': 'ruby' }
+Plug 'tpope/vim-rails', { 'for': 'ruby' }
+Plug 'Keithbsmiley/rspec.vim', { 'for': 'ruby' }
+Plug 'ecomba/vim-ruby-refactoring', { 'for': 'ruby' }
+Plug 'AndrewRadev/switch.vim', { 'for': ['ruby', 'eruby', 'coffee', 'haml'] }
+Plug 'janko-m/vim-test', { 'for': 'ruby' }
+		nnoremap <silent> <Leader>t :TestFile<CR>
+		nnoremap <silent> <Leader>s :TestNearest<CR>
+		nnoremap <silent> <Leader>l :TestLast<CR>
+		nnoremap <silent> <Leader>a :TestSuite<CR>
+		nnoremap <silent> <leader>gt :TestVisit<CR>
+
+Plug 'StanAngeloff/php.vim', { 'for': 'php' }
+Plug 'shawncplus/phpcomplete.vim', { 'for': 'php' }
+
+Plug 'hynek/vim-python-pep8-indent', { 'for': 'python' }
+Plug 'chase/vim-ansible-yaml'
+
+Plug 'autowitch/hive.vim', { 'for': ['hql', 'sql'] }
+
+Plug 'plasticboy/vim-markdown'
+Plug 'mzlogin/vim-markdown-toc'
+    let g:vim_markdown_folding_disabled=1
+    let g:vim_markdown_initial_foldlevel=1
+" }}}
+
+" Colorscheme {{{
+Plug 'altercation/vim-colors-solarized'
+Plug 'yonchu/accelerated-smooth-scroll'
+" }}}
+
+" Airline {{{
+" Plug 'Lokaltog/vim-powerline'
+" Plug 'bling/vim-airline'
+" Plug 'edkolev/tmuxline.vim'
+" }}}
+
+" " Static language Complete {{{
+" Plug 'Valloric/YouCompleteMe'
+		" noremap <c-]> :YcmCompleter GoToDefinitionElseDeclaration<CR>
+		" set completeopt-=preview
+		" let g:ycm_key_list_select_completion=['<Down>']
+		" let g:ycm_key_list_previous_completion=['<Up>']
+		" let g:ycm_seed_identifiers_with_syntax=1
+		" let g:ycm_complete_in_comments=1
+		" let g:ycm_confirm_extra_conf=0
+		" " let g:ycm_collect_identifiers_from_tags_files=1
+		" let g:ycm_key_invoke_completion='<C-Space>'
+		" let g:ycm_auto_trigger=0
+		" let g:ycm_filetype_blacklist = {
+					" \ 'tagbar' : 1,
+					" \ 'qf' : 1,
+					" \ 'notes' : 1,
+					" \ 'markdown' : 1,
+					" \ 'unite' : 1,
+					" \ 'text' : 1,
+					" \ 'vimwiki' : 1,
+					" \ 'pandoc' : 1,
+					" \ 'infolog' : 1,
+					" \ 'mail' : 1
+					" \}
+		" let g:ycm_semantic_triggers =  {
+			" \   'c' : ['->', '.'],
+			" \   'objc' : ['->', '.'],
+			" \   'ocaml' : ['.', '#'],
+			" \   'cpp,objcpp' : ['->', '.', '::'],
+			" \   'perl' : ['->'],
+			" \   'php' : ['->', '::'],
+			" \   'cs,java,javascript,d,python,perl6,scala,vb,elixir,go' : ['.'],
+			" \   'vim' : ['re![_a-zA-Z]+[_\w]*\.'],
+			" \   'ruby' : ['.', '::'],
+			" \   'lua' : ['.', ':'],
+			" \   'erlang' : [':'],
+			" \ }
+
+" Plug 'marijnh/tern_for_vim'
+" Plug 'OrangeT/vim-csharp'
+" Plug 'scrooloose/syntastic'
+" " }}}
+
+if filereadable(expand("~/.vimrc.bundles.local"))
+  source ~/.vimrc.bundles.local
+endif
+
+call plug#end()
