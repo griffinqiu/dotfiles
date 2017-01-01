@@ -75,8 +75,8 @@ Plug 'vimwiki/vimwiki'
     " let g:vimwiki_browsers = ['google-chrome']
 
 Plug 'rizzatti/dash.vim'
-		" noremap <c-g> :call investigate#Investigate()<CR>
-		" let g:investigate_use_dash=1
+    " noremap <c-g> :call investigate#Investigate()<CR>
+    " let g:investigate_use_dash=1
 
 Plug 'vim-scripts/TwitVim'
     let g:twitvim_browser_cmd='open'
@@ -244,8 +244,8 @@ endif
 Plug 'maksimr/vim-jsbeautify', { 'for': 'js' }
 Plug 'kchmck/vim-coffee-script', { 'for': 'coffee' }
 Plug 'pangloss/vim-javascript', { 'for': 'js' }
-		let g:javascript_enable_domhtmlcss = 1
-		let g:javascript_ignore_javaScriptdoc = 1
+    let g:javascript_enable_domhtmlcss = 1
+    let g:javascript_ignore_javaScriptdoc = 1
 
 Plug 'gorodinskiy/vim-coloresque', { 'for': ['css', 'scss', 'less'] }
 Plug 'hail2u/vim-css3-syntax', { 'for': ['css', 'scss', 'less'] }
@@ -260,11 +260,11 @@ Plug 'Keithbsmiley/rspec.vim', { 'for': 'ruby' }
 Plug 'ecomba/vim-ruby-refactoring', { 'for': 'ruby' }
 Plug 'AndrewRadev/switch.vim', { 'for': ['ruby', 'eruby', 'coffee', 'haml'] }
 Plug 'janko-m/vim-test', { 'for': 'ruby' }
-		nnoremap <silent> <Leader>t :TestFile<CR>
-		nnoremap <silent> <Leader>s :TestNearest<CR>
-		nnoremap <silent> <Leader>l :TestLast<CR>
-		nnoremap <silent> <Leader>a :TestSuite<CR>
-		nnoremap <silent> <leader>gt :TestVisit<CR>
+    nnoremap <silent> <Leader>t :TestFile<CR>
+    nnoremap <silent> <Leader>s :TestNearest<CR>
+    nnoremap <silent> <Leader>l :TestLast<CR>
+    nnoremap <silent> <Leader>a :TestSuite<CR>
+    nnoremap <silent> <leader>gt :TestVisit<CR>
 
 Plug 'StanAngeloff/php.vim', { 'for': 'php' }
 Plug 'shawncplus/phpcomplete.vim', { 'for': 'php' }
@@ -293,41 +293,41 @@ Plug 'yonchu/accelerated-smooth-scroll'
 
 " " Static language Complete {{{
 " Plug 'Valloric/YouCompleteMe'
-		" noremap <c-]> :YcmCompleter GoToDefinitionElseDeclaration<CR>
-		" set completeopt-=preview
-		" let g:ycm_key_list_select_completion=['<Down>']
-		" let g:ycm_key_list_previous_completion=['<Up>']
-		" let g:ycm_seed_identifiers_with_syntax=1
-		" let g:ycm_complete_in_comments=1
-		" let g:ycm_confirm_extra_conf=0
-		" " let g:ycm_collect_identifiers_from_tags_files=1
-		" let g:ycm_key_invoke_completion='<C-Space>'
-		" let g:ycm_auto_trigger=0
-		" let g:ycm_filetype_blacklist = {
-					" \ 'tagbar' : 1,
-					" \ 'qf' : 1,
-					" \ 'notes' : 1,
-					" \ 'markdown' : 1,
-					" \ 'unite' : 1,
-					" \ 'text' : 1,
-					" \ 'vimwiki' : 1,
-					" \ 'pandoc' : 1,
-					" \ 'infolog' : 1,
-					" \ 'mail' : 1
-					" \}
-		" let g:ycm_semantic_triggers =  {
-			" \   'c' : ['->', '.'],
-			" \   'objc' : ['->', '.'],
-			" \   'ocaml' : ['.', '#'],
-			" \   'cpp,objcpp' : ['->', '.', '::'],
-			" \   'perl' : ['->'],
-			" \   'php' : ['->', '::'],
-			" \   'cs,java,javascript,d,python,perl6,scala,vb,elixir,go' : ['.'],
-			" \   'vim' : ['re![_a-zA-Z]+[_\w]*\.'],
-			" \   'ruby' : ['.', '::'],
-			" \   'lua' : ['.', ':'],
-			" \   'erlang' : [':'],
-			" \ }
+    " noremap <c-]> :YcmCompleter GoToDefinitionElseDeclaration<CR>
+    " set completeopt-=preview
+    " let g:ycm_key_list_select_completion=['<Down>']
+    " let g:ycm_key_list_previous_completion=['<Up>']
+    " let g:ycm_seed_identifiers_with_syntax=1
+    " let g:ycm_complete_in_comments=1
+    " let g:ycm_confirm_extra_conf=0
+    " " let g:ycm_collect_identifiers_from_tags_files=1
+    " let g:ycm_key_invoke_completion='<C-Space>'
+    " let g:ycm_auto_trigger=0
+    " let g:ycm_filetype_blacklist = {
+          " \ 'tagbar' : 1,
+          " \ 'qf' : 1,
+          " \ 'notes' : 1,
+          " \ 'markdown' : 1,
+          " \ 'unite' : 1,
+          " \ 'text' : 1,
+          " \ 'vimwiki' : 1,
+          " \ 'pandoc' : 1,
+          " \ 'infolog' : 1,
+          " \ 'mail' : 1
+          " \}
+    " let g:ycm_semantic_triggers =  {
+      " \   'c' : ['->', '.'],
+      " \   'objc' : ['->', '.'],
+      " \   'ocaml' : ['.', '#'],
+      " \   'cpp,objcpp' : ['->', '.', '::'],
+      " \   'perl' : ['->'],
+      " \   'php' : ['->', '::'],
+      " \   'cs,java,javascript,d,python,perl6,scala,vb,elixir,go' : ['.'],
+      " \   'vim' : ['re![_a-zA-Z]+[_\w]*\.'],
+      " \   'ruby' : ['.', '::'],
+      " \   'lua' : ['.', ':'],
+      " \   'erlang' : [':'],
+      " \ }
 
 " Plug 'marijnh/tern_for_vim'
 " Plug 'OrangeT/vim-csharp'

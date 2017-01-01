@@ -25,9 +25,9 @@ set backspace=indent,eol,start
 
 set foldmethod=marker
 
-set shiftwidth=2
-set softtabstop=2
-set tabstop=2
+set shiftwidth=4
+set softtabstop=4
+set tabstop=4
 set expandtab
 " set nolist
 set list listchars=tab:»·,trail:·,nbsp:·
@@ -46,34 +46,34 @@ endif
 set nocompatible
 filetype plugin indent on
 augroup vimrcEx
-		autocmd!
+    autocmd!
 
-		" When editing a file, always jump to the last known cursor position.
-		" Don't do it for commit messages, when the position is invalid, or when
-		" inside an event handler (happens when dropping a file on gvim).
-		autocmd BufReadPost *
-			\ if &ft != 'gitcommit' && line("'\"") > 0 && line("'\"") <= line("$") |
-			\   exe "normal g`\"" |
-			\ endif
+    " When editing a file, always jump to the last known cursor position.
+    " Don't do it for commit messages, when the position is invalid, or when
+    " inside an event handler (happens when dropping a file on gvim).
+    autocmd BufReadPost *
+      \ if &ft != 'gitcommit' && line("'\"") > 0 && line("'\"") <= line("$") |
+      \   exe "normal g`\"" |
+      \ endif
 
-		" Set syntax highlighting for specific file types
-		autocmd BufRead,BufNewFile Appraisals set filetype=ruby
-		autocmd BufRead,BufNewFile *.{md,mdown,mkd,mkdn,markdown,mdwn}   set filetype=markdown
-		autocmd BufRead,BufNewFile .{jscs,jshint,eslint}rc set filetype=json
-		autocmd BufNewFile,BufRead *.hql set filetype=hive expandtab
-		autocmd BufNewFile,BufRead *.q set filetype=hive expandtab
-		autocmd FileType c set omnifunc=ccomplete#Complete
-		autocmd FileType python set omnifunc=pythoncomplete#Complete
-		autocmd FileType ada set omnifunc=adacomplete#Complete
-		autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
-		autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
-		autocmd FileType phtml set omnifunc=htmlcomplete#CompleteTags
-		autocmd FileType css set omnifunc=csscomplete#CompleteCSS
-		autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
-		autocmd FileType php set omnifunc=phpcomplete#CompletePHP
-		autocmd FileType tpl set omnifunc=htmlcomplete#CompleteTags
-		autocmd FileType sql set omnifunc=sqlcomplete#Completesql
-		autocmd FileType css,scss,less,html setl iskeyword+=-
+    " Set syntax highlighting for specific file types
+    autocmd BufRead,BufNewFile Appraisals set filetype=ruby
+    autocmd BufRead,BufNewFile *.{md,mdown,mkd,mkdn,markdown,mdwn}   set filetype=markdown
+    autocmd BufRead,BufNewFile .{jscs,jshint,eslint}rc set filetype=json
+    autocmd BufNewFile,BufRead *.hql set filetype=hive expandtab
+    autocmd BufNewFile,BufRead *.q set filetype=hive expandtab
+    autocmd FileType c set omnifunc=ccomplete#Complete
+    autocmd FileType python set omnifunc=pythoncomplete#Complete
+    autocmd FileType ada set omnifunc=adacomplete#Complete
+    autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
+    autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
+    autocmd FileType phtml set omnifunc=htmlcomplete#CompleteTags
+    autocmd FileType css set omnifunc=csscomplete#CompleteCSS
+    autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
+    autocmd FileType php set omnifunc=phpcomplete#CompletePHP
+    autocmd FileType tpl set omnifunc=htmlcomplete#CompleteTags
+    autocmd FileType sql set omnifunc=sqlcomplete#Completesql
+    autocmd FileType css,scss,less,html setl iskeyword+=-
 augroup END
 
 " When the type of shell script is /bin/sh, assume a POSIX-compatible
@@ -151,8 +151,8 @@ set complete-=i
 set spellfile=$HOME/.vim-spell-en.utf-8.add
 
 " set sessionoptions=
-		" \blank,buffers,curdir,folds,globals,help,localoptions,
-		" \options,tabpages,winsize,resize,winpos,winsize
+    " \blank,buffers,curdir,folds,globals,help,localoptions,
+    " \options,tabpages,winsize,resize,winpos,winsize
 
 set formatoptions+=mM
 set ttymouse=xterm2
@@ -165,19 +165,19 @@ set nrformats=
 
 " Use The Silver Searcher https://github.com/ggreer/the_silver_searcher
 if executable('ag')
-	" Use Ag over Grep
-	set grepprg=ag\ --nogroup\ --nocolor
+  " Use Ag over Grep
+  set grepprg=ag\ --nogroup\ --nocolor
 
-	" Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
-	let g:ctrlp_user_command = 'ag -Q -l --nocolor --hidden -g "" %s'
+  " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
+  let g:ctrlp_user_command = 'ag -Q -l --nocolor --hidden -g "" %s'
 
-	" ag is fast enough that CtrlP doesn't need to cache
-	let g:ctrlp_use_caching = 0
+  " ag is fast enough that CtrlP doesn't need to cache
+  let g:ctrlp_use_caching = 0
 
-	if !exists(":Ag")
-			command -nargs=+ -complete=file -bar Ag silent! grep! <args>|cwindow|redraw!
-			nnoremap \ :Ag<SPACE>
-	endif
+  if !exists(":Ag")
+      command -nargs=+ -complete=file -bar Ag silent! grep! <args>|cwindow|redraw!
+      nnoremap \ :Ag<SPACE>
+  endif
 endif
 
 " if exists('$TMUX')
@@ -196,11 +196,16 @@ nnoremap gk k
 nnoremap j gj
 nnoremap gj j
 
-" buftabs
+" Move a line of text using <up><down>
+" http://vim.wikia.com/wiki/Moving_lines_up_or_down
+nnoremap <up>   :m .-2<CR>==
+nnoremap <down> :m .+1<CR>==
+vnoremap <up>   :m '<-2<CR>gv=gv
+vnoremap <down> :m '>+1<CR>gv=gv
+
+" Move to prev/next buffer
 noremap <left> :bprev<CR>
 noremap <right> :bnext<CR>
-noremap <up> :cprev<CR>
-noremap <down> :cnext<CR>
 
 " ctags
 nnoremap <c-]> g<c-]>
@@ -260,14 +265,9 @@ inoremap <C-B> <C-X><C-L>
 noremap <leader><leader>m mmHmt:%s/<C-V><cr>//ge<cr>'tzt'm
 
 if executable('p4')
-		nnoremap @p4a :!p4 add %:p<cr>
-		nnoremap @p4e :!p4 edit %:p<cr>
-		nnoremap @p4d :!p4 diff %<cr>
+    nnoremap @p4a :!p4 add %:p<cr>
+    nnoremap @p4e :!p4 edit %:p<cr>
+    nnoremap @p4d :!p4 diff %<cr>
 endif
 
 " }}}
-
-let g:syntastic_check_on_open=1
-let g:syntastic_html_tidy_ignore_errors=[" proprietary attribute \"ng-"]
-let g:syntastic_eruby_ruby_quiet_messages =
-    \ {"regex": "possibly useless use of a variable in void context"}
