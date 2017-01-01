@@ -3,8 +3,6 @@ Griffin's dotfiles
 
 This project structure refers to [thoughtbot dotfiles](https://github.com/thoughtbot/dotfiles)
 
-![prompt](http://images.thoughtbot.com/thoughtbot-dotfiles-prompt.png)
-
 Requirements
 ------------
 
@@ -202,34 +200,3 @@ Shell aliases and scripts:
 * `replace foo bar **/*.rb` to find and replace within a given list of files.
 * `tat` to attach to tmux session named the same as the current directory.
 * `v` for `$VISUAL`.
-
-Thanks
-------
-
-Thank you, [contributors](https://github.com/thoughtbot/dotfiles/contributors)!
-Also, thank you to Corey Haines, Gary Bernhardt, and others for sharing your
-dotfiles and other shell scripts from which we derived inspiration for items
-in this project.
-
-License
--------
-
-dotfiles is copyright © 2009-2016 thoughtbot. It is free software, and may be
-redistributed under the terms specified in the [`LICENSE`] file.
-
-[`LICENSE`]: /LICENSE
-
-About thoughtbot
-----------------
-
-![thoughtbot](https://thoughtbot.com/logo.png)
-
-dotfiles is maintained and funded by thoughtbot, inc.
-The names and logos for thoughtbot are trademarks of thoughtbot, inc.
-
-We love open source software!
-See [our other projects][community].
-We are [available for hire][hire].
-
-[community]: https://thoughtbot.com/community?utm_source=github
-[hire]: https://thoughtbot.com/hire-us?utm_source=github
