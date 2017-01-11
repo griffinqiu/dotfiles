@@ -30,8 +30,8 @@ call plug#begin()
 
 " Tpopes' :) {{{
 Plug 'tpope/vim-fugitive'
-Plug 'tpope/vim-rails'
 Plug 'tpope/vim-endwise'
+Plug 'tpope/vim-surround'
 " }}}
 
 " Tools, Such as nerdtree, vimwiki {{{
@@ -132,7 +132,7 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
     " " Close vim if the only window left open is a NERDTree
     " autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType")
             " \ && b:NERDTreeType == "primary") | q | endif
-Plug 'Xuyuanp/nerdtree-git-plugin', { 'on': 'NERDTreeToggle' }
+Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'scrooloose/nerdcommenter'
     let g:NERDSpaceDelims=1
 
@@ -163,7 +163,7 @@ Plug 'dyng/ctrlsf.vim'
     let g:ctrlsf_winsize = '15' 
     let g:ctrlsf_position = 'bottom'
     "let g:ctrlsf_context = '-B 5 -A 3'
-    let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'vendor']
+    let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp']
     " Ack
     if executable('ag')
         let g:ackprg = 'ag --vimgrep'
@@ -185,38 +185,38 @@ Plug 'Lokaltog/vim-easymotion'
 
 " CtrlP or FZF {{{
 if has('gui_running')
-  " for ctrlp plugin
-  " Define bundles via Github repos
-  Plug 'ctrlpvim/ctrlp.vim'
-      let g:ctrlp_custom_ignore = {
-        \'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic|build|vendor)$',
-        \'file': '\v\.(exe|so|dll|meta|pyc|as|so|tags)$',
-        \'link': 'some_bad_symbolic_links'
-      \}
-      let g:ctrlp_prompt_mappings = {
-        \'AcceptSelection("v")': ['<C-V>', '<RightMouse>'],
-        \'AcceptSelection("h")': ['<C-S>', '<C-CR>'],
-        \'PrtClearCache()':      ['<F6>'],
-        \'PrtCurLeft()': ['<left>', '<c-h>'] 
-      \}
-      " let g:ctrlp_user_command = 'find %s -type f'
-      let g:ctrlp_by_filename = 1
-      let g:ctrlp_mruf_case_sensitive = 0
-      let g:ctrlp_use_caching = 1
-      let g:ctrlp_cache_dir = '~/tmp/ctrlp'
-      let g:ctrlp_working_path_mode = 'w'
-      let g:ctrlp_tabpage_position = 'f'
-      " nnoremap <leader>b :CtrlPBuffer<CR>
-      " nnoremap <leader>h :CtrlPMRU<CR>
-      " nnoremap <leader>e :CtrlPRegister<CR>
-      " nnoremap <leader>m :CtrlPMark<CR>
-      " nnoremap <leader>g :CtrlPTag<CR>
-      " nnoremap <leader>f :CtrlPFunky<Cr>
-      " nnoremap <Leader>u :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
+Plug 'ctrlpvim/ctrlp.vim'
+    " for ctrlp plugin
+    " Define bundles via Github repos
+        let g:ctrlp_custom_ignore = {
+          \'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic|build|vendor)$',
+          \'file': '\v\.(exe|so|dll|meta|pyc|as|so|tags)$',
+          \'link': 'some_bad_symbolic_links'
+        \}
+        let g:ctrlp_prompt_mappings = {
+          \'AcceptSelection("v")': ['<C-V>', '<RightMouse>'],
+          \'AcceptSelection("h")': ['<C-S>', '<C-CR>'],
+          \'PrtClearCache()':      ['<F6>'],
+          \'PrtCurLeft()': ['<left>', '<c-h>'] 
+        \}
+        " let g:ctrlp_user_command = 'find %s -type f'
+        let g:ctrlp_by_filename = 1
+        let g:ctrlp_mruf_case_sensitive = 0
+        let g:ctrlp_use_caching = 1
+        let g:ctrlp_cache_dir = '~/tmp/ctrlp'
+        let g:ctrlp_working_path_mode = 'w'
+        let g:ctrlp_tabpage_position = 'f'
+        " nnoremap <leader>b :CtrlPBuffer<CR>
+        " nnoremap <leader>h :CtrlPMRU<CR>
+        " nnoremap <leader>e :CtrlPRegister<CR>
+        " nnoremap <leader>m :CtrlPMark<CR>
+        " nnoremap <leader>g :CtrlPTag<CR>
+        " nnoremap <leader>f :CtrlPFunky<Cr>
+        " nnoremap <Leader>u :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
 else
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
     " for fzf plugin
-    Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-    Plug 'junegunn/fzf.vim'
         nnoremap <c-p> :Files <cr>
         let g:fzf_action = {
           \ 'ctrl-t': 'tab split',
@@ -252,12 +252,13 @@ Plug 'hail2u/vim-css3-syntax', { 'for': ['css', 'scss', 'less'] }
 Plug 'cakebaker/scss-syntax.vim', { 'for': 'scss' }
 Plug 'groenewege/vim-less', { 'for': 'less' }
 
-Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
 Plug 'tpope/vim-bundler', { 'for': 'ruby' }
 Plug 'tpope/vim-endwise', { 'for': 'ruby' }
 Plug 'tpope/vim-rails', { 'for': 'ruby' }
+Plug 'tpope/vim-rake'
 Plug 'Keithbsmiley/rspec.vim', { 'for': 'ruby' }
 Plug 'ecomba/vim-ruby-refactoring', { 'for': 'ruby' }
+Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
 Plug 'AndrewRadev/switch.vim', { 'for': ['ruby', 'eruby', 'coffee', 'haml'] }
 Plug 'janko-m/vim-test', { 'for': 'ruby' }
     nnoremap <silent> <Leader>t :TestFile<CR>
@@ -293,41 +294,41 @@ Plug 'yonchu/accelerated-smooth-scroll'
 
 " " Static language Complete {{{
 " Plug 'Valloric/YouCompleteMe'
-    " noremap <c-]> :YcmCompleter GoToDefinitionElseDeclaration<CR>
-    " set completeopt-=preview
-    " let g:ycm_key_list_select_completion=['<Down>']
-    " let g:ycm_key_list_previous_completion=['<Up>']
-    " let g:ycm_seed_identifiers_with_syntax=1
-    " let g:ycm_complete_in_comments=1
-    " let g:ycm_confirm_extra_conf=0
-    " " let g:ycm_collect_identifiers_from_tags_files=1
-    " let g:ycm_key_invoke_completion='<C-Space>'
-    " let g:ycm_auto_trigger=0
-    " let g:ycm_filetype_blacklist = {
-          " \ 'tagbar' : 1,
-          " \ 'qf' : 1,
-          " \ 'notes' : 1,
-          " \ 'markdown' : 1,
-          " \ 'unite' : 1,
-          " \ 'text' : 1,
-          " \ 'vimwiki' : 1,
-          " \ 'pandoc' : 1,
-          " \ 'infolog' : 1,
-          " \ 'mail' : 1
-          " \}
-    " let g:ycm_semantic_triggers =  {
-      " \   'c' : ['->', '.'],
-      " \   'objc' : ['->', '.'],
-      " \   'ocaml' : ['.', '#'],
-      " \   'cpp,objcpp' : ['->', '.', '::'],
-      " \   'perl' : ['->'],
-      " \   'php' : ['->', '::'],
-      " \   'cs,java,javascript,d,python,perl6,scala,vb,elixir,go' : ['.'],
-      " \   'vim' : ['re![_a-zA-Z]+[_\w]*\.'],
-      " \   'ruby' : ['.', '::'],
-      " \   'lua' : ['.', ':'],
-      " \   'erlang' : [':'],
-      " \ }
+" noremap <c-]> :YcmCompleter GoToDefinitionElseDeclaration<CR>
+" set completeopt-=preview
+" let g:ycm_key_list_previous_completion=['<Up>']
+" let g:ycm_key_list_select_completion=['<Down>']
+" let g:ycm_seed_identifiers_with_syntax=1
+" let g:ycm_complete_in_comments=1
+" let g:ycm_confirm_extra_conf=0
+" " let g:ycm_collect_identifiers_from_tags_files=1
+" let g:ycm_key_invoke_completion='<C-Space>'
+" let g:ycm_auto_trigger=0
+" let g:ycm_filetype_blacklist = {
+" \ 'tagbar' : 1,
+" \ 'qf' : 1,
+" \ 'notes' : 1,
+" \ 'markdown' : 1,
+" \ 'unite' : 1,
+" \ 'text' : 1,
+" \ 'vimwiki' : 1,
+" \ 'pandoc' : 1,
+" \ 'infolog' : 1,
+" \ 'mail' : 1
+" \}
+" let g:ycm_semantic_triggers =  {
+" \   'c' : ['->', '.'],
+" \   'objc' : ['->', '.'],
+" \   'ocaml' : ['.', '#'],
+" \   'cpp,objcpp' : ['->', '.', '::'],
+" \   'perl' : ['->'],
+" \   'php' : ['->', '::'],
+" \   'cs,java,javascript,d,python,perl6,scala,vb,elixir,go' : ['.'],
+" \   'vim' : ['re![_a-zA-Z]+[_\w]*\.'],
+" \   'ruby' : ['.', '::'],
+" \   'lua' : ['.', ':'],
+" \   'erlang' : [':'],
+" \ }
 
 " Plug 'marijnh/tern_for_vim'
 " Plug 'OrangeT/vim-csharp'

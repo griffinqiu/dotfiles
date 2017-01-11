@@ -42,8 +42,6 @@
     default = current
 [rebase]
     autosquash = true
-[merge]
-    ff = only
 [alias]
   aa = add --all
   ap = add --patch

@@ -18,16 +18,16 @@ set wrap
 set linebreak
 set autoread
 " set autowrite
-" set hidden
+set hidden
 set novisualbell
 set nojoinspaces
 set backspace=indent,eol,start
 
 set foldmethod=marker
 
-set shiftwidth=4
-set softtabstop=4
-set tabstop=4
+set shiftwidth=2
+set softtabstop=2
+set tabstop=2
 set expandtab
 " set nolist
 set list listchars=tab:»·,trail:·,nbsp:·
@@ -114,8 +114,8 @@ set diffopt+=vertical
 set whichwrap=b,s
 
 set wildmenu
-set wildmode=list:longest,list:full
-" set wildmode=longest:full,full
+" set wildmode=list:longest,list:full
+set wildmode=longest:full,full
 set wildignore+=.hg,.git,.svn                    " Version control
 set wildignore+=*.jpg,*.bmp,*.gif,*.png,*.jpeg   " binary images
 set wildignore+=*.o,*.obj,*.exe,*.dll,*.manifest " compiled object files
