@@ -25,18 +25,12 @@ if(has("win32") || has("win64"))
     endfunction
 
     "set guifont=Monaco:h10:cANSI
-    set gfn=Bitstream\ Vera\ Sans\ Mono:h10
+    set gfn=Bitstream\ Vera\ Sans\ Mono:h14
 
     set langmenu=en_US
     let $LANG='en_US'
     source $VIMRUNTIME/delmenu.vim
     source $VIMRUNTIME/menu.vim
-
-    " Textmate alt-p & alt+l
-    " inoremap <M-p> params[:]<left>
-    " inoremap <M-s> session[:]<left>
-    " inoremap <M-l> <space>=><space>
-    " inoremap <M->> <%=<space><space>%><left><left><left>
 
     nmap <F8> :!start explorer /select, %:p<CR>
 
@@ -69,7 +63,7 @@ if(has("win32") || has("win64"))
     " Use CTRL-Q to do what CTRL-V used to do
     noremap <C-Q>       <C-V>
 else
-    set gfn=Menlo:h14
+    set gfn=Menlo:h16
 endif
 
 " No audible bell
@@ -87,14 +81,13 @@ set guioptions-=L
 set guioptions-=T
 
 set t_Co=256
-" colorscheme desert
+" colorscheme solarized
+colorscheme desert
 set background=dark
-colorscheme solarized
 set mouse+=a
 set mousehide
 
 if has("gui_macvim")
-    macmenu &File.New\ Tab key=<nop>
     macmenu &File.Save key=<nop>
     macmenu &File.New\ Window key=<nop>
     macmenu &File.Open\.\.\. key=<nop>
@@ -106,8 +99,6 @@ if has("gui_macvim")
     macmenu &Edit.Undo key=<nop>
     macmenu &Edit.Redo key=<nop>
     macmenu &Edit.Cut key=<nop>
-    macmenu &Edit.Copy key=<nop>
-    macmenu &Edit.Paste key=<nop>
     macmenu &Edit.Select\ All key=<nop>
     macmenu &Edit.Find.Find\.\.\. key=<nop>
     macmenu &Edit.Find.Find\ Next key=<nop>
@@ -126,7 +117,7 @@ if has("gui_macvim")
 
     set transparency=5
 endif
-set noimdisable
+" set noimdisable
 set iminsert=2
 set imsearch=2
 

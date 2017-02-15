@@ -1,7 +1,9 @@
 " .vimrc
 
 " Vim Settings {{{
+map <space> <nop>
 let mapleader = " "
+" let g:mapleader = " "
 
 set encoding=utf-8
 set fileencodings=utf-8,chinese,latin-1
@@ -168,25 +170,11 @@ if executable('ag')
   " Use Ag over Grep
   set grepprg=ag\ --nogroup\ --nocolor
 
-  " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
-  let g:ctrlp_user_command = 'ag -Q -l --nocolor --hidden -g "" %s'
-
-  " ag is fast enough that CtrlP doesn't need to cache
-  let g:ctrlp_use_caching = 0
-
   if !exists(":Ag")
       command -nargs=+ -complete=file -bar Ag silent! grep! <args>|cwindow|redraw!
       nnoremap \ :Ag<SPACE>
   endif
 endif
-
-" if exists('$TMUX')
-    " let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
-    " let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
-" else
-    " let &t_SI = "\<Esc>]50;CursorShape=1\x7"
-    " let &t_EI = "\<Esc>]50;CursorShape=0\x7"
-" endif
 
 " }}}
 
@@ -196,22 +184,19 @@ nnoremap gk k
 nnoremap j gj
 nnoremap gj j
 
-" Move a line of text using <up><down>
-" http://vim.wikia.com/wiki/Moving_lines_up_or_down
-nnoremap <up>   :m .-2<CR>==
-nnoremap <down> :m .+1<CR>==
-vnoremap <up>   :m '<-2<CR>gv=gv
-vnoremap <down> :m '>+1<CR>gv=gv
+" Copy filename to clipboard
+nmap ,cs :let @*=expand("%")<CR>
+nmap ,cl :let @*=expand("%:p")<CR>
 
 " Move to prev/next buffer
 noremap <left> :bprev<CR>
 noremap <right> :bnext<CR>
 
 " ctags
-nnoremap <c-]> g<c-]>
-vnoremap <c-]> g<c-]>
-nnoremap g<c-]> <c-]>
-vnoremap g<c-]> <c-]>
+" nnoremap <c-]> g<c-]>
+" vnoremap <c-]> g<c-]>
+" nnoremap g<c-]> <c-]>
+" vnoremap g<c-]> <c-]>
 
 noremap <silent> <C-s> :update!<CR>
 vnoremap <silent> <C-s> <C-c>:update!<CR>

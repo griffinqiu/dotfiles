@@ -27,5 +27,9 @@ alias s="rspec"
 # Pretty print the path
 alias path='echo $PATH | tr -s ":" "\n"'
 
+# Tmux Plugins
+alias tmux_plugins_install="~/.tmux/plugins/tpm/bin/install_plugins"
+alias tmux_plugins_update="~/.tmux/plugins/tpm/bin/update_plugins all"
+
 # Include custom aliases
 [[ -f ~/.aliases.local ]] && source ~/.aliases.local

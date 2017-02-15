@@ -29,29 +29,15 @@ com! -nargs=+  -bar Bundle call VundleToPlug("Bundle", <args>)
 call plug#begin()
 
 " Tpopes' :) {{{
+Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-speeddating'
 Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-surround'
 " }}}
 
 " Tools, Such as nerdtree, vimwiki {{{
-Plug 'majutsushi/tagbar'
-    nnoremap <silent> <leader>2 :TagbarToggle<CR>
-    let g:tagbar_type_php = {
-        \'ctagstype' : 'php',
-        \'kinds'     : [
-            \'i:interfaces',
-            \'c:classes',
-            \'d:constant definitions',
-            \'f:functions',
-            \'j:javascript functions:1'
-        \]
-    \}"
-    let g:tagbar_width=30
-    let g:tagbar_sort=0
-    let g:tagbar_autofocus=1
-    let g:Tb_MaxSize=5
-
 Plug 'vimwiki/vimwiki'
     let defualt_wiki = {
         \'path': '~/github/vimwiki/_source/',
@@ -75,6 +61,7 @@ Plug 'vimwiki/vimwiki'
     " let g:vimwiki_browsers = ['google-chrome']
 
 Plug 'rizzatti/dash.vim'
+    :nmap <silent> <leader>d <Plug>DashSearch
     " noremap <c-g> :call investigate#Investigate()<CR>
     " let g:investigate_use_dash=1
 
@@ -91,16 +78,16 @@ Plug 'vim-scripts/TwitVim'
     nnoremap <silent> <leader>tn :NextTwitter<cr>
     " nnoremap <silent> <leader>tl :PreviousTwitter<cr>
 
-Plug 'mattn/emmet-vim'
-    autocmd FileType html,css,eruby,erb EmmetInstall
-    let g:user_emmet_leader_key='<C-V>'
-    let g:user_emmet_expandabbr_key='<C-V><C-V>'
-    let g:user_emmet_expandword_key = '<C-V>v'
-    let g:user_emmet_update_tag = '<C-V>u'
-    let g:user_emmet_next_key='<C-V>n'
-    let g:user_emmet_prev_key='<C-V>p'
-    let g:user_emmet_togglecomment_key = '<C-V>/'
-    let g:user_emmet_install_global=1
+" Plug 'mattn/emmet-vim'
+    " autocmd FileType html,css,eruby,erb EmmetInstall
+    " let g:user_emmet_leader_key='<C-V>'
+    " let g:user_emmet_expandabbr_key='<C-V><C-V>'
+    " let g:user_emmet_expandword_key = '<C-V>v'
+    " let g:user_emmet_update_tag = '<C-V>u'
+    " let g:user_emmet_next_key='<C-V>n'
+    " let g:user_emmet_prev_key='<C-V>p'
+    " let g:user_emmet_togglecomment_key = '<C-V>/'
+    " let g:user_emmet_install_global=1
 
 Plug 'vim-scripts/matchit.zip'
 Plug 'msanders/snipmate.vim'
@@ -206,6 +193,7 @@ Plug 'ctrlpvim/ctrlp.vim'
         let g:ctrlp_cache_dir = '~/tmp/ctrlp'
         let g:ctrlp_working_path_mode = 'w'
         let g:ctrlp_tabpage_position = 'f'
+
         " nnoremap <leader>b :CtrlPBuffer<CR>
         " nnoremap <leader>h :CtrlPMRU<CR>
         " nnoremap <leader>e :CtrlPRegister<CR>
@@ -213,6 +201,24 @@ Plug 'ctrlpvim/ctrlp.vim'
         " nnoremap <leader>g :CtrlPTag<CR>
         " nnoremap <leader>f :CtrlPFunky<Cr>
         " nnoremap <Leader>u :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
+
+Plug 'majutsushi/tagbar'
+    nnoremap <silent> <leader>2 :TagbarToggle<CR>
+    let g:tagbar_type_php = {
+        \'ctagstype' : 'php',
+        \'kinds'     : [
+            \'i:interfaces',
+            \'c:classes',
+            \'d:constant definitions',
+            \'f:functions',
+            \'j:javascript functions:1'
+        \]
+    \}"
+    let g:tagbar_width=30
+    let g:tagbar_sort=0
+    let g:tagbar_autofocus=1
+    let g:Tb_MaxSize=5
+
 else
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
@@ -223,13 +229,18 @@ Plug 'junegunn/fzf.vim'
           \ 'ctrl-x': 'split',
           \ 'ctrl-v': 'vsplit' }
         nnoremap <C-p> :GitFiles<CR>
-        " nnoremap <leader>f :Files<CR>
-        " nnoremap <leader>b :Buffers<CR>
-        " nnoremap <leader>h :History<CR>
-        " nnoremap <leader>m :Marks<CR>
-        " nnoremap <leader>cc :Colors<CR>
+        nnoremap <leader>ff :Files<CR>
+        nnoremap <leader>fb :Buffers<CR>
+        nnoremap <leader>fa :Tags<CR>
+        nnoremap <leader>ft :Tags<CR>
+        nnoremap <leader>fs :GFiles?<CR>
+        nnoremap <leader>fh :History<CR>
+        nnoremap <leader>f: :History:<CR>
+        nnoremap <leader>f/ :History/<CR>
+        nnoremap <leader>fk :Marks<CR>
+        nnoremap <leader>fm :Maps<CR>
         " nnoremap <leader>bc :BCommits<CR>
-        " nnoremap <silent> <Leader>ag :Ag <C-R><C-W><CR>
+        nnoremap <silent> <Leader>ag :Ag <C-R><C-W><CR>
         " imap <c-x><c-k> <plug>(fzf-complete-word)
         " imap <c-x><c-f> <plug>(fzf-complete-path)
         " imap <c-x><c-j> <plug>(fzf-complete-file-ag)
@@ -252,20 +263,12 @@ Plug 'hail2u/vim-css3-syntax', { 'for': ['css', 'scss', 'less'] }
 Plug 'cakebaker/scss-syntax.vim', { 'for': 'scss' }
 Plug 'groenewege/vim-less', { 'for': 'less' }
 
-Plug 'tpope/vim-bundler', { 'for': 'ruby' }
-Plug 'tpope/vim-endwise', { 'for': 'ruby' }
-Plug 'tpope/vim-rails', { 'for': 'ruby' }
-Plug 'tpope/vim-rake'
 Plug 'Keithbsmiley/rspec.vim', { 'for': 'ruby' }
 Plug 'ecomba/vim-ruby-refactoring', { 'for': 'ruby' }
 Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
-Plug 'AndrewRadev/switch.vim', { 'for': ['ruby', 'eruby', 'coffee', 'haml'] }
-Plug 'janko-m/vim-test', { 'for': 'ruby' }
-    nnoremap <silent> <Leader>t :TestFile<CR>
-    nnoremap <silent> <Leader>s :TestNearest<CR>
-    nnoremap <silent> <Leader>l :TestLast<CR>
-    nnoremap <silent> <Leader>a :TestSuite<CR>
-    nnoremap <silent> <leader>gt :TestVisit<CR>
+Plug 'tpope/vim-rails'
+Plug 'AndrewRadev/switch.vim'
+    let g:switch_mapping = "-"
 
 Plug 'StanAngeloff/php.vim', { 'for': 'php' }
 Plug 'shawncplus/phpcomplete.vim', { 'for': 'php' }
@@ -288,8 +291,23 @@ Plug 'yonchu/accelerated-smooth-scroll'
 
 " Airline {{{
 " Plug 'Lokaltog/vim-powerline'
-" Plug 'bling/vim-airline'
+" Plug 'vim-airline/vim-airline'
+" Plug 'vim-airline/vim-airline-themes'
+    " let g:airline_theme='simple'
+    " let g:airline_powerline_fonts=1
+    " let g:airline#extensions#branch#enabled = 1
+    " let g:airline#extensions#branch#empty_message = ''
+    " let g:airline#extensions#syntastic#enabled = 1
+    " let g:airline#extensions#default#section_truncate_width = {
+        " \   'b': 79,
+        " \   'x': 60,
+        " \   'y': 88,
+        " \   'z': 45,
+        " \ }
+    " " disable summary of changed hunks under source control.
+    " let g:airline#extensions#hunks#enabled = 0
 " Plug 'edkolev/tmuxline.vim'
+    " let g:tmuxline_theme = 'icebert'
 " }}}
 
 " " Static language Complete {{{

@@ -8,6 +8,7 @@ export ZSH=$HOME/.oh-my-zsh
 # it'll load a random theme each time that oh-my-zsh is loaded.
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
 ZSH_THEME="robbyrussell"
+# ZSH_THEME="agnoster"
 
 DISABLE_AUTO_TITLE=true
 
@@ -53,14 +54,14 @@ DISABLE_AUTO_TITLE=true
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(osx tmuxinator)
 
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
 # Add RVM to PATH for scripting
-export PATH=$PATH:$HOME/.rvm/bin:$HOME/.bin
+export PATH=$PATH:$HOME/.bin:$HOME/.rvm/bin
 
 # You may need to manually set your language environment
 stty -ixon -ixoff
