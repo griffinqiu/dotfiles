@@ -192,12 +192,6 @@ nmap ,cl :let @*=expand("%:p")<CR>
 noremap <left> :bprev<CR>
 noremap <right> :bnext<CR>
 
-" ctags
-" nnoremap <c-]> g<c-]>
-" vnoremap <c-]> g<c-]>
-" nnoremap g<c-]> <c-]>
-" vnoremap g<c-]> <c-]>
-
 noremap <silent> <C-s> :update!<CR>
 vnoremap <silent> <C-s> <C-c>:update!<CR>
 inoremap <silent> <C-s> <C-o>:update!<CR>
@@ -217,10 +211,10 @@ map <C-k> <C-w>k
 map <C-h> <C-w>h
 map <C-l> <C-w>l
 map <C-w>; <C-w>p
-inoremap <C-h> <left>
-inoremap <C-l> <right>
-inoremap <C-j> <C-o>gj
-inoremap <C-k> <C-o>gk
+" inoremap <C-h> <left>
+" inoremap <C-l> <right>
+" inoremap <C-j> <C-o>gj
+" inoremap <C-k> <C-o>gk
 
 " Convert all tabs to spaces
 map <leader>ct :retab<cr>
@@ -233,11 +227,6 @@ map <leader>cd :cd %:p:h<cr>
 map <silent> <leader><cr> :nohlsearch<cr>
 map <silent> <leader><bs> :set noincsearch<cr>
 map <silent> <leader><leader><bs> :set incsearch<cr>
-
-" AutoComple
-inoremap <C-]> <C-X><C-]>
-inoremap <C-F> <C-X><C-F>
-inoremap <C-B> <C-X><C-L>
 
 " " Spell
 " map <leader>ss :setlocal spell!<cr>
