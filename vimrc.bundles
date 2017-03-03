@@ -286,7 +286,7 @@ Plug 'pangloss/vim-javascript', { 'for': 'js' }
 " Plug 'rstacruz/vim-hyperstyle'
 
 Plug 'othree/html5.vim'
-Plug 'gko/vim-coloresque'
+Plug 'griffinqiu/vim-coloresque'
 Plug 'othree/csscomplete.vim', { 'for': ['css', 'scss', 'less'] }
 Plug 'hail2u/vim-css3-syntax', { 'for': ['css', 'scss', 'less'] }
 Plug 'cakebaker/scss-syntax.vim', { 'for': 'scss' }
@@ -317,19 +317,20 @@ Plug 'mzlogin/vim-markdown-toc'
 " }}}
 
 " Colorscheme {{{
-Plug 'altercation/vim-colors-solarized'
+Plug 'ap/vim-css-color'
 Plug 'yonchu/accelerated-smooth-scroll'
 " }}}
 
 " Snips {{{
 Plug 'SirVer/ultisnips'
   let g:UltiSnipsExpandTrigger="<tab>"
-  let g:UltiSnipsListSnippets="<c-l>"
+  let g:UltiSnipsListSnippets="<c-7>"
   let g:UltiSnipsJumpForwardTrigger="<c-j>"
   let g:UltiSnipsJumpBackwardTrigger="<c-k>"
   let g:UltiSnipsEditSplit="vertical"
-" Plug 'okbreathe/vim-ultisnips-css'
-" Plug 'honza/vim-snippets'
+  nnoremap <silent> <leader>uu :UltiSnipsEdit<cr>
+  nnoremap <silent> <leader>ue :UltiSnipsEdit<space>
+Plug 'griffinqiu/vim-snippets'
 
 Plug 'mattn/emmet-vim'
   let g:user_emmet_mode = 'i'
