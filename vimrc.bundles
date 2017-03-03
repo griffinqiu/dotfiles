@@ -35,9 +35,40 @@ Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-speeddating'
 Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-surround'
+Plug 'tpope/vim-commentary'
+" }}}
+
+" kana/vim-textobj-user {{{
+Plug 'kana/vim-textobj-user'
+Plug 'kana/vim-textobj-help'
+Plug 'kana/vim-textobj-line'               " al | il
+Plug 'kana/vim-textobj-entire'             " ae | ie
+Plug 'kana/vim-textobj-syntax'             " ay | iy
+Plug 'kana/vim-textobj-indent'             " ai | ii
+Plug 'kana/vim-textobj-datetime'           " ada| ida
+Plug 'kana/vim-textobj-lastpat'            " a/ | i/
+Plug 'Julian/vim-textobj-brace'            " aj | ij
+Plug 'vimtaku/vim-textobj-keyvalue'        " ak | iv
+Plug 'sgur/vim-textobj-parameter'          " a, | i,
+Plug 'paulhybryant/vim-textobj-path'       " aP | iP
+Plug 'beloglazov/vim-textobj-quotes'       " aq | iq
+Plug 'saihoooooooo/vim-textobj-space'      " aS | iS
+Plug 'jceb/vim-textobj-uri'                " au | iu
+Plug 'whatyouhide/vim-textobj-xmlattr'     " ax | ix
+Plug 'nelstrom/vim-textobj-rubyblock'      " ar | ir
+Plug 'bootleq/vim-textobj-rubysymbol'      " a: | i:
+Plug 'whatyouhide/vim-textobj-erb'         " aE | iE
+Plug 'osyo-manga/vim-textobj-multiblock'   " ab | ib
+Plug 'idbrii/textobj-word-column.vim'      " ac | ic
+" Plug 'bps/vim-textobj-python'              " af | if, ac | ic
+" Plug 'akiyan/vim-textobj-php'              " aP | iP
+" Plug 'Julian/vim-textobj-variable-segment' " av | iv
 " }}}
 
 " Tools, Such as nerdtree, vimwiki {{{
+Plug 'vim-scripts/ReplaceWithRegister'
+Plug 'christoomey/vim-titlecase'
+Plug 'christoomey/vim-sort-motion'
 Plug 'vimwiki/vimwiki'
     let defualt_wiki = {
         \'path': '~/github/vimwiki/_source/',
@@ -252,13 +283,17 @@ endif
 " }}}
 
 " Syntax {{{
+" Plug 'w0rp/ale'
+  " let g:ale_lint_on_save = 1
+  " let g:ale_lint_on_text_changed = 0
+
 Plug 'maksimr/vim-jsbeautify', { 'for': 'js' }
 Plug 'kchmck/vim-coffee-script', { 'for': 'coffee' }
 Plug 'pangloss/vim-javascript', { 'for': 'js' }
     let g:javascript_enable_domhtmlcss = 1
     let g:javascript_ignore_javaScriptdoc = 1
 
-Plug 'gorodinskiy/vim-coloresque', { 'for': ['css', 'scss', 'less'] }
+Plug 'gko/vim-coloresque'
 Plug 'hail2u/vim-css3-syntax', { 'for': ['css', 'scss', 'less'] }
 Plug 'cakebaker/scss-syntax.vim', { 'for': 'scss' }
 Plug 'groenewege/vim-less', { 'for': 'less' }
