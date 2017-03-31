@@ -42,7 +42,6 @@ Plug 'tpope/vim-commentary'
 Plug 'kana/vim-textobj-user'
 Plug 'kana/vim-textobj-help'
 Plug 'kana/vim-textobj-line'               " al | il
-Plug 'kana/vim-textobj-entire'             " ae | ie
 Plug 'kana/vim-textobj-syntax'             " ay | iy
 Plug 'kana/vim-textobj-indent'             " ai | ii
 Plug 'kana/vim-textobj-datetime'           " ada| ida
@@ -60,6 +59,7 @@ Plug 'bootleq/vim-textobj-rubysymbol'      " a: | i:
 Plug 'whatyouhide/vim-textobj-erb'         " aE | iE
 Plug 'osyo-manga/vim-textobj-multiblock'   " ab | ib
 Plug 'idbrii/textobj-word-column.vim'      " ac | ic
+" Plug 'kana/vim-textobj-entire'             " ae | ie
 " Plug 'bps/vim-textobj-python'              " af | if, ac | ic
 " Plug 'akiyan/vim-textobj-php'              " aP | iP
 " Plug 'Julian/vim-textobj-variable-segment' " av | iv
@@ -141,53 +141,55 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
             " \ && b:NERDTreeType == "primary") | q | endif
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'scrooloose/nerdcommenter'
-    let g:NERDSpaceDelims=1
+  let g:NERDSpaceDelims=1
 
 Plug 'griffinqiu/star-search'
 Plug 'dyng/ctrlsf.vim'
-    nmap     <C-G>g <Plug>CtrlSFPrompt
-    nmap     <C-G>G <Plug>CtrlSFCwordPath
-    nmap     <C-G><C-G> <Plug>CtrlSFCwordExec
-    vmap     <C-G>g <Plug>CtrlSFVwordPath
-    vmap     <C-G>G <Plug>CtrlSFVwordPath
-    vmap     <C-G><C-G> <Plug>CtrlSFVwordExec
-    nmap     <C-G>p <Plug>CtrlSFPwordPath
-    nmap     <C-G><C-P> <Plug>CtrlSFPwordExec
-    nnoremap <C-G><C-O> :CtrlSFOpen<CR>
-    " nnoremap <C-G><C-T> :CtrlSFToggle<CR>
-    inoremap <C-G><C-T> <Esc>:CtrlSFToggle<CR>
-    nmap     <C-G>l <Plug>CtrlSFQuickfixPrompt
-    vmap     <C-G>l <Plug>CtrlSFQuickfixVwordPath
-    vmap     <C-G>L <Plug>CtrlSFQuickfixVwordPath
-    vmap     <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
-    nmap     <silent><leader>3 :CtrlSFToggle<CR>
-    let g:ctrlsf_mapping = {
-        \ "next": "<c-d>",
-        \ "prev": "<c-u>",
-        \ }
-    let g:ctrlsf_auto_close = 0
-    let g:ctrlsf_open_left = 0
-    let g:ctrlsf_winsize = '15' 
-    let g:ctrlsf_position = 'bottom'
-    "let g:ctrlsf_context = '-B 5 -A 3'
-    let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp']
-    " Ack
-    if executable('ag')
-        let g:ackprg = 'ag --vimgrep'
-    endif
-    Plug 'terryma/vim-multiple-cursors', { 'on': 'CtrlSF' }
-        let g:multi_cursor_start_key='<c-n>'
-        let g:multi_cursor_start_word_key='g<c-n>'
+  nmap     <C-G>g <Plug>CtrlSFPrompt
+  nmap     <C-G>G <Plug>CtrlSFCwordPath
+  nmap     <C-G><C-G> <Plug>CtrlSFCwordExec
+  vmap     <C-G>g <Plug>CtrlSFVwordPath
+  vmap     <C-G>G <Plug>CtrlSFVwordPath
+  vmap     <C-G><C-G> <Plug>CtrlSFVwordExec
+  nmap     <C-G>p <Plug>CtrlSFPwordPath
+  nmap     <C-G><C-P> <Plug>CtrlSFPwordExec
+  nnoremap <C-G><C-O> :CtrlSFOpen<CR>
+  " nnoremap <C-G><C-T> :CtrlSFToggle<CR>
+  inoremap <C-G><C-T> <Esc>:CtrlSFToggle<CR>
+  nmap     <C-G>l <Plug>CtrlSFQuickfixPrompt
+  vmap     <C-G>l <Plug>CtrlSFQuickfixVwordPath
+  vmap     <C-G>L <Plug>CtrlSFQuickfixVwordPath
+  vmap     <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
+  nmap     <silent><leader>3 :CtrlSFToggle<CR>
+  " let g:ctrlsf_toggle_map_key = '<leader>3'
+  let g:ctrlsf_mapping = {
+      \ "next": "<c-d>",
+      \ "prev": "<c-u>",
+      \ }
+  let g:ctrlsf_auto_close = 0
+  let g:ctrlsf_open_left = 0
+  let g:ctrlsf_position = 'right'
+  let g:ctrlsf_winsize = 'auto' 
+  "let g:ctrlsf_context = '-B 5 -A 3'
+  " let g:ctrlsf_debug_mode = 1
+  let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp']
+  nnoremap \ :CtrlSF -filetype ruby<SPACE>
 
-Plug 'mileszs/ack.vim'
-    if executable('ag')
-      let g:ackprg = 'ag --vimgrep'
-      " let g:ackprg = 'ag --nogroup --nocolor --column'
-    endif
+Plug 'terryma/vim-multiple-cursors', { 'on': 'CtrlSF' }
+  let g:multi_cursor_start_key='<c-n>'
+  let g:multi_cursor_start_word_key='g<c-n>'
+
+Plug 'rking/ag.vim'
+  if executable('ag')
+    " Use Ag over Grep
+    set grepprg=ag\ --nogroup\ --nocolor
+    " set grepprg=ag\ --vimgrep
+  endif
 
 Plug 'Lokaltog/vim-easymotion'
-    let g:EasyMotion_leader_key = "'"
+  let g:EasyMotion_leader_key = "'"
 
+Plug 'houtsnip/vim-emacscommandline'
 " }}}
 
 " CtrlP or FZF {{{
@@ -322,25 +324,35 @@ Plug 'yonchu/accelerated-smooth-scroll'
 " }}}
 
 " Snips {{{
-Plug 'SirVer/ultisnips'
-  let g:UltiSnipsExpandTrigger="<tab>"
-  let g:UltiSnipsListSnippets="<c-7>"
-  let g:UltiSnipsJumpForwardTrigger="<c-j>"
-  let g:UltiSnipsJumpBackwardTrigger="<c-k>"
-  let g:UltiSnipsEditSplit="vertical"
-  nnoremap <silent> <leader>uu :UltiSnipsEdit<cr>
-  nnoremap <silent> <leader>ue :UltiSnipsEdit<space>
-Plug 'griffinqiu/vim-snippets'
+"
+if !has('gui_running')
+  Plug 'SirVer/ultisnips'
+    let g:UltiSnipsExpandTrigger="<tab>"
+    let g:UltiSnipsListSnippets="<c-7>"
+    let g:UltiSnipsJumpForwardTrigger="<c-j>"
+    let g:UltiSnipsJumpBackwardTrigger="<c-k>"
+    let g:UltiSnipsEditSplit="vertical"
+    nnoremap <silent> <leader>uu :UltiSnipsEdit<cr>
+    nnoremap <silent> <leader>ue :UltiSnipsEdit<space>
+  Plug 'griffinqiu/vim-snippets'
+endif
 
 Plug 'mattn/emmet-vim'
-  let g:user_emmet_mode = 'i'
-  " autocmd FileType html,css,eruby,erb EmmetInstall
-  " let g:user_emmet_leader_key='<C-V>'
+  " let g:user_emmet_mode='i'
+  let g:user_emmet_mode='a'
+  autocmd FileType html,css,less,sass,eruby,erb EmmetInstall
+  let g:user_emmet_leader_key='<c-e>'
   " let g:user_emmet_expandabbr_key='<C-V><C-V>'
-  " let g:user_emmet_expandword_key = '<C-V>v'
-  " let g:user_emmet_update_tag = '<C-V>u'
-  " let g:user_emmet_next_key='<C-V>n'
-  " let g:user_emmet_prev_key='<C-V>p'
+  let g:user_emmet_expandword_key = '<C-e>v'
+  let g:user_emmet_update_tag = '<C-e>u'
+  let g:user_emmet_next_key='<C-e>n'
+  let g:user_emmet_prev_key='<C-e>p'
+
+  let g:user_emmet_settings = {
+  \  'html' : {
+  \    'quote_char': "'",
+  \  },
+  \}
   " let g:user_emmet_togglecomment_key = '<C-V>/'
   " let g:user_emmet_install_global=1
 " }}}

@@ -15,7 +15,7 @@ fi
 
 if which brew >/dev/null;then
     echo "You are using HomeBrew tool"
-    brew install vim ctags git astyle tmux reattach-to-user-namespace
+    brew install vim ctags git astyle tmux reattach-to-user-namespace pngpaste pngquant
 fi
 
 if [ ! -e "$HOME"/.vim/autoload/plug.vim ]; then
