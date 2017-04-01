@@ -1,28 +1,28 @@
 if &compatible
-  set nocompatible
+    set nocompatible
 end
 
 " Shim command and function to allow migration from Vundle to vim-plug. {{{
 function! VundleToPlug(vundle_command, arg, ...)
-  echom "You are using Vundle's `".a:vundle_command."` command to declare plugins. Dotfiles now uses vim-plug for plugin management. Please rename uses of `".a:vundle_command."` to `Plug`. Plugin was '".a:arg."'."
-  let vim_plug_options = {}
+    echom "You are using Vundle's `".a:vundle_command."` command to declare plugins. Dotfiles now uses vim-plug for plugin management. Please rename uses of `".a:vundle_command."` to `Plug`. Plugin was '".a:arg."'."
+    let vim_plug_options = {}
 
-  if a:0 > 0
-    if has_key(a:1, 'name')
-      let name = a:1.name
-      let vim_plug_options.dir = "$HOME/.vim/bundle/".a:1.name
+    if a:0 > 0
+        if has_key(a:1, 'name')
+            let name = a:1.name
+            let vim_plug_options.dir = "$HOME/.vim/bundle/".a:1.name
+        endif
+
+        if has_key(a:1, 'rtp')
+            let vim_plug_options.rtp = a:1.rtp
+        endif
     endif
 
-    if has_key(a:1, 'rtp')
-      let vim_plug_options.rtp = a:1.rtp
-    endif
-  endif
-
-  Plug a:arg, vim_plug_options
+    Plug a:arg, vim_plug_options
 endfunction
 
-com! -nargs=+  -bar Plugin call VundleToPlug("Plugin", <args>)
-com! -nargs=+  -bar Bundle call VundleToPlug("Bundle", <args>)
+com! -nargs=+ -bar Plugin call VundleToPlug("Plugin", <args>)
+com! -nargs=+ -bar Bundle call VundleToPlug("Bundle", <args>)
 
 " }}}
 
@@ -41,31 +41,32 @@ Plug 'tpope/vim-commentary'
 " kana/vim-textobj-user {{{
 Plug 'kana/vim-textobj-user'
 Plug 'kana/vim-textobj-help'
-Plug 'kana/vim-textobj-line'               " al | il
-Plug 'kana/vim-textobj-syntax'             " ay | iy
-Plug 'kana/vim-textobj-indent'             " ai | ii
-Plug 'kana/vim-textobj-datetime'           " ada| ida
-Plug 'kana/vim-textobj-lastpat'            " a/ | i/
-Plug 'Julian/vim-textobj-brace'            " aj | ij
-Plug 'vimtaku/vim-textobj-keyvalue'        " ak | iv
-Plug 'sgur/vim-textobj-parameter'          " a, | i,
-Plug 'paulhybryant/vim-textobj-path'       " aP | iP
-Plug 'beloglazov/vim-textobj-quotes'       " aq | iq
-Plug 'saihoooooooo/vim-textobj-space'      " aS | iS
-Plug 'jceb/vim-textobj-uri'                " au | iu
-Plug 'whatyouhide/vim-textobj-xmlattr'     " ax | ix
-Plug 'nelstrom/vim-textobj-rubyblock'      " ar | ir
-Plug 'bootleq/vim-textobj-rubysymbol'      " a: | i:
-Plug 'whatyouhide/vim-textobj-erb'         " aE | iE
-Plug 'osyo-manga/vim-textobj-multiblock'   " ab | ib
-Plug 'idbrii/textobj-word-column.vim'      " ac | ic
-" Plug 'kana/vim-textobj-entire'             " ae | ie
-" Plug 'bps/vim-textobj-python'              " af | if, ac | ic
-" Plug 'akiyan/vim-textobj-php'              " aP | iP
-" Plug 'Julian/vim-textobj-variable-segment' " av | iv
+Plug 'kana/vim-textobj-line'                 " al | il
+Plug 'kana/vim-textobj-syntax'               " ay | iy
+Plug 'kana/vim-textobj-indent'               " ai | ii
+Plug 'kana/vim-textobj-datetime'             " ada| ida
+Plug 'kana/vim-textobj-lastpat'              " a/ | i/
+Plug 'Julian/vim-textobj-brace'              " aj | ij
+Plug 'vimtaku/vim-textobj-keyvalue'          " ak | iv
+Plug 'sgur/vim-textobj-parameter'            " a, | i,
+Plug 'paulhybryant/vim-textobj-path'         " aP | iP
+Plug 'beloglazov/vim-textobj-quotes'         " aq | iq
+Plug 'saihoooooooo/vim-textobj-space'        " aS | iS
+Plug 'jceb/vim-textobj-uri'                  " au | iu
+Plug 'whatyouhide/vim-textobj-xmlattr'       " ax | ix
+Plug 'nelstrom/vim-textobj-rubyblock'        " ar | ir
+Plug 'bootleq/vim-textobj-rubysymbol'        " a: | i:
+Plug 'whatyouhide/vim-textobj-erb'           " aE | iE
+Plug 'osyo-manga/vim-textobj-multiblock'     " ab | ib
+Plug 'idbrii/textobj-word-column.vim'        " ac | ic
+" plug 'kana/vim-textobj-entire'               " ae | ie
+" plug 'bps/vim-textobj-python'                " af | if, ac | ic
+" plug 'akiyan/vim-textobj-php'                " ap | ip
+" plug 'julian/vim-textobj-variable-segment'   " av | iv
 " }}}
 
 " Tools, Such as nerdtree, vimwiki {{{
+Plug 'editorconfig/editorconfig-vim'
 Plug 'zhuochun/vim-dicts'
 Plug 'vim-scripts/ReplaceWithRegister'
 Plug 'christoomey/vim-titlecase'
@@ -138,56 +139,56 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
     " autocmd vimenter * if !argc() | NERDTree | endif
     " " Close vim if the only window left open is a NERDTree
     " autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType")
-            " \ && b:NERDTreeType == "primary") | q | endif
+                    " \ && b:NERDTreeType == "primary") | q | endif
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'scrooloose/nerdcommenter'
-  let g:NERDSpaceDelims=1
+    let g:NERDSpaceDelims=1
 
 Plug 'griffinqiu/star-search'
 Plug 'dyng/ctrlsf.vim'
-  nmap     <C-G>g <Plug>CtrlSFPrompt
-  nmap     <C-G>G <Plug>CtrlSFCwordPath
-  nmap     <C-G><C-G> <Plug>CtrlSFCwordExec
-  vmap     <C-G>g <Plug>CtrlSFVwordPath
-  vmap     <C-G>G <Plug>CtrlSFVwordPath
-  vmap     <C-G><C-G> <Plug>CtrlSFVwordExec
-  nmap     <C-G>p <Plug>CtrlSFPwordPath
-  nmap     <C-G><C-P> <Plug>CtrlSFPwordExec
-  nnoremap <C-G><C-O> :CtrlSFOpen<CR>
-  " nnoremap <C-G><C-T> :CtrlSFToggle<CR>
-  inoremap <C-G><C-T> <Esc>:CtrlSFToggle<CR>
-  nmap     <C-G>l <Plug>CtrlSFQuickfixPrompt
-  vmap     <C-G>l <Plug>CtrlSFQuickfixVwordPath
-  vmap     <C-G>L <Plug>CtrlSFQuickfixVwordPath
-  vmap     <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
-  nmap     <silent><leader>3 :CtrlSFToggle<CR>
-  " let g:ctrlsf_toggle_map_key = '<leader>3'
-  let g:ctrlsf_mapping = {
-      \ "next": "<c-d>",
-      \ "prev": "<c-u>",
-      \ }
-  let g:ctrlsf_auto_close = 0
-  let g:ctrlsf_open_left = 0
-  let g:ctrlsf_position = 'right'
-  let g:ctrlsf_winsize = 'auto' 
-  "let g:ctrlsf_context = '-B 5 -A 3'
-  " let g:ctrlsf_debug_mode = 1
-  let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp']
-  nnoremap \ :CtrlSF -filetype ruby<SPACE>
+    nmap <C-G>g <Plug>CtrlSFPrompt
+    nmap <C-G>G <Plug>CtrlSFCwordPath
+    nmap <C-G><C-G> <Plug>CtrlSFCwordExec
+    vmap <C-G>g <Plug>CtrlSFVwordPath
+    vmap <C-G>G <Plug>CtrlSFVwordPath
+    vmap <C-G><C-G> <Plug>CtrlSFVwordExec
+    nmap <C-G>p <Plug>CtrlSFPwordPath
+    nmap <C-G><C-P> <Plug>CtrlSFPwordExec
+    nnoremap <C-G><C-O> :CtrlSFOpen<CR>
+    " nnoremap <C-G><C-T> :CtrlSFToggle<CR>
+    inoremap <C-G><C-T> <Esc>:CtrlSFToggle<CR>
+    nmap <C-G>l <Plug>CtrlSFQuickfixPrompt
+    vmap <C-G>l <Plug>CtrlSFQuickfixVwordPath
+    vmap <C-G>L <Plug>CtrlSFQuickfixVwordPath
+    vmap <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
+    nmap <silent><leader>3 :CtrlSFToggle<CR>
+    " let g:ctrlsf_toggle_map_key = '<leader>3'
+    let g:ctrlsf_mapping = {
+        \ "next": "<c-d>",
+        \ "prev": "<c-u>",
+        \ }
+    let g:ctrlsf_auto_close = 0
+    let g:ctrlsf_open_left = 0
+    let g:ctrlsf_position = 'right'
+    let g:ctrlsf_winsize = 'auto' 
+    "let g:ctrlsf_context = '-B 5 -A 3'
+    " let g:ctrlsf_debug_mode = 1
+    let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp']
+    nnoremap \ :CtrlSF -filetype ruby<SPACE>
 
 Plug 'terryma/vim-multiple-cursors', { 'on': 'CtrlSF' }
-  let g:multi_cursor_start_key='<c-n>'
-  let g:multi_cursor_start_word_key='g<c-n>'
+    let g:multi_cursor_start_key='<c-n>'
+    let g:multi_cursor_start_word_key='g<c-n>'
 
 Plug 'rking/ag.vim'
-  if executable('ag')
-    " Use Ag over Grep
-    set grepprg=ag\ --nogroup\ --nocolor
-    " set grepprg=ag\ --vimgrep
-  endif
+    if executable('ag')
+        " Use Ag over Grep
+        set grepprg=ag\ --nogroup\ --nocolor
+        " set grepprg=ag\ --vimgrep
+    endif
 
 Plug 'Lokaltog/vim-easymotion'
-  let g:EasyMotion_leader_key = "'"
+    let g:EasyMotion_leader_key = "'"
 
 Plug 'houtsnip/vim-emacscommandline'
 " }}}
@@ -197,38 +198,38 @@ if has('gui_running')
 Plug 'ctrlpvim/ctrlp.vim'
     " for ctrlp plugin
     " Define bundles via Github repos
-        let g:ctrlp_custom_ignore = {
-          \'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic|build|vendor)$',
-          \'file': '\v\.(exe|so|dll|meta|pyc|as|so|tags)$',
-          \'link': 'some_bad_symbolic_links'
-        \}
-        let g:ctrlp_prompt_mappings = {
-          \'AcceptSelection("v")': ['<C-V>', '<RightMouse>'],
-          \'AcceptSelection("h")': ['<C-S>', '<C-CR>'],
-          \'PrtClearCache()':      ['<F6>'],
-          \'PrtCurLeft()': ['<left>', '<c-h>'] 
-        \}
-        " let g:ctrlp_user_command = 'find %s -type f'
-        let g:ctrlp_by_filename = 1
-        let g:ctrlp_mruf_case_sensitive = 0
-        let g:ctrlp_use_caching = 1
-        let g:ctrlp_cache_dir = '~/tmp/ctrlp'
-        let g:ctrlp_working_path_mode = 'w'
-        let g:ctrlp_tabpage_position = 'f'
+    let g:ctrlp_custom_ignore = {
+        \'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic|build|vendor)$',
+        \'file': '\v\.(exe|so|dll|meta|pyc|as|so|tags)$',
+        \'link': 'some_bad_symbolic_links'
+    \}
+    let g:ctrlp_prompt_mappings = {
+        \'AcceptSelection("v")': ['<C-V>', '<RightMouse>'],
+        \'AcceptSelection("h")': ['<C-S>', '<C-CR>'],
+        \'PrtClearCache()':            ['<F6>'],
+        \'PrtCurLeft()': ['<left>', '<c-h>'] 
+    \}
+    " let g:ctrlp_user_command = 'find %s -type f'
+    let g:ctrlp_by_filename = 1
+    let g:ctrlp_mruf_case_sensitive = 0
+    let g:ctrlp_use_caching = 1
+    let g:ctrlp_cache_dir = '~/tmp/ctrlp'
+    let g:ctrlp_working_path_mode = 'w'
+    let g:ctrlp_tabpage_position = 'f'
 
-        " nnoremap <leader>b :CtrlPBuffer<CR>
-        " nnoremap <leader>h :CtrlPMRU<CR>
-        " nnoremap <leader>e :CtrlPRegister<CR>
-        " nnoremap <leader>m :CtrlPMark<CR>
-        " nnoremap <leader>g :CtrlPTag<CR>
-        " nnoremap <leader>f :CtrlPFunky<Cr>
-        " nnoremap <Leader>u :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
+    " nnoremap <leader>b :CtrlPBuffer<CR>
+    " nnoremap <leader>h :CtrlPMRU<CR>
+    " nnoremap <leader>e :CtrlPRegister<CR>
+    " nnoremap <leader>m :CtrlPMark<CR>
+    " nnoremap <leader>g :CtrlPTag<CR>
+    " nnoremap <leader>f :CtrlPFunky<Cr>
+    " nnoremap <Leader>u :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
 
 Plug 'majutsushi/tagbar'
     nnoremap <silent> <leader>2 :TagbarToggle<CR>
     let g:tagbar_type_php = {
         \'ctagstype' : 'php',
-        \'kinds'     : [
+        \'kinds'         : [
             \'i:interfaces',
             \'c:classes',
             \'d:constant definitions',
@@ -244,47 +245,47 @@ Plug 'majutsushi/tagbar'
 else
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
-  " for fzf plugin
-  nnoremap <c-p> :Files <cr>
-  let g:fzf_action = {
-    \ 'ctrl-t': 'tab split',
-    \ 'ctrl-x': 'split',
-    \ 'ctrl-v': 'vsplit' }
-  nnoremap <C-p> :GitFiles<CR>
-  nnoremap <leader>ff :Files<CR>
-  nnoremap <leader>fb :Buffers<CR>
-  nnoremap <leader>fa :Tags<CR>
-  nnoremap <leader>ft :Tags<CR>
-  nnoremap <leader>fs :GFiles?<CR>
-  nnoremap <leader>fh :History<CR>
-  nnoremap <leader>f: :History:<CR>
-  nnoremap <leader>f/ :History/<CR>
-  nnoremap <leader>fm :Marks<CR>
-  " nnoremap <leader>fm :Maps<CR>
-  " nnoremap <leader>bc :BCommits<CR>
-  nnoremap <silent> <Leader>ag :Ag <C-R><C-W><CR>
+    " for fzf plugin
+    nnoremap <c-p> :Files <cr>
+    let g:fzf_action = {
+        \ 'ctrl-t': 'tab split',
+        \ 'ctrl-x': 'split',
+        \ 'ctrl-v': 'vsplit' }
+    nnoremap <C-p> :GitFiles<CR>
+    nnoremap <leader>ff :Files<CR>
+    nnoremap <leader>fb :Buffers<CR>
+    nnoremap <leader>fa :Tags<CR>
+    nnoremap <leader>ft :Tags<CR>
+    nnoremap <leader>fs :GFiles?<CR>
+    nnoremap <leader>fh :History<CR>
+    nnoremap <leader>f: :History:<CR>
+    nnoremap <leader>f/ :History/<CR>
+    nnoremap <leader>fm :Marks<CR>
+    " nnoremap <leader>fm :Maps<CR>
+    " nnoremap <leader>bc :BCommits<CR>
+    nnoremap <silent> <Leader>ag :Ag <C-R><C-W><CR>
 
-  imap <c-x><c-k> <plug>(fzf-complete-word)
-  imap <c-x><c-f> <plug>(fzf-complete-file-ag)
-  " imap <c-x><c-f> <plug>(fzf-complete-path)
-  imap <c-x><c-l> <plug>(fzf-complete-line)
+    imap <c-x><c-k> <plug>(fzf-complete-word)
+    imap <c-x><c-f> <plug>(fzf-complete-file-ag)
+    " imap <c-x><c-f> <plug>(fzf-complete-path)
+    imap <c-x><c-l> <plug>(fzf-complete-line)
 
-  nmap <leader><tab> <plug>(fzf-maps-n)
-  xmap <leader><tab> <plug>(fzf-maps-x)
-  omap <leader><tab> <plug>(fzf-maps-o)
+    nmap <leader><tab> <plug>(fzf-maps-n)
+    xmap <leader><tab> <plug>(fzf-maps-x)
+    omap <leader><tab> <plug>(fzf-maps-o)
 endif
 " }}}
 
 " Syntax {{{
 " Plug 'w0rp/ale'
-  " let g:ale_lint_on_save = 1
-  " let g:ale_lint_on_text_changed = 0
+    " let g:ale_lint_on_save = 1
+    " let g:ale_lint_on_text_changed = 0
 
 Plug 'maksimr/vim-jsbeautify', { 'for': 'js' }
 Plug 'kchmck/vim-coffee-script', { 'for': 'coffee' }
 Plug 'pangloss/vim-javascript', { 'for': 'js' }
-  let g:javascript_enable_domhtmlcss = 1
-  let g:javascript_ignore_javaScriptdoc = 1
+    let g:javascript_enable_domhtmlcss = 1
+    let g:javascript_ignore_javaScriptdoc = 1
 " Plug 'rstacruz/vim-hyperstyle'
 
 Plug 'othree/html5.vim'
@@ -303,8 +304,8 @@ Plug 'AndrewRadev/switch.vim'
 
 Plug 'StanAngeloff/php.vim', { 'for': 'php' }
 Plug 'shawncplus/phpcomplete.vim', { 'for': 'php' }
-  let g:phpcomplete_mappings = {
-    \ 'jump_to_def': ',g',
+    let g:phpcomplete_mappings = {
+        \ 'jump_to_def': ',g',
     \ }
 
 Plug 'hynek/vim-python-pep8-indent', { 'for': 'python' }
@@ -314,8 +315,8 @@ Plug 'autowitch/hive.vim', { 'for': ['hql', 'sql'] }
 
 Plug 'plasticboy/vim-markdown'
 Plug 'mzlogin/vim-markdown-toc'
-  let g:vim_markdown_folding_disabled=1
-  let g:vim_markdown_initial_foldlevel=1
+    let g:vim_markdown_folding_disabled=1
+    let g:vim_markdown_initial_foldlevel=1
 " }}}
 
 " Colorscheme {{{
@@ -326,35 +327,35 @@ Plug 'yonchu/accelerated-smooth-scroll'
 " Snips {{{
 "
 if !has('gui_running')
-  Plug 'SirVer/ultisnips'
-    let g:UltiSnipsExpandTrigger="<tab>"
-    let g:UltiSnipsListSnippets="<c-7>"
-    let g:UltiSnipsJumpForwardTrigger="<c-j>"
-    let g:UltiSnipsJumpBackwardTrigger="<c-k>"
-    let g:UltiSnipsEditSplit="vertical"
-    nnoremap <silent> <leader>uu :UltiSnipsEdit<cr>
-    nnoremap <silent> <leader>ue :UltiSnipsEdit<space>
-  Plug 'griffinqiu/vim-snippets'
+    Plug 'SirVer/ultisnips'
+        let g:UltiSnipsExpandTrigger="<tab>"
+        let g:UltiSnipsListSnippets="<c-7>"
+        let g:UltiSnipsJumpForwardTrigger="<c-j>"
+        let g:UltiSnipsJumpBackwardTrigger="<c-k>"
+        let g:UltiSnipsEditSplit="vertical"
+        nnoremap <silent> <leader>uu :UltiSnipsEdit<cr>
+        nnoremap <silent> <leader>ue :UltiSnipsEdit<space>
+    Plug 'griffinqiu/vim-snippets'
 endif
 
 Plug 'mattn/emmet-vim'
-  " let g:user_emmet_mode='i'
-  let g:user_emmet_mode='a'
-  autocmd FileType html,css,less,sass,eruby,erb EmmetInstall
-  let g:user_emmet_leader_key='<c-e>'
-  " let g:user_emmet_expandabbr_key='<C-V><C-V>'
-  let g:user_emmet_expandword_key = '<C-e>v'
-  let g:user_emmet_update_tag = '<C-e>u'
-  let g:user_emmet_next_key='<C-e>n'
-  let g:user_emmet_prev_key='<C-e>p'
+    " let g:user_emmet_mode='i'
+    let g:user_emmet_mode='a'
+    autocmd FileType html,css,less,sass,eruby,erb EmmetInstall
+    let g:user_emmet_leader_key='<c-e>'
+    " let g:user_emmet_expandabbr_key='<C-V><C-V>'
+    let g:user_emmet_expandword_key = '<C-e>v'
+    let g:user_emmet_update_tag = '<C-e>u'
+    let g:user_emmet_next_key='<C-e>n'
+    let g:user_emmet_prev_key='<C-e>p'
 
-  let g:user_emmet_settings = {
-  \  'html' : {
-  \    'quote_char': "'",
-  \  },
-  \}
-  " let g:user_emmet_togglecomment_key = '<C-V>/'
-  " let g:user_emmet_install_global=1
+    let g:user_emmet_settings = {
+    \    'html' : {
+    \        'quote_char': "'",
+    \    },
+    \}
+    " let g:user_emmet_togglecomment_key = '<C-V>/'
+    " let g:user_emmet_install_global=1
 " }}}
 
 " Airline {{{
@@ -367,10 +368,10 @@ Plug 'mattn/emmet-vim'
     " let g:airline#extensions#branch#empty_message = ''
     " let g:airline#extensions#syntastic#enabled = 1
     " let g:airline#extensions#default#section_truncate_width = {
-        " \   'b': 79,
-        " \   'x': 60,
-        " \   'y': 88,
-        " \   'z': 45,
+        " \ 'b': 79,
+        " \ 'x': 60,
+        " \ 'y': 88,
+        " \ 'z': 45,
         " \ }
     " " disable summary of changed hunks under source control.
     " let g:airline#extensions#hunks#enabled = 0
@@ -402,18 +403,18 @@ Plug 'mattn/emmet-vim'
 " \ 'infolog' : 1,
 " \ 'mail' : 1
 " \}
-" let g:ycm_semantic_triggers =  {
-" \   'c' : ['->', '.'],
-" \   'objc' : ['->', '.'],
-" \   'ocaml' : ['.', '#'],
-" \   'cpp,objcpp' : ['->', '.', '::'],
-" \   'perl' : ['->'],
-" \   'php' : ['->', '::'],
-" \   'cs,java,javascript,d,python,perl6,scala,vb,elixir,go' : ['.'],
-" \   'vim' : ['re![_a-zA-Z]+[_\w]*\.'],
-" \   'ruby' : ['.', '::'],
-" \   'lua' : ['.', ':'],
-" \   'erlang' : [':'],
+" let g:ycm_semantic_triggers = {
+" \ 'c' : ['->', '.'],
+" \ 'objc' : ['->', '.'],
+" \ 'ocaml' : ['.', '#'],
+" \ 'cpp,objcpp' : ['->', '.', '::'],
+" \ 'perl' : ['->'],
+" \ 'php' : ['->', '::'],
+" \ 'cs,java,javascript,d,python,perl6,scala,vb,elixir,go' : ['.'],
+" \ 'vim' : ['re![_a-zA-Z]+[_\w]*\.'],
+" \ 'ruby' : ['.', '::'],
+" \ 'lua' : ['.', ':'],
+" \ 'erlang' : [':'],
 " \ }
 
 " Plug 'marijnh/tern_for_vim'
@@ -422,8 +423,7 @@ Plug 'mattn/emmet-vim'
 " " }}}
 
 if filereadable(expand("~/.vimrc.bundles.local"))
-  source ~/.vimrc.bundles.local
+    source ~/.vimrc.bundles.local
 endif
 
 call plug#end()
-

@@ -27,9 +27,9 @@ set backspace=indent,eol,start
 
 set foldmethod=marker
 
-set shiftwidth=2
-set softtabstop=2
-set tabstop=2
+set shiftwidth=4
+set softtabstop=4
+set tabstop=4
 set expandtab
 " set nolist
 set list listchars=tab:»·,trail:·,nbsp:·
@@ -37,12 +37,12 @@ set list listchars=tab:»·,trail:·,nbsp:·
 " Switch syntax highlighting on, when the terminal has colors
 " Also switch on highlighting the last used search pattern.
 if (&t_Co > 2 || has("gui_running")) && !exists("syntax_on")
-  syntax on
+    syntax on
 endif
 let g:solarized_termcolors = 256
 
 if filereadable(expand("~/.vimrc.bundles"))
-  source ~/.vimrc.bundles
+    source ~/.vimrc.bundles
 endif
 
 set nocompatible
@@ -54,13 +54,13 @@ augroup vimrcEx
     " Don't do it for commit messages, when the position is invalid, or when
     " inside an event handler (happens when dropping a file on gvim).
     autocmd BufReadPost *
-      \ if &ft != 'gitcommit' && line("'\"") > 0 && line("'\"") <= line("$") |
-      \   exe "normal g`\"" |
-      \ endif
+        \ if &ft != 'gitcommit' && line("'\"") > 0 && line("'\"") <= line("$") |
+        \     exe "normal g`\"" |
+        \ endif
 
     " Set syntax highlighting for specific file types
     autocmd BufRead,BufNewFile Appraisals set filetype=ruby
-    autocmd BufRead,BufNewFile *.{md,mdown,mkd,mkdn,markdown,mdwn}   set filetype=markdown
+    autocmd BufRead,BufNewFile *.{md,mdown,mkd,mkdn,markdown,mdwn} set filetype=markdown
     autocmd BufRead,BufNewFile .{jscs,jshint,eslint}rc set filetype=json
     autocmd BufNewFile,BufRead *.hql set filetype=hive expandtab
     autocmd BufNewFile,BufRead *.q set filetype=hive expandtab
