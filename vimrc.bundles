@@ -173,7 +173,7 @@ Plug 'dyng/ctrlsf.vim'
     let g:ctrlsf_winsize = 'auto' 
     "let g:ctrlsf_context = '-B 5 -A 3'
     " let g:ctrlsf_debug_mode = 1
-    let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp']
+    " let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp']
     nnoremap \ :CtrlSF -filetype ruby<SPACE>
 
 Plug 'terryma/vim-multiple-cursors', { 'on': 'CtrlSF' }

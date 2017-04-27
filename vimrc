@@ -166,6 +166,9 @@ set shortmess=atI
 set nrformats=
 set tags+=gems.tags
 
+" Speed up for macros
+set lazyredraw
+
 " }}}
 
 " Mapping {{{
@@ -174,7 +177,14 @@ nnoremap gk k
 nnoremap j gj
 nnoremap gj j
 
+" nnoremap B ^
+" nnoremap E $
+
+" highlight last inserted text
+nnoremap gV `[v`]
+
 " Copy filename to clipboard
+nmap ,cn :let @*=expand("%"). ':' . line(".")<CR>
 nmap ,cs :let @*=expand("%")<CR>
 nmap ,cl :let @*=expand("%:p")<CR>
 

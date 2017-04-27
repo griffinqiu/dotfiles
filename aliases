@@ -10,6 +10,7 @@ alias grep='grep --color=auto'
 alias l.='ls -d .* -FHG'
 alias ll='ls -l -FHG'
 alias ls='ls -FHG'
+alias tailf='tail -f'
 # alias which='alias | /usr/bin/which --tty-only --read-alias --show-dot --show-tilde'
 alias ln="ln -v"
 alias mkdir="mkdir -p"
