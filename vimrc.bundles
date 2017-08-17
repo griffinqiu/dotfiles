@@ -31,11 +31,30 @@ call plug#begin()
 " Tpopes' :) {{{
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
-Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-speeddating'
 Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
+" }}}
+
+" Git {{{
+Plug 'mhinz/vim-signify'
+    let g:signify_vcs_list = ['git']
+Plug 'tpope/vim-fugitive'
+Plug 'junegunn/gv.vim'
+" Plug 'gregsexton/gitv', { 'on': 'Gitv' }
+    nnoremap <leader>gv :GV<CR>
+    nnoremap <leader>g4 :GV!<CR>
+    nnoremap <leader>gc :Gcommit -v<CR>
+    nnoremap <Leader>gs :Gstatus<CR>
+    nnoremap <Leader>gd :Gdiff<CR>
+    nnoremap <Leader>gb :Gblame<CR>
+    nnoremap <Leader>gl :exe ':!cd ' . expand('%:p:h') . '; git log'<CR>
+    nnoremap <Leader>gr :Gread<CR>
+    nnoremap <Leader>gw :Gwrite<CR>
+    nnoremap <Leader>gp :Git push<CR>
+    nnoremap <Leader>g- :Silent Git stash<CR>:e<CR>
+    nnoremap <Leader>g+ :Silent Git stash pop<CR>:e<CR>
 " }}}
 
 " kana/vim-textobj-user {{{
@@ -66,6 +85,7 @@ Plug 'idbrii/textobj-word-column.vim'        " ac | ic
 " }}}
 
 " Tools, Such as nerdtree, vimwiki {{{
+Plug 'rhlobo/vim-super-retab'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'zhuochun/vim-dicts'
 Plug 'vim-scripts/ReplaceWithRegister'
@@ -298,6 +318,9 @@ Plug 'groenewege/vim-less', { 'for': 'less' }
 Plug 'Keithbsmiley/rspec.vim', { 'for': 'ruby' }
 Plug 'ecomba/vim-ruby-refactoring', { 'for': 'ruby' }
 Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
+Plug 'griffinqiu/vim-i18n'
+    vmap <leader>zz :call I18nTranslateString()<CR>
+    vmap <leader>zd :call I18nDisplayTranslation()<CR>
 Plug 'tpope/vim-rails'
 Plug 'AndrewRadev/switch.vim'
     let g:switch_mapping = "-"

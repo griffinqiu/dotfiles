@@ -92,8 +92,8 @@ endif
 set backupdir=~/tmp/backups
 set directory=~/tmp/
 
-set textwidth=80
-set colorcolumn=+1
+" set textwidth=80
+set colorcolumn=81
 
 set nonumber
 set numberwidth=4

@@ -106,8 +106,8 @@ if has("gui_macvim")
     macmenu &Edit.Find.Use\ Selection\ for\ Find key=<nop>
     macmenu &Edit.Font.Bigger key=<nop>
     macmenu &Edit.Font.Smaller key=<nop>
-    macmenu &Tools.Spelling.To\ Next\ error key=<nop>
-    macmenu &Tools.Spelling.To\ Previous\ error key=<nop>
+    macmenu &Tools.Spelling.To\ Next\ Error key=<nop>
+    macmenu &Tools.Spelling.To\ Previous\ Error key=<nop>
     macmenu &Tools.Make key=<nop>
     macmenu &Tools.List\ Errors key=<nop>
     macmenu &Tools.Next\ Error key=<nop>

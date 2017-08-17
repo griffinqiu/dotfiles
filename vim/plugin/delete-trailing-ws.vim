@@ -7,3 +7,4 @@ endfunc
 map <leader>ds :call DeleteTrailingWS()<CR>
 autocmd BufWrite *.php :call DeleteTrailingWS()
 autocmd BufWrite *.rb :call DeleteTrailingWS()
+autocmd BufWrite *.py :call DeleteTrailingWS()
