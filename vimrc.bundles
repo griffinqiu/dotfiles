@@ -71,7 +71,7 @@ Plug 'sgur/vim-textobj-parameter'            " a, | i,
 Plug 'paulhybryant/vim-textobj-path'         " aP | iP
 Plug 'beloglazov/vim-textobj-quotes'         " aq | iq
 Plug 'saihoooooooo/vim-textobj-space'        " aS | iS
-Plug 'jceb/vim-textobj-uri'                  " au | iu
+" Plug 'jceb/vim-textobj-uri'                  " au | iu
 Plug 'whatyouhide/vim-textobj-xmlattr'       " ax | ix
 Plug 'nelstrom/vim-textobj-rubyblock'        " ar | ir
 Plug 'bootleq/vim-textobj-rubysymbol'        " a: | i:
@@ -284,6 +284,8 @@ Plug 'junegunn/fzf.vim'
     " nnoremap <leader>fm :Maps<CR>
     " nnoremap <leader>bc :BCommits<CR>
     nnoremap <silent> <Leader>ag :Ag <C-R><C-W><CR>
+    nnoremap <silent> <Leader>at :let @"=&filetype \| Agt --<C-R>" <C-R><C-W><CR>
+    command! -nargs=+ -complete=file Agt call fzf#vim#ag_raw(<q-args>)
 
     imap <c-x><c-k> <plug>(fzf-complete-word)
     imap <c-x><c-f> <plug>(fzf-complete-file-ag)
