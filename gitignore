@@ -13,3 +13,4 @@ tmp/**/*
 *.pyc
 .Trash
 Thumbs.db
+coverage/.last_run.json
