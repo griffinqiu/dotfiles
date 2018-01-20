@@ -342,6 +342,8 @@ Plug 'plasticboy/vim-markdown'
 Plug 'mzlogin/vim-markdown-toc'
     let g:vim_markdown_folding_disabled=1
     let g:vim_markdown_initial_foldlevel=1
+
+Plug 'chemzqm/wxapp.vim'
 " }}}
 
 " Colorscheme {{{

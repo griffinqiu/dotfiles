@@ -60,9 +60,6 @@ source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
-# Add RVM to PATH for scripting
-export PATH=$PATH:$HOME/.bin:$HOME/.rvm/bin
-
 # You may need to manually set your language environment
 stty -ixon -ixoff
 export LANG="en_US.UTF-8"
@@ -91,3 +88,6 @@ export EDITOR='vim'
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+export PATH="$HOME/.bin:$PATH"
+eval "$(rbenv init - --no-rehash)"
