@@ -177,6 +177,9 @@ nnoremap gk k
 nnoremap j gj
 nnoremap gj j
 
+nnoremap gT :tabprevious<CR>
+nnoremap gt :tabnext<CR>
+
 " nnoremap B ^
 " nnoremap E $
 

@@ -40,19 +40,29 @@ Plug 'tpope/vim-commentary'
 " Git {{{
 Plug 'mhinz/vim-signify'
     let g:signify_vcs_list = ['git']
+    let g:signify_realtime = 1
+    let g:signify_disable_by_default = 1
+    omap ic <plug>(signify-motion-inner-pending)
+    xmap ic <plug>(signify-motion-inner-visual)
+    omap ac <plug>(signify-motion-outer-pending)
+    xmap ac <plug>(signify-motion-outer-visual)
+    nnoremap <leader>gt :SignifyToggle<CR>
+    nnoremap <leader>gh :SignifyToggleHighlight<CR>
+    " nnoremap <leader>gr :SignifyRefresh<CR>
 Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-rhubarb'
 Plug 'junegunn/gv.vim'
 " Plug 'gregsexton/gitv', { 'on': 'Gitv' }
-    nnoremap <leader>gv :GV<CR>
-    nnoremap <leader>g4 :GV!<CR>
-    nnoremap <leader>gc :Gcommit -v<CR>
-    nnoremap <Leader>gs :Gstatus<CR>
+    " nnoremap <leader>gv :GV<CR>
+    " nnoremap <leader>g4 :GV!<CR>
+    " nnoremap <leader>gc :Gcommit -v<CR>
+    " nnoremap <Leader>gs :Gstatus<CR>
+    " nnoremap <Leader>gp :Git push<CR>
+    nnoremap <Leader>gw :Gwrite<CR>
     nnoremap <Leader>gd :Gdiff<CR>
     nnoremap <Leader>gb :Gblame<CR>
     nnoremap <Leader>gl :exe ':!cd ' . expand('%:p:h') . '; git log'<CR>
     nnoremap <Leader>gr :Gread<CR>
-    nnoremap <Leader>gw :Gwrite<CR>
-    nnoremap <Leader>gp :Git push<CR>
     nnoremap <Leader>g- :Silent Git stash<CR>:e<CR>
     nnoremap <Leader>g+ :Silent Git stash pop<CR>:e<CR>
 " }}}
@@ -77,7 +87,7 @@ Plug 'nelstrom/vim-textobj-rubyblock'        " ar | ir
 Plug 'bootleq/vim-textobj-rubysymbol'        " a: | i:
 Plug 'whatyouhide/vim-textobj-erb'           " aE | iE
 Plug 'osyo-manga/vim-textobj-multiblock'     " ab | ib
-Plug 'idbrii/textobj-word-column.vim'        " ac | ic
+" Plug 'idbrii/textobj-word-column.vim'        " ac | ic
 " plug 'kana/vim-textobj-entire'               " ae | ie
 " plug 'bps/vim-textobj-python'                " af | if, ac | ic
 " plug 'akiyan/vim-textobj-php'                " ap | ip
@@ -89,29 +99,23 @@ Plug 'rhlobo/vim-super-retab'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'zhuochun/vim-dicts'
 Plug 'vim-scripts/ReplaceWithRegister'
-Plug 'christoomey/vim-titlecase'
 Plug 'christoomey/vim-sort-motion'
-Plug 'vimwiki/vimwiki'
-    let defualt_wiki = {
-        \'path': '~/github/vimwiki/_source/',
-        \'path_html': '~/github/vimwiki/html/',
-        \'template_path': '~/github/vimwiki/templates/',
-        \'template_ext': '.tpl',
-        \'template_default': 'default',
-        \'nested_syntaxes': {'php': 'php', 'python': 'python', 'c++': 'cpp', 'js': 'javascript', 'bash': 'bash'},
-        \'index': 'index',
-        \'ext': '.wiki',
-        \'syntax': 'default',
-        \'auto_export': 1
-    \}
-    let g:vimwiki_use_calendar = 1
-    let g:vimwiki_use_mouse = 1
-    let g:vimwiki_list = [defualt_wiki]
-    " nnoremap <S-Space> <Plug>VimwikiToggleListItem
-    " let g:vimwiki_hl_cb_checked = 1
-    " let g:vimwiki_valid_html_tags='strong,em,del,blockquote,ins,code'
-    " let g:vimwiki_file_exts = 'php, c'
-    " let g:vimwiki_browsers = ['google-chrome']
+" Plug 'vimwiki/vimwiki'
+    " let defualt_wiki = {
+        " \'path': '~/github/vimwiki/_source/',
+        " \'path_html': '~/github/vimwiki/html/',
+        " \'template_path': '~/github/vimwiki/templates/',
+        " \'template_ext': '.tpl',
+        " \'template_default': 'default',
+        " \'nested_syntaxes': {'php': 'php', 'python': 'python', 'c++': 'cpp', 'js': 'javascript', 'bash': 'bash'},
+        " \'index': 'index',
+        " \'ext': '.wiki',
+        " \'syntax': 'default',
+        " \'auto_export': 1
+    " \}
+    " let g:vimwiki_use_calendar = 1
+    " let g:vimwiki_use_mouse = 1
+    " let g:vimwiki_list = [defualt_wiki]
 
 Plug 'rizzatti/dash.vim'
     :nmap <silent> <leader>d <Plug>DashSearch
@@ -155,11 +159,6 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
     " let NERDTreeWinPos = 'right'
     let NERDTreeShowBookmarks = 1
     let NERDTreeWinSize = 30
-    " " Automatically open a NERDTree if no files where specified
-    " autocmd vimenter * if !argc() | NERDTree | endif
-    " " Close vim if the only window left open is a NERDTree
-    " autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType")
-                    " \ && b:NERDTreeType == "primary") | q | endif
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'scrooloose/nerdcommenter'
     let g:NERDSpaceDelims=1
