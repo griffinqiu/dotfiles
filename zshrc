@@ -83,11 +83,12 @@ export EDITOR='vim'
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 [[ -f ~/.aliases ]] && source ~/.aliases
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+export POSTGRES_DB_USERNAME=postgres
+export PATH="$HOME/.bin:$PATH"
+eval "$(rbenv init - --no-rehash)"
+eval "$(pyenv init -)"
 
 # Local config
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
-
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-export PATH="$HOME/.bin:$PATH"
-eval "$(rbenv init - --no-rehash)"

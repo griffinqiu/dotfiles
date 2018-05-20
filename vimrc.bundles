@@ -40,8 +40,6 @@ Plug 'tpope/vim-commentary'
 " Git {{{
 Plug 'mhinz/vim-signify'
     let g:signify_vcs_list = ['git']
-    let g:signify_realtime = 1
-    let g:signify_disable_by_default = 1
     omap ic <plug>(signify-motion-inner-pending)
     xmap ic <plug>(signify-motion-inner-visual)
     omap ac <plug>(signify-motion-outer-pending)
@@ -346,7 +344,7 @@ Plug 'chemzqm/wxapp.vim'
 " }}}
 
 " Colorscheme {{{
-Plug 'ap/vim-css-color'
+" Plug 'ap/vim-css-color'
 Plug 'yonchu/accelerated-smooth-scroll'
 " }}}
 
