@@ -179,6 +179,8 @@ nnoremap gj j
 
 nnoremap gT :tabprevious<CR>
 nnoremap gt :tabnext<CR>
+nnoremap t<C-]> :tabnew %<CR>g<C-]>
+vnoremap t<C-]> <Esc>:tabnew %<CR>gvg<C-]>
 
 " nnoremap B ^
 " nnoremap E $

@@ -187,7 +187,7 @@ Plug 'dyng/ctrlsf.vim'
     let g:ctrlsf_auto_close = 0
     let g:ctrlsf_open_left = 0
     let g:ctrlsf_position = 'right'
-    let g:ctrlsf_winsize = 'auto' 
+    " let g:ctrlsf_winsize = 'auto' 
     "let g:ctrlsf_context = '-B 5 -A 3'
     " let g:ctrlsf_debug_mode = 1
     " let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp']
@@ -313,10 +313,18 @@ Plug 'othree/csscomplete.vim', { 'for': ['css', 'scss', 'less'] }
 Plug 'hail2u/vim-css3-syntax', { 'for': ['css', 'scss', 'less'] }
 Plug 'cakebaker/scss-syntax.vim', { 'for': 'scss' }
 Plug 'groenewege/vim-less', { 'for': 'less' }
+Plug 'fatih/vim-go', { 'for': 'go' }
 
 Plug 'Keithbsmiley/rspec.vim', { 'for': 'ruby' }
 Plug 'ecomba/vim-ruby-refactoring', { 'for': 'ruby' }
 Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
+" Plug 'tpope/vim-projectionist', { 'for': 'ruby' }
+" Plug 'tpope/vim-rake', { 'for': 'ruby' }
+Plug 'tpope/vim-bundler', { 'for': 'ruby' }
+Plug 'tpope/vim-pathogen', { 'for': 'ruby' }
+    " autocmd FileType ruby let &l:tags = pathogen#legacyjoin(pathogen#uniq(
+        " \ pathogen#split(&tags) +
+        " \ map(split($GEM_PATH,':'),'v:val."/gems/*/tags"')))
 Plug 'griffinqiu/vim-i18n'
     vmap <leader>zz :call I18nTranslateString()<CR>
     vmap <leader>zd :call I18nDisplayTranslation()<CR>

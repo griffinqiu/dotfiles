@@ -90,5 +90,8 @@ export PATH="$HOME/.bin:$PATH"
 eval "$(rbenv init - --no-rehash)"
 eval "$(pyenv init -)"
 
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+
 # Local config
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
