@@ -1,18 +1,12 @@
 #!/bin/bash
-
-# User specific environment and startup programs
-export PATH=$PATH:$HOME/bin:$HOME/.rvm/bin:$HOME/.bin
+[[ -f ~/.exports ]] && source ~/.exports
+[[ -f ~/.aliases ]] && source ~/.aliases
 
 set -o ignoreeof
 stty -ixon -ixoff
 
-# Aliases
-[[ -f ~/.aliases ]] && source ~/.aliases
+[[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
+[[ -f ~/.bashrc.local ]] && source ~/.bashrc.local
 
-# Local config
-[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
-
-# Load RVM into a shell session *as a function*
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+eval "$(rbenv init - --no-rehash)"
+eval "$(pyenv init -)"

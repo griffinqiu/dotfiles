@@ -39,7 +39,6 @@ set expandtab
 if (&t_Co > 2 || has("gui_running")) && !exists("syntax_on")
     syntax on
 endif
-let g:solarized_termcolors = 256
 
 if filereadable(expand("~/.vimrc.bundles"))
     source ~/.vimrc.bundles
