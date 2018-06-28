@@ -14,6 +14,7 @@
     editor = vim -f
     autocrlf = input
     safecrlf = true
+    # commentchar = *
 [color]
     ui = auto
     diff = auto
