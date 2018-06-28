@@ -187,7 +187,7 @@ Plug 'dyng/ctrlsf.vim'
     let g:ctrlsf_auto_close = 0
     let g:ctrlsf_open_left = 0
     let g:ctrlsf_position = 'right'
-    let g:ctrlsf_winsize = '30%' 
+    let g:ctrlsf_winsize = '30%'
     "let g:ctrlsf_context = '-B 5 -A 3'
     " let g:ctrlsf_debug_mode = 1
     " let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp']
@@ -225,7 +225,7 @@ Plug 'ctrlpvim/ctrlp.vim'
         \'AcceptSelection("v")': ['<C-V>', '<RightMouse>'],
         \'AcceptSelection("h")': ['<C-S>', '<C-CR>'],
         \'PrtClearCache()':            ['<F6>'],
-        \'PrtCurLeft()': ['<left>', '<c-h>'] 
+        \'PrtCurLeft()': ['<left>', '<c-h>']
     \}
     " let g:ctrlp_user_command = 'find %s -type f'
     let g:ctrlp_by_filename = 1
@@ -263,9 +263,7 @@ Plug 'majutsushi/tagbar'
 else
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
-    " for fzf plugin
-    nnoremap <c-p> :Files <cr>
-
+    " <c-m>
     " function! s:build_quickfix_list(lines)
         " call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
         " copen
@@ -278,13 +276,13 @@ Plug 'junegunn/fzf.vim'
         \ 'ctrl-v': 'vsplit' }
     let $FZF_DEFAULT_OPTS = '--bind ctrl-a:select-all,ctrl-d:deselect-all'
 
-    nnoremap <C-p> :GitFiles<CR>
+    nnoremap <c-p> :GitFiles<CR>
     nnoremap <leader>fg :GitFiles<CR>
     nnoremap <leader>fgs :GFiles?<CR>
     nnoremap <leader>ff :Files<CR>
     nnoremap <leader>fd :Buffers<CR>
     nnoremap <leader>ft :Tags<CR>
-    nnoremap <leader>fbt :Tags<CR>
+    nnoremap <leader>fbt :BTags<CR>
     nnoremap <leader>fc :Commits<CR>
     nnoremap <leader>fbc :BCommits<CR>
     nnoremap <leader>fl :Lines<CR>
@@ -294,16 +292,15 @@ Plug 'junegunn/fzf.vim'
     nnoremap <leader>fh :History<CR>
     nnoremap <leader>f: :History:<CR>
     nnoremap <leader>f/ :History/<CR>
-    nnoremap <leader>f? :Commands<CR>
+    nnoremap <leader>fC :Commands<CR>
     nnoremap <leader>fm :Maps<CR>
     " nnoremap <leader>ag :Ag<CR>
     " nnoremap <leader>agt :Agt<CR>
-    nnoremap <silent> <Leader>at :let @"=&filetype \| Agt --<C-R>" <C-R><C-W><CR>
-    command! -nargs=+ -complete=file Agt call fzf#vim#ag_raw(<q-args>)
+    nnoremap <silent> <leader>at :let @"=&filetype \| Agt --<C-R>" <C-R><C-W><CR>
 
     imap <c-x><c-k> <plug>(fzf-complete-word)
     imap <c-x><c-f> <plug>(fzf-complete-file-ag)
-    " imap <c-x><c-f> <plug>(fzf-complete-path)
+    imap <c-x><c-f> <plug>(fzf-complete-path)
     imap <c-x><c-l> <plug>(fzf-complete-line)
 
     nmap <leader><tab> <plug>(fzf-maps-n)
