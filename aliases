@@ -45,6 +45,7 @@ alias b="bundle"
 alias be="bundle exec"
 alias s="rspec"
 alias regem="gem ripper_tags --reindex"
+alias rmgemtags="find ~/.rbenv -type f -name 'tags' -exec rm -rf {} \;"
 
 # Pretty print the path
 alias path='echo $PATH | tr -s ":" "\n"'

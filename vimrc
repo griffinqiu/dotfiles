@@ -163,6 +163,7 @@ set showmode
 set shortmess=atI
 
 set nrformats=
+" set tags=tags
 set tags+=gems.tags
 
 " Speed up for macros
@@ -208,6 +209,7 @@ nnoremap g, g,zz
 
 nmap <leader><c-g> <c-g>
 nmap <leader><c-l> <c-l>
+nnoremap <leader>ct :silent ! ctags -R --languages=ruby --exclude=.git --exclude=log -f tags<cr>
 
 inoremap <C-e> <C-k>
 map <C-j> <C-w>j

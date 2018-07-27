@@ -35,6 +35,15 @@ Plug 'tpope/vim-speeddating'
 Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-abolish'
+    " MixedCase (crm)
+    " camelCase (crc)
+    " snake_case (crs) or (cr_)
+    " UPPER_CASE (cru)
+    " dash-case (cr-)
+    " dot.case (cr.)
+    " space case (cr<space>)
+    " and Title Case (crt)
 " }}}
 
 " Git {{{
@@ -50,12 +59,6 @@ Plug 'mhinz/vim-signify'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-rhubarb'
 Plug 'junegunn/gv.vim'
-" Plug 'gregsexton/gitv', { 'on': 'Gitv' }
-    " nnoremap <leader>gv :GV<CR>
-    " nnoremap <leader>g4 :GV!<CR>
-    " nnoremap <leader>gc :Gcommit -v<CR>
-    " nnoremap <Leader>gs :Gstatus<CR>
-    " nnoremap <Leader>gp :Git push<CR>
     nnoremap <Leader>gw :Gwrite<CR>
     nnoremap <Leader>gd :Gdiff<CR>
     nnoremap <Leader>gb :Gblame<CR>
@@ -150,8 +153,6 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
     let g:NERDTreeMapPreviewVSplit = "<c-v>"
     let g:NERDTreeMapToggleHidden = "I"
     let g:NERDTreeIgnore=['\.meta$', '\.pyc$']
-    let g:NERDTreeMapJumpNextSibling = '<c-d>'
-    let g:NERDTreeMapJumpPrevSibling = '<c-u>'
     " Set opened dir to workspace dir
     let NERDTreeChDirMode = 2
     " let NERDTreeWinPos = 'right'
@@ -179,10 +180,10 @@ Plug 'dyng/ctrlsf.vim'
     vmap <C-G>L <Plug>CtrlSFQuickfixVwordPath
     vmap <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
     nmap <silent><leader>3 :CtrlSFToggle<CR>
-    " let g:ctrlsf_toggle_map_key = '<leader>3'
+    let g:ctrlsf_toggle_map_key = '<leader>3'
     let g:ctrlsf_mapping = {
-        \ "next": "<c-d>",
-        \ "prev": "<c-u>",
+        \ "next": "<c-n>",
+        \ "prev": "<c-p>",
         \ }
     let g:ctrlsf_auto_close = 0
     let g:ctrlsf_open_left = 0
@@ -235,14 +236,6 @@ Plug 'ctrlpvim/ctrlp.vim'
     let g:ctrlp_working_path_mode = 'w'
     let g:ctrlp_tabpage_position = 'f'
 
-    " nnoremap <leader>b :CtrlPBuffer<CR>
-    " nnoremap <leader>h :CtrlPMRU<CR>
-    " nnoremap <leader>e :CtrlPRegister<CR>
-    " nnoremap <leader>m :CtrlPMark<CR>
-    " nnoremap <leader>g :CtrlPTag<CR>
-    " nnoremap <leader>f :CtrlPFunky<Cr>
-    " nnoremap <Leader>u :execute 'CtrlPFunky ' . expand('<cword>')<Cr>
-
 Plug 'majutsushi/tagbar'
     nnoremap <silent> <leader>2 :TagbarToggle<CR>
     let g:tagbar_type_php = {
@@ -263,18 +256,11 @@ Plug 'majutsushi/tagbar'
 else
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
-    " <c-m>
-    " function! s:build_quickfix_list(lines)
-        " call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
-        " copen
-        " cc
-    " endfunction
-
     let g:fzf_action = {
         \ 'ctrl-t': 'tab split',
         \ 'ctrl-x': 'split',
         \ 'ctrl-v': 'vsplit' }
-    let $FZF_DEFAULT_OPTS = '--bind ctrl-a:select-all,ctrl-d:deselect-all'
+    let $FZF_DEFAULT_OPTS = '--bind ctrl-s:select-all,ctrl-d:deselect-all'
 
     nnoremap <c-p> :GitFiles<CR>
     nnoremap <leader>fg :GitFiles<CR>
@@ -337,9 +323,11 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoUpdateBinaries' }
 Plug 'Keithbsmiley/rspec.vim', { 'for': 'ruby' }
 Plug 'ecomba/vim-ruby-refactoring', { 'for': 'ruby' }
 Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
+Plug 'tpope/vim-rails', { 'for': 'ruby' }
+Plug 'tpope/vim-rbenv', { 'for': 'ruby' }
+Plug 'tpope/vim-bundler', { 'for': 'ruby' }
 " Plug 'tpope/vim-projectionist', { 'for': 'ruby' }
 " Plug 'tpope/vim-rake', { 'for': 'ruby' }
-Plug 'tpope/vim-bundler', { 'for': 'ruby' }
 Plug 'tpope/vim-pathogen', { 'for': 'ruby' }
     " autocmd FileType ruby let &l:tags = pathogen#legacyjoin(pathogen#uniq(
         " \ pathogen#split(&tags) +
@@ -347,7 +335,6 @@ Plug 'tpope/vim-pathogen', { 'for': 'ruby' }
 Plug 'griffinqiu/vim-i18n'
     vmap <leader>zz :call I18nTranslateString()<CR>
     vmap <leader>zd :call I18nDisplayTranslation()<CR>
-Plug 'tpope/vim-rails'
 Plug 'AndrewRadev/switch.vim'
     let g:switch_mapping = "-"
 
