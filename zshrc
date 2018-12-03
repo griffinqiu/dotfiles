@@ -6,7 +6,7 @@ ZSH_THEME="robbyrussell"
 # ZSH_THEME="agnoster"
 
 DISABLE_AUTO_TITLE=true
-plugins=(osx tmuxinator)
+plugins=(osx tmuxinator docker docker-compose docker-machine)
 
 source $ZSH/oh-my-zsh.sh
 [[ -f ~/.exports ]] && source ~/.exports
