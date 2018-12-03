@@ -25,7 +25,7 @@ set novisualbell
 set nojoinspaces
 set backspace=indent,eol,start
 set foldmethod=marker
-set spell
+set spell spelllang=en_us,cjk
 
 set shiftwidth=4
 set softtabstop=4
