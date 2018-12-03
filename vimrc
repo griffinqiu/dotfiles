@@ -24,8 +24,8 @@ set hidden
 set novisualbell
 set nojoinspaces
 set backspace=indent,eol,start
-
 set foldmethod=marker
+set spell
 
 set shiftwidth=4
 set softtabstop=4
@@ -150,7 +150,6 @@ set complete-=t
 
 " Set spellfile to location that is guaranteed to exist, can be symlinked to
 " Dropbox or kept in Git and managed outside of thoughtbot/dotfiles using rcm.
-" set dictionary=$HOME/dict/words
 set spellfile=$HOME/.vim-spell-en.utf-8.add
 
 " set sessionoptions=
@@ -239,12 +238,12 @@ map <silent> <leader><cr> :nohlsearch<cr>
 map <silent> <leader><bs> :set noincsearch<cr>
 map <silent> <leader><leader><bs> :set incsearch<cr>
 
-" " Spell
-" map <leader>ss :setlocal spell!<cr>
-" map <leader>sn ]s
-" map <leader>sp [s
-" map <leader>sa zg
-" map <leader>s? z=
+" Spell
+map <leader>ss :setlocal spell!<cr>
+map <leader>sn ]s
+map <leader>sp [s
+map <leader>sa zg
+map <leader>s? z=
 
 " Remove the Windows ^M - when the encodings gets messed up
 noremap <leader><leader>m mmHmt:%s/<C-V><cr>//ge<cr>'tzt'm
