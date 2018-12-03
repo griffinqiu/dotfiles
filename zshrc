@@ -1,5 +1,6 @@
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
+# export POSTGRES_DB_USERNAME=goku_development
 
 ZSH_THEME="robbyrussell"
 # ZSH_THEME="agnoster"
