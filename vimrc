@@ -146,9 +146,11 @@ set statusline+=%=\ %y\ %l,\ %c\ \<%P\>
 set complete+=kspell
 set complete-=u
 set complete-=i
+set complete-=t
 
 " Set spellfile to location that is guaranteed to exist, can be symlinked to
 " Dropbox or kept in Git and managed outside of thoughtbot/dotfiles using rcm.
+" set dictionary=$HOME/dict/words
 set spellfile=$HOME/.vim-spell-en.utf-8.add
 
 " set sessionoptions=
@@ -221,6 +223,9 @@ map <C-w>; <C-w>p
 " inoremap <C-l> <right>
 " inoremap <C-j> <C-o>gj
 " inoremap <C-k> <C-o>gk
+"
+inoremap <C-]> <C-x><C-]>
+inoremap <C-g> <C-x><C-l>
 
 " Convert all tabs to spaces
 map <leader>ct :retab<cr>
