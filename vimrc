@@ -20,6 +20,7 @@ set wrap
 set linebreak
 set autoread
 " set autowrite
+" set autochdir
 set hidden
 set novisualbell
 set nojoinspaces

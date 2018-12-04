@@ -19,3 +19,5 @@ stty -ixon -ixoff
 
 eval "$(rbenv init - --no-rehash)"
 eval "$(pyenv init -)"
+
+# export PATH="$HOME/.bin:$PATH"
