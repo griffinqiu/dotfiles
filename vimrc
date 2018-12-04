@@ -31,6 +31,9 @@ set shiftwidth=4
 set softtabstop=4
 set tabstop=4
 set expandtab
+set scrolloff=5
+set sidescroll=1 " zh zl
+set sidescrolloff=10
 " set nolist
 " set list listchars=tab:»·,trail:·,nbsp:·
 
