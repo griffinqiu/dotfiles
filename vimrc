@@ -199,8 +199,8 @@ nmap ,cs :let @*=expand("%")<CR>
 nmap ,cl :let @*=expand("%:p")<CR>
 
 " Move to prev/next buffer
-noremap <left> :bprev<CR>
-noremap <right> :bnext<CR>
+noremap <right> gt
+noremap <left>  gT
 
 noremap <silent> <C-s> :update!<CR>
 vnoremap <silent> <C-s> <C-c>:update!<CR>
