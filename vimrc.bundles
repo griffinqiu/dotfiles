@@ -318,7 +318,49 @@ Plug 'othree/csscomplete.vim', { 'for': ['css', 'scss', 'less'] }
 Plug 'hail2u/vim-css3-syntax', { 'for': ['css', 'scss', 'less'] }
 Plug 'cakebaker/scss-syntax.vim', { 'for': 'scss' }
 Plug 'groenewege/vim-less', { 'for': 'less' }
-Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoUpdateBinaries' }
+Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
+Plug 'AndrewRadev/splitjoin.vim'
+let g:go_fmt_command = "goimports"
+let g:go_fmt_fail_silently = 1
+" let g:go_addtags_transform = "camelcase"
+let g:go_def_mode = 'godef'
+let g:go_decls_includes = "func,type"
+" let g:go_fmt_autosave = 0
+" run :GoBuild or :GoTestCompile based on the go file
+function! s:build_go_files()
+  let l:file = expand('%')
+  if l:file =~# '^\f\+_test\.go$'
+    call go#test#Test(0, 1)
+  elseif l:file =~# '^\f\+\.go$'
+    call go#cmd#Build(0)
+  endif
+endfunction
+" Mappings or Tips
+" - <c-x><c-o>
+" - <c-]>
+" - vif
+" - gJ
+" - gS
+" - GoDoc
+" - GoDocBrowser
+" - GoDef
+" - gd or c-]
+" - c-t
+" - c-o
+" - c-i
+" - GoSameIds
+" - GoRename
+autocmd FileType go nmap <leader>gg :<C-u>call <SID>build_go_files()<CR>
+" autocmd FileType go nmap <leader>gb  <Plug>(go-build)
+autocmd FileType go nmap <leader>gr  <Plug>(go-run)
+autocmd FileType go nmap <leader>gf  <Plug>(go-test-func)
+autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
+autocmd FileType go nmap <leader>gd  :GoDeclsDir<cr>
+autocmd FileType go nmap <Leader>gi <Plug>(go-info)
+autocmd Filetype go command! -bang A  call go#alternate#Switch(<bang>0, 'edit')
+autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
+autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
 
 Plug 'Keithbsmiley/rspec.vim', { 'for': 'ruby' }
 Plug 'ecomba/vim-ruby-refactoring', { 'for': 'ruby' }
@@ -417,9 +459,9 @@ Plug 'mattn/emmet-vim'
     " let g:tmuxline_theme = 'icebert'
 " }}}
 
-" " Static language Complete {{{
+" Static language Complete {{{
 " Plug 'Valloric/YouCompleteMe'
-" noremap <c-]> :YcmCompleter GoToDefinitionElseDeclaration<CR>
+" noremap <c-[> :YcmCompleter GoToDefinitionElseDeclaration<CR>
 " set completeopt-=preview
 " let g:ycm_key_list_previous_completion=['<Up>']
 " let g:ycm_key_list_select_completion=['<Down>']
@@ -458,7 +500,7 @@ Plug 'mattn/emmet-vim'
 " Plug 'marijnh/tern_for_vim'
 " Plug 'OrangeT/vim-csharp'
 " Plug 'scrooloose/syntastic'
-" " }}}
+" }}}
 
 if filereadable(expand("~/.vimrc.bundles.local"))
     source ~/.vimrc.bundles.local
