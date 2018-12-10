@@ -1,879 +1,493 @@
-snippet m0a "margin: 0 auto"
-margin: 0 auto;
-endsnippet
-
-snippet m0p0 "margin: 0; padding: 0"
-margin: 0;
-padding: 0;
-endsnippet
-
-snippet m0 "margin: 0"
-margin: 0;
-endsnippet
-
-snippet p0 "padding: 0"
-padding: 0;
-endsnippet
-
-snippet b0 "border: 0"
-border: 0;
-endsnippet
-
-snippet w "width: ___"
-width: ${1:0};
-endsnippet
-
-snippet h "height: ___"
-height: ${1:0};
-endsnippet
-
-snippet mh "min-height: ___"
-min-height: ${1:100%};
-endsnippet
-
-snippet mw "min-width: ___"
-min-width: ${1:100%};
-endsnippet
-
-snippet mah "max-height: ___"
-max-height: ${1:none};
-endsnippet
-
-snippet maw "max-width: ___"
-max-width: ${1:none};
-endsnippet
-
-snippet m "margin: ___"
-margin: ${1:0};
-endsnippet
-
-snippet mt "margin-top: ___"
-margin-top: ${1:0};
-endsnippet
-
-snippet mb "margin-bottom: ___"
-margin-bottom: ${1:0};
-endsnippet
-
-snippet ml "margin-left: ___"
-margin-left: ${1:0};
-endsnippet
-
-snippet mr "margin-right: ___"
-margin-right: ${1:0};
-endsnippet
-
-snippet p "padding: ___"
-padding: ${1:0};
-endsnippet
-
-snippet pt "padding-top: ___"
-padding-top: ${1:0};
-endsnippet
-
-snippet pb "padding-bottom: ___"
-padding-bottom: ${1:0};
-endsnippet
-
-snippet pl "padding-left: ___"
-padding-left: ${1:0};
-endsnippet
-
-snippet pr "padding-right: ___"
-padding-right: ${1:0};
-endsnippet
-
-snippet bo "border: ___"
-border: ${1:solid 1px #333};
-endsnippet
-
-snippet bt "border-top: ___"
-border-top: ${1:solid 1px #333};
-endsnippet
-
-snippet bb "border-bottom: ___"
-border-bottom: ${1:solid 1px #333};
-endsnippet
+priority -50
 
-snippet bl "border-left: ___"
-border-left: ${1:solid 1px #333};
+snippet p "padding"
+padding: ${1:0};$0
 endsnippet
 
-snippet br "border-right: ___"
-border-right: ${1:solid 1px #333};
+snippet m "margin"
+margin: ${1:0};$0
 endsnippet
 
-snippet bt0 "border-top: 0"
-border-top: 0;
+snippet bd "border"
+border: ${1:0};$0
 endsnippet
 
-snippet bb0 "border-bottom: 0"
-border-bottom: 0;
+snippet d "display"
+display: ${1:none};$0
 endsnippet
 
-snippet bl0 "border-left: 0"
-border-left: 0;
+snippet bg "background"
+background: ${1:none};$0
 endsnippet
 
-snippet br0 "border-right: 0"
-border-right: 0;
+snippet ff "font-family"
+font-family: ${1:"Helvetica Neue", Helvetica, Arial, sans-serif};$0
 endsnippet
 
-snippet bg "background: ___"
-background: ${1:#fff url(image.png) no-repeat left top fixed};
+snippet h "height"
+height: ${1:auto};$0
 endsnippet
 
-snippet bgp "background-position: ___"
-background-position: ${1:x y};
+snippet w "width"
+width: ${1:auto};$0
 endsnippet
 
-snippet bgi "background-image: ___"
-background-image: ${1:url()};
+snippet pos "position"
+position: ${1:relative};$0
 endsnippet
 
-snippet bgc "background-color: ___"
-background-color: ${1:transparent};
+snippet tt "text-transform"
+text-transform: ${1:none};$0
 endsnippet
 
-snippet bgr "background-repeat: ___"
-background-repeat: ${1:no-repeat};
+snippet ! "!important CSS (!)"
+!important
 endsnippet
 
-snippet bga "background-attachment: ___"
-background-attachment: ${1:scroll|fixed|local};
+snippet tsh "text-shadow: color-hex x y blur (text)"
+text-shadow: ${1:${2:color} ${3:offset-x} ${4:offset-y} ${5:blur}};$0
 endsnippet
 
-snippet bgas "background-attachment: scroll"
-background-attachment: scroll;
+snippet bxsh "box-shadow: color-hex x y blur (text)"
+box-shadow: ${1:${2:offset-x} ${3:offset-y} ${4:blur} ${5:spread} ${6:color}};$0
 endsnippet
 
-snippet bgaf "background-attachment: fixed"
-background-attachment: fixed;
-endsnippet
-
-snippet bgal "background-attachment: local"
-background-attachment: local;
-endsnippet
-
-snippet f "font: ___"
-font: ${1:italic bold 1em/1.5em serif};
-endsnippet
-
-snippet font "font: ___"
-font: ${1:italic bold 1em/1.5em serif};
-endsnippet
-
-snippet ff "font-family: ___"
-font-family: ${1:sans-serif};
-endsnippet
-
-snippet fs "font-size: ___"
-font-size: ${1:1em};
-endsnippet
-
-snippet lh "line-height: ___"
-line-height: ${1:1.5};
-endsnippet
-
-snippet ls "letter-spacing: ___"
-letter-spacing: ${1:0};
-endsnippet
-
-snippet hlh "height: ___; line-height: ___"
-height: ${1:0px};
-line-height: ${2:1.5};
-endsnippet
-
-snippet fn "float: none"
-float: none;
-endsnippet
-
-snippet fl "float: left"
-float: left;
-endsnippet
-
-snippet fr "float: right"
-float: right;
-endsnippet
+#
+# Colors
+#
 
-snippet co "color: ___"
-color: ${1:#333};
+snippet rgb "color rgb"
+rgb(${1:255}, ${2:255}, ${3:255})$0
 endsnippet
 
-snippet cl "clear: left"
-clear: left;
+snippet rgba "color rgba"
+rgba(${1:255}, ${2:255}, ${3:255}, ${4:0.5})$0
 endsnippet
 
-snippet cr "clear: right"
-clear: right;
+snippet hsl "color hsl"
+hsl(${1:360}, ${2:100}%, ${3:100}%)$0
 endsnippet
 
-snippet cb "clear: both"
-clear: both;
+snippet hsla "color hsla"
+hsla(${1:360}, ${2:100}%, ${3:100}%, ${4:0.5})$0
 endsnippet
 
-snippet cd "cursor: default"
-cursor: default;
-endsnippet
-
-snippet cp "cursor: pointer"
-cursor: pointer;
-endsnippet
-
-snippet ct "cursor: text"
-cursor: text;
-endsnippet
-
-snippet cu "cursor: ___"
-cursor: ${1:default|pointer|text};
-endsnippet
-
-snippet cut "cursor: text"
-cursor: text;
-endsnippet
-
-snippet cup "cursor: pointer"
-cursor: pointer;
-endsnippet
-
-snippet cud "cursor: default"
-cursor: default;
-endsnippet
-
-snippet cuna "cursor: not-allowed"
-cursor: not-allowed;
-endsnippet
-
-snippet cuew "cursor: ew-resize"
-cursor: ew-resize;
-endsnippet
-
-snippet cuns "cursor: ns-resize"
-cursor: ns-resize;
-endsnippet
-
-snippet d "display: ___"
-display: ${1:none|inline|block};
-endsnippet
+#
+# Selectors
+#
 
-snippet di "display: inline"
-display: inline;
+snippet :fc
+:first-child
 endsnippet
 
-snippet df "display: flex"
-display: flex;
+snippet :lc
+:last-child
 endsnippet
 
-snippet dif "display: inline-flex"
-display: inline-flex;
+snippet :nc
+:nth-child($0)
 endsnippet
 
-snippet dn "display: none"
-display: none;
+snippet :nlc
+:nth-last-child($0)
 endsnippet
 
-snippet db "display: block"
-display: block;
+snippet :oc
+:only-child
 endsnippet
 
-snippet dib "display: inline-block"
-display: inline-block;
-endsnippet
+#
+# Pseudo-elements
+#
 
-snippet dt "display: table"
-display: table;
+snippet :a
+:after
 endsnippet
 
-snippet dtc "display: table-cell"
-display: table-cell;
+snippet :b
+:before
 endsnippet
 
-snippet dtr "display: table-row"
-display: table-row;
+snippet ::a
+::after
 endsnippet
 
-snippet fsn "font-style: normal"
-font-style: normal;
+snippet ::b
+::before
 endsnippet
 
-snippet fsi "font-style: italic"
-font-style: italic;
-endsnippet
+###########################################################################
+#                    Most of these came from TextMate                     #
+###########################################################################
 
-snippet fwn "font-weight: normal"
-font-weight: normal;
+snippet background "background-attachment: scroll:fixed (background)"
+background-attachment: ${1:scroll/fixed};$0
 endsnippet
 
-snippet fwb "font-weight: bold"
-font-weight: bold;
+snippet background "background-color:  color-hex (background)"
+background-color: #${1:DDD};$0
 endsnippet
 
-snippet fw1 "font-weight: 100"
-font-weight: 100;
+snippet background "background-color:  color-name (background)"
+background-color: ${1:red};$0
 endsnippet
 
-snippet fw2 "font-weight: 200"
-font-weight: 200;
+snippet background "background-color:  color-rgb (background)"
+background-color: rgb(${1:255},${2:255},${3:255});$0
 endsnippet
 
-snippet fw3 "font-weight: 300"
-font-weight: 300;
+snippet background "background-color:  transparent (background)"
+background-color: transparent;$0
 endsnippet
 
-snippet fw4 "font-weight: 400"
-font-weight: 400;
+snippet background "background-image:  none (background)"
+background-image: none;$0
 endsnippet
 
-snippet fw5 "font-weight: 500"
-font-weight: 500;
+snippet background "background-image:  url (background)"
+background-image: url($1);$0
 endsnippet
 
-snippet fw6 "font-weight: 600"
-font-weight: 600;
+snippet background "background-position:  position (background)"
+background-position: ${1:top left/top center/top right/center left/center center/center right/bottom left/bottom center/bottom right/x-% y-%/x-pos y-pos};$0
 endsnippet
 
-snippet fw7 "font-weight: 700"
-font-weight: 700;
+snippet background "background-repeat:  r:r-x:r-y:n-r (background)"
+background-repeat: ${1:repeat/repeat-x/repeat-y/no-repeat};$0
 endsnippet
 
-snippet fw8 "font-weight: 800"
-font-weight: 800;
+snippet background "background:  color image repeat attachment position (background)"
+background:${6: #${1:DDD}} url($2) ${3:repeat/repeat-x/repeat-y/no-repeat} ${4:scroll/fixed} ${5:top left/top center/top right/center left/center center/center right/bottom left/bottom center/bottom right/x-% y-%/x-pos y-pos};$0
 endsnippet
 
-snippet fw9 "font-weight: 900"
-font-weight: 900;
+snippet border "border-bottom-color: size style color (border)"
+border-bottom-color: #${1:999};$0
 endsnippet
 
-snippet wwb "word-wrap: break-word"
-word-wrap: break-word;
+snippet border "border-bottom-style: size style color (border)"
+border-bottom-style: ${1:none/hidden/dotted/dashed/solid/double/groove/ridge/inset/outset};$0
 endsnippet
 
-snippet wwn "word-wrap: normal"
-word-wrap: normal;
+snippet border "border-bottom-width: size style color (border)"
+border-bottom-width: ${1:1}px ${2:solid} #${3:999};$0
 endsnippet
 
-snippet va "vertical-align: ___"
-vertical-align: ${1:top|bottom|baseline|middle};
+snippet border "border-bottom: size style color (border)"
+border-bottom: ${1:1}px ${2:solid} #${3:999};$0
 endsnippet
 
-snippet vat "vertical-align: top"
-vertical-align: top;
+snippet border "border-color: color (border)"
+border-color: ${1:999};$0
 endsnippet
 
-snippet vab "vertical-align: bottom"
-vertical-align: bottom;
+snippet border "border-left-color: color (border)"
+border-right-color: #${1:999};$0
 endsnippet
 
-snippet vabl "vertical-align: baseline"
-vertical-align: baseline;
+snippet border "border-left-style: style (border)"
+border-left-style: ${1:none/hidden/dotted/dashed/solid/double/groove/ridge/inset/outset};$0
 endsnippet
 
-snippet vam "vertical-align: middle"
-vertical-align: middle;
+snippet border "border-left-width: size (border)"
+border-left-width: ${1:1}px
 endsnippet
 
-snippet v "visibility: ___"
-visibility: ${1:visible|hidden|collapse};
+snippet border "border-left: size style color (border)"
+border-left: ${1:1}px ${2:solid} #${3:999};$0
 endsnippet
 
-snippet vh "visibility: hidden"
-visibility: hidden;
+snippet border "border-right-color: color (border)"
+border-right-color: #${1:999};$0
 endsnippet
 
-snippet vv "visibility: visible"
-visibility: visible;
+snippet border "border-right-style: style (border)"
+border-right-style: ${1:none/hidden/dotted/dashed/solid/double/groove/ridge/inset/outset};$0
 endsnippet
 
-snippet bcc "border-collapse: collapse"
-border-collapse: collapse;
+snippet border "border-right-width: size (border)"
+border-right-width: ${1:1}px
 endsnippet
 
-snippet ttu "text-transform: uppercase"
-text-transform: uppercase;
+snippet border "border-right: size style color (border)"
+border-right: ${1:1}px ${2:solid} #${3:999};$0
 endsnippet
 
-snippet ttl "text-transform: lowercase"
-text-transform: lowercase;
+snippet border "border-style: style (border)"
+border-style: ${1:none/hidden/dotted/dashed/solid/double/groove/ridge/inset/outset};$0
 endsnippet
 
-snippet ttc "text-transform: capitalize"
-text-transform: capitalize;
+snippet border "border-top-color: color (border)"
+border-top-color: #${1:999};$0
 endsnippet
 
-snippet ttn "text-transform: none"
-text-transform: none;
+snippet border "border-top-style: style (border)"
+border-top-style: ${1:none/hidden/dotted/dashed/solid/double/groove/ridge/inset/outset};$0
 endsnippet
 
-snippet td "text-decoration: ___"
-text-decoration: ${1:none|underline|strikethrough};
+snippet border "border-top-width: size (border)"
+border-top-width: ${1:1}px
 endsnippet
 
-snippet tdu "text-decoration: underline"
-text-decoration: underline;
+snippet border "border-top: size style color (border)"
+border-top: ${1:1}px ${2:solid} #${3:999};$0
 endsnippet
 
-snippet tdn "text-decoration: none"
-text-decoration: none;
+snippet border "border-width: width (border)"
+border-width: ${1:1px};$0
 endsnippet
 
-snippet tdlt "text-decoration: line-through"
-text-decoration: line-through;
+snippet border "border:   size style color (border)"
+border: ${1:1px} ${2:solid} #${3:999};$0
 endsnippet
 
-snippet ti "text-indent: ___"
-text-indent: ${1:0};
+snippet clear "clear: value (clear)"
+clear: ${1:left/right/both/none};$0
 endsnippet
 
-snippet tsh "text-shadow: ___"
-text-shadow: ${1:0 1px 0 #333};
+snippet color "color:  color-hex (color)"
+color: #${1:DDD};$0
 endsnippet
 
-snippet o "overflow: ___"
-overflow: ${1:hidden|auto|scroll};
+snippet color "color:  color-name (color)"
+color: ${1:red};$0
 endsnippet
 
-snippet os "overflow: scroll"
-overflow: scroll;
+snippet color "color:  color-rgb (color)"
+color: rgb(${1:255},${2:255},${3:255});$0
 endsnippet
 
-snippet oh "overflow: hidden"
-overflow: hidden;
+snippet cursor "cursor: type (cursor)"
+cursor: ${1:default/auto/crosshair/pointer/move/*-resize/text/wait/help};$0
 endsnippet
 
-snippet oa "overflow: auto"
-overflow: auto;
+snippet cursor "cursor: url (cursor)"
+cursor: url($1);$0
 endsnippet
 
-snippet oxs "overflow-x: scroll"
-overflow-x: scroll;
+snippet direction "direction: ltr|rtl (direction)"
+direction: ${1:ltr|rtl};$0
 endsnippet
 
-snippet oxh "overflow-x: hidden"
-overflow-x: hidden;
+snippet display "display: block (display)"
+display: block;$0
 endsnippet
 
-snippet oxa "overflow-x: auto"
-overflow-x: auto;
+snippet display "display: common-types (display)"
+display: ${1:none/inline/block/list-item/run-in/compact/marker};$0
 endsnippet
 
-snippet oys "overflow-y: scroll"
-overflow-y: scroll;
+snippet display "display: inline (display)"
+display: inline;$0
 endsnippet
 
-snippet oyh "overflow-y: hidden"
-overflow-y: hidden;
+snippet display "display: table-types (display)"
+display: ${1:table/inline-table/table-row-group/table-header-group/table-footer-group/table-row/table-column-group/table-column/table-cell/table-caption};$0
 endsnippet
 
-snippet oya "overflow-y: auto"
-overflow-y: auto;
+snippet float "float: left:right:none (float)"
+float: ${1:left/right/none};$0
 endsnippet
 
-snippet ta "text-align: ___"
-text-align: ${1:left|right|center|justify};
+snippet font "font-family:   family (font)"
+font-family: ${1:Arial, "MS Trebuchet"}, ${2:sans-}serif;$0
 endsnippet
 
-snippet tar "text-align: right"
-text-align: right;
+snippet font "font-size: size (font)"
+font-size: ${1:100%};$0
 endsnippet
 
-snippet tal "text-align: left"
-text-align: left;
+snippet font "font-style:   normal:italic:oblique (font)"
+font-style: ${1:normal/italic/oblique};$0
 endsnippet
 
-snippet tac "text-align: center"
-text-align: center;
+snippet font "font-variant:   normal:small-caps (font)"
+font-variant: ${1:normal/small-caps};$0
 endsnippet
 
-snippet taj "text-align: justify"
-text-align: justify;
+snippet font "font-weight: weight (font)"
+font-weight: ${1:normal/bold};$0
 endsnippet
 
-snippet poa "position: absolute"
-position: absolute;
+snippet font "font:   style variant weight size:line-height font -family (font)"
+font: ${1:normal/italic/oblique} ${2:normal/small-caps} ${3:normal/bold} ${4:1em/1.5em} ${5:Arial}, ${6:sans-}serif;$0
 endsnippet
 
-snippet pof "position: fixed"
-position: fixed;
+snippet font "font: size font (font)"
+font: ${1:75%} ${2:"Lucida Grande", "Trebuchet MS", Verdana,} ${3:sans-}serif;$0
 endsnippet
 
-snippet por "position: relative"
-position: relative;
+snippet letter "letter-spacing:   length-em (letter)"
+letter-spacing: $1em;$0
 endsnippet
 
-snippet pos "position: static"
-position: static;
+snippet letter "letter-spacing:   length-px (letter)"
+letter-spacing: $1px;$0
 endsnippet
 
-snippet l "left: ___"
-left: ${1:0};
+snippet list "list-style-image: url (list)"
+list-style-image: url($1);$0
 endsnippet
 
-snippet r "right: ___"
-right: ${1:0};
+snippet list "list-style-position: pos (list)"
+list-style-position: ${1:inside/outside};$0
 endsnippet
 
-snippet t "top: ___"
-top: ${1:0};
+snippet list "list-style-type: asian (list)"
+list-style-type: ${1:cjk-ideographic/hiragana/katakana/hiragana-iroha/katakana-iroha};$0
 endsnippet
 
-snippet b "bottom: ___"
-bottom: ${1:0};
+snippet list "list-style-type: marker(list)"
+list-style-type: ${1:none/disc/circle/square};$0
 endsnippet
 
-snippet lt "left: ___; top: ___"
-left: ${1:0};
-top: ${2:0};
+snippet list "list-style-type: numeric (list)"
+list-style-type: ${1:decimal/decimal-leading-zero/zero};$0
 endsnippet
 
-snippet lb "left: ___; bottom: ___"
-left: ${1:0};
-bottom: ${2:0};
+snippet list "list-style-type: other (list)"
+list-style-type: ${1:hebrew/armenian/georgian};$0
 endsnippet
 
-snippet rt "right: ___; top: ___"
-right: ${1:0};
-top: ${2:0};
+snippet list "list-style-type: roman-alpha-greek (list)"
+list-style-type: ${1:lower-roman/upper-roman/lower-alpha/upper-alpha/lower-greek/lower-latin/upper-latin};$0
 endsnippet
 
-snippet rb "right: ___; bottom: ___"
-right: ${1:0};
-bottom: ${2:0};
+snippet list "list-style: type position image (list)"
+list-style: ${1:none/disc/circle/square/decimal/zero} ${2:inside/outside} url($3);$0
 endsnippet
 
-snippet zi "z-index: ___"
-z-index: ${1:1};
+snippet margin "margin-bottom: length (margin)"
+margin-bottom: ${1:20px};$0
 endsnippet
 
-snippet tl "table-layout: ___"
-table-layout: ${1:fixed|auto};
+snippet margin "margin-left: length (margin)"
+margin-left: ${1:20px};$0
 endsnippet
 
-snippet tlf "table-layout: fixed"
-table-layout: fixed;
+snippet margin "margin-right: length (margin)"
+margin-right: ${1:20px};$0
 endsnippet
 
-snippet tla "table-layout: auto"
-table-layout: auto;
+snippet margin "margin-top: length (margin)"
+margin-top: ${1:20px};$0
 endsnippet
 
-snippet brad "border-radius: ___"
-border-radius: ${1:3px};
+snippet margin "margin:   all (margin)"
+margin: ${1:20px};$0
 endsnippet
 
-snippet btrad "border-top-radius: ___"
-border-top-radius: ${1:3px};
+snippet margin "margin: T R B L (margin)"
+margin: ${1:20px} ${2:0px} ${3:40px} ${4:0px};$0
 endsnippet
 
-snippet btlrad "border-top-left-radius: ___"
-border-top-left-radius: ${1:3px};
+snippet margin "margin: V H (margin)"
+margin: ${1:20px} ${2:0px};$0
 endsnippet
 
-snippet btrrad "border-top-right-radius: ___"
-border-top-right-radius: ${1:3px};
+snippet marker "marker-offset: auto (marker)"
+marker-offset: auto;$0
 endsnippet
 
-snippet bbrad "border-bottom-radius: ___"
-border-bottom-radius: ${1:3px};
+snippet marker "marker-offset: length (marker)"
+marker-offset: ${1:10px};$0
 endsnippet
 
-snippet bblrad "border-bottom-left-radius: ___"
-border-bottom-left-radius: ${1:3px};
+snippet overflow "overflow: type (overflow)"
+overflow: ${1:visible/hidden/scroll/auto};$0
 endsnippet
 
-snippet bbrrad "border-bottom-right-radius: ___"
-border-bottom-right-radius: ${1:3px};
+snippet padding "padding-bottom: length (margin)"
+padding-bottom: ${1:20px};$0
 endsnippet
 
-snippet bgs "background-size: ___"
-background-size: ${1:cover|contain|auto};
+snippet padding "padding-left: length (margin)"
+padding-left: ${1:20px};$0
 endsnippet
 
-snippet bgsc "background-size: cover"
-background-size: cover;
+snippet padding "padding-right: length (margin)"
+padding-right: ${1:20px};$0
 endsnippet
 
-snippet bsh "box-shadow: ___"
-box-shadow: ${1:0 1px 2px #fff};
+snippet padding "padding-top: length (margin)"
+padding-top: ${1:20px};$0
 endsnippet
 
-snippet ws "white-space: ___"
-white-space: ${1:nowrap};
+snippet padding "padding:   T R B L (padding)"
+padding: ${1:20px} ${2:0px} ${3:40px} ${4:0px};$0
 endsnippet
 
-snippet 0nr "0 0 no-repeat"
-0 0 no-repeat
+snippet padding "padding:   V H (padding)"
+padding: ${1:20px} ${2:0px};$0
 endsnippet
 
-snippet cnr "center center no-repeat"
-center center no-repeat
+snippet padding "padding:   all (padding)"
+padding: ${1:20px};$0
 endsnippet
 
-snippet nr "no-repeat"
-no-repeat
+snippet position "position: type (position)"
+position: ${1:static/relative/absolute/fixed};$0
 endsnippet
 
-snippet rx "repeat-x"
-repeat-x
-endsnippet
+snippet { "properties { } ( } )"
+{
+	/* $1 */
+	$0
 
-snippet ry "repeat-y"
-repeat-y
 endsnippet
 
-snippet ra "rgba($___, $___)"
-rgba(${1:0, 0, 0}, ${2:0.5})
+snippet scrollbar "scrollbar"
+scrollbar-base-color:       ${1:#CCCCCC};${2:
+scrollbar-arrow-color:      ${3:#000000};
+scrollbar-track-color:      ${4:#999999};
+scrollbar-3dlight-color:    ${5:#EEEEEE};
+scrollbar-highlight-color:  ${6:#FFFFFF};
+scrollbar-face-color:       ${7:#CCCCCC};
+scrollbar-shadow-color:     ${9:#999999};
+scrollbar-darkshadow-color: ${8:#666666};}
 endsnippet
 
-snippet @large "Media Query - Larger than standard 960"
-/* Media Query - Larger than standard 960 */
-@media only screen and (min-width: 1180px) {
-  $0
+snippet selection "selection"
+$1::-moz-selection,
+$1::selection {
+	color: ${2:inherit};
+	background: ${3:inherit};
 }
 endsnippet
 
-snippet @small "Media Query - Smaller than standard 960"
-/* Media Query - Smaller than standard 960 */
-@media only screen and (max-width: 959px) {
-  $0
-}
+snippet text "text-align: left:center:right (txt)"
+text-align: ${1:left/right/center/justify};$0
 endsnippet
 
-snippet @tablet "Media Query - Tablet Portrait size to standard 960"
-/* Media Query - Tablet Portrait size to standard 960 */
-@media only screen and (min-width: 768px) and (max-width: 959px) {
-  $0
-}
+snippet text "text-decoration: none:underline:overline:line-through:blink (text)"
+text-decoration: ${1:none/underline/overline/line-through/blink};$0
 endsnippet
 
-snippet @mobile "Media Query - All Mobile Sizes"
-/* Media Query - All Mobile Sizes */
-@media only screen and (max-width: 767px) {
-  $0
-}
+snippet text "text-indent: length (text)"
+text-indent: ${1:10}px;$0
 endsnippet
 
-snippet @mobile-land "Media Query - Mobile Landscape Size to Tablet Portrait"
-/* Media Query - Mobile Landscape Size to Tablet Portrait */
-@media only screen and (min-width: 480px) and (max-width: 767px) {
-  $0
-}
+snippet text "text-transform: capitalize:upper:lower (text)"
+text-transform: ${1:capitalize/uppercase/lowercase};$0
 endsnippet
 
-snippet @mobile-port "Media Query - Mobile Portrait Size to Mobile Landscape Size"
-/* Media Query - Mobile Portrait Size to Mobile Landscape Size */
-@media only screen and (max-width: 479px) {
-  $0
-}
+snippet vertical "vertical-align: type (vertical)"
+vertical-align: ${1:baseline/sub/super/top/text-top/middle/bottom/text-bottom/length/%};$0
 endsnippet
 
-snippet flx "flex: ___ ___ ___"
-flex: ${1:0} ${2:1} ${3:auto};
+snippet visibility "visibility: type (visibility)"
+visibility: ${1:visible/hidden/collapse};$0
 endsnippet
 
-snippet fld "flex-direction: ___"
-flex-direction: ${1: row | row-reverse | column | column-reverse };
+snippet white "white-space:  normal:pre:nowrap (white)"
+white-space: ${1:normal/pre/nowrap};$0
 endsnippet
 
-snippet fldr "flex-direction: row"
-flex-direction: row;
+snippet word "word-spacing:  length (word)"
+word-spacing: ${1:10px};$0
 endsnippet
 
-snippet fldrr "flex-direction: row-reverse"
-flex-direction: row-reverse;
+snippet z "z-index: index (z)"
+z-index: $1;$0
 endsnippet
 
-snippet fldc "flex-direction: column"
-flex-direction: column;
-endsnippet
-
-snippet fldcr "flex-direction: column-reverse"
-flex-direction: column-reverse;
-endsnippet
-
-snippet flo "order: ___"
-order: ${1:1};
-endsnippet
-
-snippet flw "flex-wrap: ___"
-flex-wrap: ${1:nowrap|wrap|wrap-reverse};
-endsnippet
-
-snippet flwn "flex-wrap: nowrap"
-flex-wrap: nowrap;
-endsnippet
-
-snippet flww "flex-wrap: wrap"
-flex-wrap: wrap;
-endsnippet
-
-snippet flwr "flex-wrap: wrap-reverse"
-flex-wrap: wrap-reverse;
-endsnippet
-
-snippet flg "flex-grow: ___"
-flex-grow: ${1:0};
-endsnippet
-
-snippet fls "flex-shrink: ___"
-flex-shrink: ${1:1};
-endsnippet
-
-snippet flf "flex-flow: ___ ___"
-flex-flow: ${1:row} ${2:nowrap};
-endsnippet
-
-snippet flb "flex-basis: ___ ___"
-flex-basis: ${1:default} ${2:auto};
-endsnippet
-
-snippet jc "justify-content: ___"
-justify-content: ${1:flex-start|flex-end|center|space-between|space-around};
-endsnippet
-
-snippet jcfs "justify-content: flex-start"
-justify-content: flex-start;
-endsnippet
-
-snippet jcfe "justify-content: flex-end"
-justify-content: flex-end;
-endsnippet
-
-snippet jcc "justify-content: center"
-justify-content: center;
-endsnippet
-
-snippet jcsb "justify-content: space-between"
-justify-content: space-between;
-endsnippet
-
-snippet jcsa "justify-content: space-around"
-justify-content: space-around;
-endsnippet
-
-snippet as "align-self: ___"
-align-self: ${1:auto|flex-start|flex-end|center|baseline|stretch};
-endsnippet
-
-snippet asa "align-self: auto"
-align-self: auto;
-endsnippet
-
-snippet asfs "align-self: flex-start"
-align-self: flex-start;
-endsnippet
-
-snippet asfe "align-self: flex-end"
-align-self: flex-end;
-endsnippet
-
-snippet asc "align-self: center"
-align-self: center;
-endsnippet
-
-snippet asb "align-self: baseline"
-align-self: baseline;
-endsnippet
-
-snippet ass "align-self: stretch"
-align-self: stretch;
-endsnippet
-
-snippet ai "align-items: ___"
-align-items: ${1:flex-start|flex-end|center|baseline|stretch};
-endsnippet
-
-snippet aifs "align-items: flex-start"
-align-items: flex-start;
-endsnippet
-
-snippet aife "align-items: flex-end"
-align-items: flex-end;
-endsnippet
-
-snippet aic "align-items: center"
-align-items: center;
-endsnippet
-
-snippet aib "align-items: baseline"
-align-items: baseline;
-endsnippet
-
-snippet ais "align-items: stretch"
-align-items: stretch;
-endsnippet
-
-snippet ac "align-content: ___"
-align-content: ${1:flex-start|flex-end|center|space-between|space-around|stretch};
-endsnippet
-
-snippet acc "align-content: center"
-align-content: center;
-endsnippet
-
-snippet acfs "align-content: flex-start"
-align-content: flex-start;
-endsnippet
-
-snippet acfe "align-content: flex-end"
-align-content: flex-end;
-endsnippet
-
-snippet acs "align-content: stretch"
-align-content: stretch;
-endsnippet
-
-snippet acsa "align-content: space-around"
-align-content: space-around;
-endsnippet
-
-snippet acsb "align-content: space-between"
-align-content: space-between;
-endsnippet
-
-snippet bsb "box-sizing: border-box"
-box-sizing: border-box;
-endsnippet
-
-snippet bsc "box-sizing: content-box"
-box-sizing: content-box;
-endsnippet
-
-snippet trans "transition: ___"
-transition: ${1:all 300ms ease};
-endsnippet
-
-snippet xf "transform: ___"
-transform: ${1:scale(1.0)};
-endsnippet
-
-snippet xform "transform: ___"
-transform: ${1:scale(1.0)};
-endsnippet
-
-snippet op "opacity: ___"
-opacity: ${1:0};
-endsnippet
-
-snippet bgclip "background-clip: padding-box"
-background-clip: padding-box;
-endsnippet
-
-snippet us "user-select: ___"
-user-select: ${1:none|text|toggle|element|elements|all};
-endsnippet
-
-snippet usa "user-select: all"
-user-select: all;
-endsnippet
-
-snippet ust "user-select: text"
-user-select: text;
-endsnippet
-
-snippet usn "user-select: none"
-user-select: none;
-endsnippet
-
-snippet an "animation: ___ ___"
-animation: ${1:name} ${2:300ms linear infinite};
-endsnippet
+# vim:ft=snippets:
