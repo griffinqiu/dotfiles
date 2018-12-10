@@ -280,6 +280,7 @@ Plug 'junegunn/fzf.vim'
     nnoremap <leader>f/ :History/<CR>
     nnoremap <leader>fC :Commands<CR>
     nnoremap <leader>fm :Maps<CR>
+    nnoremap <leader>fu :Snippets<CR>
     " nnoremap <leader>ag :Ag<CR>
     " nnoremap <leader>agt :Agt<CR>
     nnoremap <silent> <leader>at :let @"=&filetype \| Agt --<C-R>" <C-R><C-W><CR>
@@ -418,17 +419,16 @@ Plug 'yonchu/accelerated-smooth-scroll'
 
 " Snips {{{
 "
-if !has('gui_running')
-    Plug 'SirVer/ultisnips'
-        let g:UltiSnipsExpandTrigger="<tab>"
-        let g:UltiSnipsListSnippets="<c-7>"
-        let g:UltiSnipsJumpForwardTrigger="<c-j>"
-        let g:UltiSnipsJumpBackwardTrigger="<c-k>"
-        let g:UltiSnipsEditSplit="vertical"
-        nnoremap <silent> <leader>uu :UltiSnipsEdit<cr>
-        nnoremap <silent> <leader>ue :UltiSnipsEdit<space>
-    Plug 'griffinqiu/vim-snippets'
-endif
+Plug 'SirVer/ultisnips'
+    let g:UltiSnipsExpandTrigger="<tab>"
+    " link to fzf Snippets
+    " let g:UltiSnipsListSnippets="<c-h>"
+    let g:UltiSnipsJumpForwardTrigger="<c-j>"
+    let g:UltiSnipsJumpBackwardTrigger="<c-k>"
+    let g:UltiSnipsEditSplit="vertical"
+    nnoremap <silent> <leader>uu :UltiSnipsEdit<cr>
+    nnoremap <silent> <leader>ue :UltiSnipsEdit<space>
+Plug 'griffinqiu/vim-snippets'
 
 Plug 'mattn/emmet-vim'
     " let g:user_emmet_mode='i'
