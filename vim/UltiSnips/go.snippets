@@ -201,12 +201,17 @@ endsnippet
 
 # json field tag
 snippet json "\`json:key\`"
-\`json:"${1:`!v  go#util#snippetcase(matchstr(getline("."), '\w\+'))`}"\`
+\`json:"${1:`!v  go#util#camelcase(matchstr(getline("."), '\w\+'))`}"\`
+endsnippet
+
+# xml field tag
+snippet xml "\`xml:key\`"
+\`xml:"${1:`!v  go#util#camelcase(matchstr(getline("."), '\w\+'))`}"\`
 endsnippet
 
 # yaml field tag
 snippet yaml "\`yaml:key\`"
-\`yaml:"${1:`!v  go#util#snippetcase(matchstr(getline("."), '\w\+'))`}"\`
+\`yaml:"${1:`!v  go#util#camelcase(matchstr(getline("."), '\w\+'))`}"\`
 endsnippet
 
 # fallthrough
@@ -459,5 +464,10 @@ def closing_par(snip, pos):
 		snip.rv = ""
 
 endglobal
+
+# Assignment with error
+snippet awe "If with inline erro"
+${0:variable}, err := ${1:code}
+endsnippet
 
 # vim:ft=snippets:

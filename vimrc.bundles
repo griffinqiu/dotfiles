@@ -327,6 +327,8 @@ let g:go_fmt_fail_silently = 1
 let g:go_def_mode = 'godef'
 let g:go_decls_includes = "func,type"
 " let g:go_fmt_autosave = 0
+let g:go_list_height = 10
+let g:go_list_type='locationlist'
 " run :GoBuild or :GoTestCompile based on the go file
 function! s:build_go_files()
   let l:file = expand('%')
