@@ -216,19 +216,20 @@ nmap <leader><c-g> <c-g>
 nmap <leader><c-l> <c-l>
 nnoremap <leader>ct :silent ! ctags -R --languages=ruby --exclude=.git --exclude=log -f tags<cr>
 
-inoremap <C-e> <C-k>
-map <C-j> <C-w>j
-map <C-k> <C-w>k
-map <C-h> <C-w>h
-map <C-l> <C-w>l
-map <C-w>; <C-w>p
+" inoremap <C-e> <C-k>
+" map <C-j> <C-w>j
+" map <C-k> <C-w>k
+" map <C-h> <C-w>h
+" map <C-l> <C-w>l
+" map <C-w>; <C-w>p
 " inoremap <C-h> <left>
 " inoremap <C-l> <right>
 " inoremap <C-j> <C-o>gj
 " inoremap <C-k> <C-o>gk
 "
 inoremap <C-]> <C-x><C-]>
-inoremap <C-g> <C-x><C-l>
+inoremap <C-k> <C-x><C-o>
+inoremap <C-l> <C-x><c-l>
 
 " Convert all tabs to spaces
 map <leader>ct :retab<cr>
