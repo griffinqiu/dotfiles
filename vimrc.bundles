@@ -34,6 +34,9 @@ Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-speeddating'
 Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-surround'
+    let g:surround_no_insert_mappings = 1
+    imap <C-d> <Plug>Isurround
+    imap <C-e> <Plug>ISurround
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-abolish'
     " MixedCase (crm)
@@ -320,8 +323,10 @@ Plug 'hail2u/vim-css3-syntax', { 'for': ['css', 'scss', 'less'] }
 Plug 'cakebaker/scss-syntax.vim', { 'for': 'scss' }
 Plug 'groenewege/vim-less', { 'for': 'less' }
 Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
+Plug 'mdempsky/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/vim/symlink.sh' }
 Plug 'AndrewRadev/splitjoin.vim'
-let g:go_fmt_command = "goimports"
+" let g:go_fmt_command = "goimports"
+let g:go_fmt_command = "gofmt"
 let g:go_fmt_fail_silently = 1
 let g:go_highlight_trailing_whitespace_error = 0
 " let g:go_addtags_transform = "camelcase"
@@ -368,10 +373,11 @@ endfunction
 autocmd FileType go nmap <leader>gg :<C-u>call <SID>build_go_files()<CR>
 " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
 autocmd FileType go nmap <leader>gr  <Plug>(go-run)
+autocmd FileType go nmap <leader>gi  <Plug>(go-imports)
 autocmd FileType go nmap <leader>gf  <Plug>(go-test-func)
 autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
 autocmd FileType go nmap <leader>gd  :GoDeclsDir<cr>
-autocmd FileType go nmap <Leader>gi <Plug>(go-info)
+" autocmd FileType go nmap <Leader>gi <Plug>(go-info)
 autocmd FileType go nmap <Leader>gh <Plug>(go-sameids-toggle)
 autocmd Filetype go command! -bang A  call go#alternate#Switch(<bang>0, 'edit')
 autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')

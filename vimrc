@@ -228,7 +228,7 @@ nnoremap <leader>ct :silent ! ctags -R --languages=ruby --exclude=.git --exclude
 " inoremap <C-k> <C-o>gk
 "
 inoremap <C-]> <C-x><C-]>
-inoremap <C-k> <C-x><C-o>
+inoremap <C-g> <C-x><C-o>
 inoremap <C-l> <C-x><c-l>
 
 " Convert all tabs to spaces

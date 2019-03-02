@@ -21,4 +21,5 @@ eval "$(rbenv init - --no-rehash)"
 eval "$(pyenv init -)"
 
 # export PATH="$HOME/.bin:$PATH"
-export GOPATH=$HOME/Dropbox/Work/go:$GOPATH
+export PATH="$HOME/gocode/bin:$PATH"
+export GOPATH=$HOME/gocode
