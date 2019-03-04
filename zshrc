@@ -18,7 +18,7 @@ stty -ixon -ixoff
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
 eval "$(rbenv init - --no-rehash)"
-eval "$(pyenv init -)"
+# eval "$(pyenv init -)"
 
 # export PATH="$HOME/.bin:$PATH"
 export PATH="$HOME/gocode/bin:$PATH"
