@@ -323,11 +323,11 @@ Plug 'hail2u/vim-css3-syntax', { 'for': ['css', 'scss', 'less'] }
 Plug 'cakebaker/scss-syntax.vim', { 'for': 'scss' }
 Plug 'groenewege/vim-less', { 'for': 'less' }
 Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
-Plug 'mdempsky/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/vim/symlink.sh' }
+" Plug 'mdempsky/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/vim/symlink.sh' }
 Plug 'AndrewRadev/splitjoin.vim'
 " let g:go_fmt_command = "goimports"
 let g:go_fmt_command = "gofmt"
-let g:go_fmt_fail_silently = 1
+" let g:go_fmt_fail_silently = 1
 let g:go_highlight_trailing_whitespace_error = 0
 " let g:go_addtags_transform = "camelcase"
 let g:go_def_mode = 'godef'
