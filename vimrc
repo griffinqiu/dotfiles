@@ -99,6 +99,7 @@ set directory=~/tmp/
 set colorcolumn=81
 
 set nonumber
+set norelativenumber
 set numberwidth=4
 
 set sidescroll=1
