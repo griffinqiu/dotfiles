@@ -7,6 +7,11 @@ snippet : "v := value"
 ${1} := ${0}
 endsnippet
 
+# use the double quotes translator in double quotes
+snippet " "use the double quotes translator in double quotes"
+\"${0}\"
+endsnippet
+
 # anonymous function
 snippet anon "fn := func() { ... }"
 ${1:fn} := func() {
@@ -401,6 +406,7 @@ endsnippet
 # quick test server
 snippet tsrv "httptest.NewServer"
 ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    ${2}
 	fmt.Fprintln(w, ${1:`response`})
 }))
 defer ts.Close()
