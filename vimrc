@@ -155,7 +155,7 @@ set complete-=t
 
 " Set spellfile to location that is guaranteed to exist, can be symlinked to
 " Dropbox or kept in Git and managed outside of thoughtbot/dotfiles using rcm.
-set spellfile=$HOME/vim-spell-en.utf-8.add
+set spellfile=$HOME/Sync/vim-spell-en.utf-8.add
 
 " set sessionoptions=
     " \blank,buffers,curdir,folds,globals,help,localoptions,
