@@ -21,5 +21,5 @@ eval "$(rbenv init - --no-rehash)"
 # eval "$(pyenv init -)"
 
 # export PATH="$HOME/.bin:$PATH"
-# export GOPATH=$HOME/Sync/go
-export PATH="/usr/local/sbin:$HOME/Sync/go/bin:$PATH"
+export GOPATH=$HOME/Documents/Sync/go
+export PATH="/usr/local/sbin:$HOME/Documents/Sync/go/bin:$PATH"

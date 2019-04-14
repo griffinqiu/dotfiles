@@ -323,6 +323,9 @@ Plug 'hail2u/vim-css3-syntax', { 'for': ['css', 'scss', 'less'] }
 Plug 'cakebaker/scss-syntax.vim', { 'for': 'scss' }
 Plug 'groenewege/vim-less', { 'for': 'less' }
 Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
+Plug 'Shougo/vimshell.vim', { 'for': 'go' }
+Plug 'Shougo/vimproc.vim', { 'for': 'go', 'do' : 'make'}
+Plug 'sebdah/vim-delve', { 'for': 'go' }
 " Plug 'mdempsky/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/vim/symlink.sh' }
 Plug 'AndrewRadev/splitjoin.vim'
 " let g:go_fmt_command = "goimports"
