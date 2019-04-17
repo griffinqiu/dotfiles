@@ -60,15 +60,9 @@ Plug 'mhinz/vim-signify'
     nnoremap <leader>gh :SignifyToggleHighlight<CR>
     " nnoremap <leader>gr :SignifyRefresh<CR>
 Plug 'tpope/vim-fugitive'
-Plug 'tpope/vim-rhubarb'
-Plug 'junegunn/gv.vim'
-    nnoremap <Leader>gw :Gwrite<CR>
-    nnoremap <Leader>gd :Gdiff<CR>
     nnoremap <Leader>gb :Gblame<CR>
-    nnoremap <Leader>gl :exe ':!cd ' . expand('%:p:h') . '; git log'<CR>
-    nnoremap <Leader>gr :Gread<CR>
-    nnoremap <Leader>g- :Silent Git stash<CR>:e<CR>
-    nnoremap <Leader>g+ :Silent Git stash pop<CR>:e<CR>
+Plug 'tpope/vim-rhubarb'
+    " :Gbrowse
 " }}}
 
 " kana/vim-textobj-user {{{
@@ -85,12 +79,12 @@ Plug 'sgur/vim-textobj-parameter'            " a, | i,
 Plug 'paulhybryant/vim-textobj-path'         " aP | iP
 Plug 'beloglazov/vim-textobj-quotes'         " aq | iq
 Plug 'saihoooooooo/vim-textobj-space'        " aS | iS
-" Plug 'jceb/vim-textobj-uri'                  " au | iu
 Plug 'whatyouhide/vim-textobj-xmlattr'       " ax | ix
 Plug 'nelstrom/vim-textobj-rubyblock'        " ar | ir
 Plug 'bootleq/vim-textobj-rubysymbol'        " a: | i:
 Plug 'whatyouhide/vim-textobj-erb'           " aE | iE
 Plug 'osyo-manga/vim-textobj-multiblock'     " ab | ib
+" Plug 'jceb/vim-textobj-uri'                  " au | iu
 " Plug 'idbrii/textobj-word-column.vim'        " ac | ic
 " plug 'kana/vim-textobj-entire'               " ae | ie
 " plug 'bps/vim-textobj-python'                " af | if, ac | ic
@@ -101,48 +95,18 @@ Plug 'osyo-manga/vim-textobj-multiblock'     " ab | ib
 " Tools, Such as nerdtree, vimwiki {{{
 Plug 'rhlobo/vim-super-retab'
 Plug 'editorconfig/editorconfig-vim'
-Plug 'zhuochun/vim-dicts'
-Plug 'vim-scripts/ReplaceWithRegister'
+" Plug 'zhuochun/vim-dicts'
+" Plug 'vim-scripts/ReplaceWithRegister'
 Plug 'christoomey/vim-sort-motion'
-" Plug 'vimwiki/vimwiki'
-    " let defualt_wiki = {
-        " \'path': '~/github/vimwiki/_source/',
-        " \'path_html': '~/github/vimwiki/html/',
-        " \'template_path': '~/github/vimwiki/templates/',
-        " \'template_ext': '.tpl',
-        " \'template_default': 'default',
-        " \'nested_syntaxes': {'php': 'php', 'python': 'python', 'c++': 'cpp', 'js': 'javascript', 'bash': 'bash'},
-        " \'index': 'index',
-        " \'ext': '.wiki',
-        " \'syntax': 'default',
-        " \'auto_export': 1
-    " \}
-    " let g:vimwiki_use_calendar = 1
-    " let g:vimwiki_use_mouse = 1
-    " let g:vimwiki_list = [defualt_wiki]
+Plug 'AndrewRadev/splitjoin.vim'
 
 Plug 'rizzatti/dash.vim'
-    :nmap <silent> <leader>d <Plug>DashSearch
-    " noremap <c-g> :call investigate#Investigate()<CR>
-    " let g:investigate_use_dash=1
-
-Plug 'vim-scripts/TwitVim'
-    let g:twitvim_browser_cmd='open'
-    let g:twitvim_force_ssl=1
-    nnoremap <silent> <leader>tt :FriendsTwitter<cr>
-    nnoremap <silent> <leader>tp :PosttoTwitter<cr>
-    vnoremap <silent> <leader>tp <Plug>TwitvimVisual<cr>
-    nnoremap <silent> <leader>tcp :CPosttoTwitter<cr>
-    nnoremap <silent> <leader>tu :UserTwitter<cr>
-    nnoremap <silent> <leader>tm :MentionsTwitter<cr>
-    nnoremap <silent> <leader>td :DMTwitter<cr>
-    nnoremap <silent> <leader>tn :NextTwitter<cr>
-    " nnoremap <silent> <leader>tl :PreviousTwitter<cr>
+    nmap <silent> <leader>d <Plug>DashSearch
 
 Plug 'vim-scripts/matchit.zip'
 Plug 'godlygeek/tabular'
+    vmap <leader>tz :Tabularize /=
 Plug 'liangfeng/vimcdoc'
-Plug 'uguu-org/vim-matrix-screensaver'
 " }}}
 
 " Browse, Jump, motion {{{
@@ -179,8 +143,8 @@ Plug 'dyng/ctrlsf.vim'
     " nnoremap <C-G><C-T> :CtrlSFToggle<CR>
     inoremap <C-G><C-T> <Esc>:CtrlSFToggle<CR>
     nmap <C-G>l <Plug>CtrlSFQuickfixPrompt
-    vmap <C-G>l <Plug>CtrlSFQuickfixVwordPath
-    vmap <C-G>L <Plug>CtrlSFQuickfixVwordPath
+    vmap <C-G>l <Plug>CtrlSFQuilkfixVwordPath
+    vmap <C-G>L <Plug>CtrSFQuickfixVwordPath
     vmap <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
     nmap <silent><leader>3 :CtrlSFToggle<CR>
     let g:ctrlsf_toggle_map_key = '<leader>3'
@@ -202,15 +166,10 @@ Plug 'dyng/ctrlsf.vim'
     " let g:multi_cursor_start_word_key='g<c-n>'
     " let g:multi_cursor_quit_key = '<Esc>'
 
-" Plug 'rking/ag.vim'
-    " if executable('ag')
-        " " Use Ag over Grep
-        " set grepprg=ag\ --nogroup\ --nocolor
-        " " set grepprg=ag\ --vimgrep
-    " endif
-
 Plug 'Lokaltog/vim-easymotion'
-    let g:EasyMotion_leader_key = "'"
+    " let g:EasyMotion_leader_key = "'"
+    map ' <Plug>(easymotion-prefix)
+    nmap <Leader>' <Plug>(easymotion-overwin-w)
 
 Plug 'houtsnip/vim-emacscommandline'
 " }}}
@@ -299,6 +258,72 @@ Plug 'junegunn/fzf.vim'
 endif
 " }}}
 
+" GO {{{
+Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
+    " let g:go_fmt_command = "goimports"
+    let g:go_fmt_command = "gofmt"
+    " let g:go_fmt_fail_silently = 1
+    let g:go_highlight_trailing_whitespace_error = 0
+    " let g:go_addtags_transform = "camelcase"
+    let g:go_def_mode = 'godef'
+    let g:go_decls_includes = "func,type"
+    " let g:go_fmt_autosave = 0
+    let g:go_list_height = 10
+    let g:go_list_type='locationlist'
+    " run :GoBuild or :GoTestCompile based on the go file
+    function! s:build_go_files()
+      let l:file = expand('%')
+      if l:file =~# '^\f\+_test\.go$'
+        call go#test#Test(0, 1)
+      elseif l:file =~# '^\f\+\.go$'
+        call go#cmd#Build(0)
+      endif
+    endfunction
+    " Mappings or Tips
+    " - <c-x><c-o>
+    " - <c-]>
+    " - vif
+    " - gJ
+    " - gS
+    " - GoDoc
+    " - GoDocBrowser
+    " - GoDef
+    " - gd or c-]
+    " - c-t
+    " - c-o
+    " - c-i
+    " - GoDefStack
+    " - GoSameIds
+    " - GoRename
+    " - GoFreevars
+    " - GoReferrers
+    " - GoDescribe
+    " - GoImplements
+    " - GoWhicherrs
+    " - GoChannelPeers
+    " - GoCallees
+    " - GoCallers
+    " - GoImpl
+    " - GoPlay
+    autocmd FileType go nmap <leader>gg :<C-u>call <SID>build_go_files()<CR>
+    " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
+    autocmd FileType go nmap <leader>gr  <Plug>(go-run)
+    autocmd FileType go nmap <leader>gi  <Plug>(go-imports)
+    autocmd FileType go nmap <leader>gf  <Plug>(go-test-func)
+    autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
+    autocmd FileType go nmap <leader>gd  :GoDeclsDir<cr>
+    " autocmd FileType go nmap <Leader>gi <Plug>(go-info)
+    autocmd FileType go nmap <Leader>gh <Plug>(go-sameids-toggle)
+    autocmd Filetype go command! -bang A  call go#alternate#Switch(<bang>0, 'edit')
+    autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
+    autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+    autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
+Plug 'Shougo/vimshell.vim', { 'for': 'go' }
+Plug 'Shougo/vimproc.vim', { 'for': 'go', 'do' : 'make'}
+Plug 'sebdah/vim-delve', { 'for': 'go' }
+" Plug 'mdempsky/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/vim/symlink.sh' }
+" }}}
+
 " Syntax {{{
 " Plug 'w0rp/ale'
     " let g:ale_lint_on_save = 1
@@ -322,70 +347,6 @@ Plug 'othree/csscomplete.vim', { 'for': ['css', 'scss', 'less'] }
 Plug 'hail2u/vim-css3-syntax', { 'for': ['css', 'scss', 'less'] }
 Plug 'cakebaker/scss-syntax.vim', { 'for': 'scss' }
 Plug 'groenewege/vim-less', { 'for': 'less' }
-Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
-Plug 'Shougo/vimshell.vim', { 'for': 'go' }
-Plug 'Shougo/vimproc.vim', { 'for': 'go', 'do' : 'make'}
-Plug 'sebdah/vim-delve', { 'for': 'go' }
-" Plug 'mdempsky/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/vim/symlink.sh' }
-Plug 'AndrewRadev/splitjoin.vim'
-" let g:go_fmt_command = "goimports"
-let g:go_fmt_command = "gofmt"
-" let g:go_fmt_fail_silently = 1
-let g:go_highlight_trailing_whitespace_error = 0
-" let g:go_addtags_transform = "camelcase"
-let g:go_def_mode = 'godef'
-let g:go_decls_includes = "func,type"
-" let g:go_fmt_autosave = 0
-let g:go_list_height = 10
-let g:go_list_type='locationlist'
-" run :GoBuild or :GoTestCompile based on the go file
-function! s:build_go_files()
-  let l:file = expand('%')
-  if l:file =~# '^\f\+_test\.go$'
-    call go#test#Test(0, 1)
-  elseif l:file =~# '^\f\+\.go$'
-    call go#cmd#Build(0)
-  endif
-endfunction
-" Mappings or Tips
-" - <c-x><c-o>
-" - <c-]>
-" - vif
-" - gJ
-" - gS
-" - GoDoc
-" - GoDocBrowser
-" - GoDef
-" - gd or c-]
-" - c-t
-" - c-o
-" - c-i
-" - GoDefStack
-" - GoSameIds
-" - GoRename
-" - GoFreevars
-" - GoReferrers
-" - GoDescribe
-" - GoImplements
-" - GoWhicherrs
-" - GoChannelPeers
-" - GoCallees
-" - GoCallers
-" - GoImpl
-" - GoPlay
-autocmd FileType go nmap <leader>gg :<C-u>call <SID>build_go_files()<CR>
-" autocmd FileType go nmap <leader>gb  <Plug>(go-build)
-autocmd FileType go nmap <leader>gr  <Plug>(go-run)
-autocmd FileType go nmap <leader>gi  <Plug>(go-imports)
-autocmd FileType go nmap <leader>gf  <Plug>(go-test-func)
-autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
-autocmd FileType go nmap <leader>gd  :GoDeclsDir<cr>
-" autocmd FileType go nmap <Leader>gi <Plug>(go-info)
-autocmd FileType go nmap <Leader>gh <Plug>(go-sameids-toggle)
-autocmd Filetype go command! -bang A  call go#alternate#Switch(<bang>0, 'edit')
-autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
-autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
-autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
 
 Plug 'Keithbsmiley/rspec.vim', { 'for': 'ruby' }
 Plug 'ecomba/vim-ruby-refactoring', { 'for': 'ruby' }
@@ -414,14 +375,10 @@ Plug 'shawncplus/phpcomplete.vim', { 'for': 'php' }
 Plug 'hynek/vim-python-pep8-indent', { 'for': 'python' }
 Plug 'chase/vim-ansible-yaml'
 
-Plug 'autowitch/hive.vim', { 'for': ['hql', 'sql'] }
-
 Plug 'plasticboy/vim-markdown'
 Plug 'mzlogin/vim-markdown-toc'
     let g:vim_markdown_folding_disabled=1
     let g:vim_markdown_initial_foldlevel=1
-
-Plug 'chemzqm/wxapp.vim'
 " }}}
 
 " Colorscheme {{{

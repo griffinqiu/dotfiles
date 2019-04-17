@@ -15,6 +15,7 @@ source $ZSH/oh-my-zsh.sh
 stty -ixon -ixoff
 
 [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+[[ -f ~/Documents/Sync/zshrc.sync ]] && source ~/Documents/Sync/zshrc.sync
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
 eval "$(rbenv init - --no-rehash)"
