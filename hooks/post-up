@@ -7,6 +7,16 @@ echo " | (_| | (_) | ||  |  _| | |  __/\__ \\"
 echo "  \__,_|\___/ \__| |_| |_|_|\___||___/"
 echo ""
 
+brew bundle --file=- <<EOF
+brew "tig"
+brew "ncdu"
+brew "diff-so-fancy"
+brew "stress"
+brew "watch"
+brew "sysbench"
+brew "macvim"
+EOF
+
 if [ ! -e "$HOME"/.oh-my-zsh ]; then
     echo 'Installing oh-my-zsh'
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
