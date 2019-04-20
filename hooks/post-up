@@ -7,17 +7,6 @@ echo " | (_| | (_) | ||  |  _| | |  __/\__ \\"
 echo "  \__,_|\___/ \__| |_| |_|_|\___||___/"
 echo ""
 
-if which apt-get >/dev/null; then
-    sudo apt-get install -y vim vim-gnome ctags xclip tmux astyle git
-elif which yum >/dev/null; then
-    sudo yum install -y gcc vim git ctags xclip tmux astyle
-fi
-
-if which brew >/dev/null;then
-    echo "You are using HomeBrew tool"
-    brew install vim git astyle tmux reattach-to-user-namespace pngpaste pngquant
-fi
-
 if [ ! -e "$HOME"/.oh-my-zsh ]; then
     echo 'Installing oh-my-zsh'
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
@@ -29,8 +18,28 @@ if [ ! -e "$HOME"/.tmux ]; then
     "$HOME/.tmux/plugins/tpm/bin/install_plugins"
 fi
 
-if [ ! -e "$HOME"/.vim/autoload/plug.vim ]; then
-    echo 'Initing plug.vim'
-    curl -fLo "$HOME"/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+if [ -e "$HOME"/.vim/autoload/plug.vim ]; then
+  vim -E -s +PlugUpgrade +qa
+else
+  echo 'Initing plug.vim'
+  curl -fLo "$HOME"/.vim/autoload/plug.vim --create-dirs \
+      https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 fi
-vim -u "$HOME"/.vimrc.bundles +PlugInstall +PlugClean! +qa
+vim -u "$HOME"/.vimrc.bundles +PlugUpdate +PlugClean! +qa
+
+reset -Q
+
+# detect old OS X broken /etc/zshenv and suggest rename
+if grep -qw path_helper /etc/zshenv 2>/dev/null; then
+  dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+
+  cat <<MSG >&2
+Warning: \`/etc/zshenv' configuration file on your system may cause unexpected
+PATH changes on subsequent invocations of the zsh shell. The solution is to
+rename the file to \`zprofile':
+  sudo mv /etc/{zshenv,zprofile}
+
+(called from ${dir}/post-up:${LINENO})
+
+MSG
+fi

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+brew bundle --file=- <<EOF
+brew "tig"
+brew "ncdu"
+brew "diff-so-fancy"
+brew "stress"
+brew "watch"
+brew "sysbench"
+brew "macvim"
+EOF

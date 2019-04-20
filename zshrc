@@ -1,26 +1,43 @@
-# Path to your oh-my-zsh installation.
-export ZSH=$HOME/.oh-my-zsh
-# export POSTGRES_DB_USERNAME=goku_development
+# load custom executable functions
+for function in ~/.zsh/functions/*; do
+  source $function
+done
 
-ZSH_THEME="robbyrussell"
-# ZSH_THEME="agnoster"
+# extra files in ~/.zsh/configs/pre , ~/.zsh/configs , and ~/.zsh/configs/post
+# these are loaded first, second, and third, respectively.
+_load_settings() {
+  _dir="$1"
+  if [ -d "$_dir" ]; then
+    if [ -d "$_dir/pre" ]; then
+      for config in "$_dir"/pre/**/*~*.zwc(N-.); do
+        . $config
+      done
+    fi
 
-DISABLE_AUTO_TITLE=true
-plugins=(osx tmuxinator docker docker-compose docker-machine)
+    for config in "$_dir"/**/*(N-.); do
+      case "$config" in
+        "$_dir"/(pre|post)/*|*.zwc)
+          :
+          ;;
+        *)
+          . $config
+          ;;
+      esac
+    done
 
-source $ZSH/oh-my-zsh.sh
-[[ -f ~/.exports ]] && source ~/.exports
+    if [ -d "$_dir/post" ]; then
+      for config in "$_dir"/post/**/*~*.zwc(N-.); do
+        . $config
+      done
+    fi
+  fi
+}
+_load_settings "$HOME/.zsh/configs"
+
+export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"
+
+[[ -f ~/.zshrc.oh-my-zsh ]] && source ~/.zshrc.oh-my-zsh
 [[ -f ~/.aliases ]] && source ~/.aliases
-
-stty -ixon -ixoff
-
 [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
-[[ -f ~/Documents/Sync/zshrc.sync ]] && source ~/Documents/Sync/zshrc.sync
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
-
-eval "$(rbenv init - --no-rehash)"
-# eval "$(pyenv init -)"
-
-# export PATH="$HOME/.bin:$PATH"
-export GOPATH=$HOME/Documents/Sync/go
-export PATH="/usr/local/sbin:$HOME/Documents/Sync/go/bin:$PATH"
