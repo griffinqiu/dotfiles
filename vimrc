@@ -87,7 +87,7 @@ let g:is_posix = 1
 
 if v:version >= 703
     set undofile
-    set undodir=~/tmp/undofiles
+    set undodir=~/tmp
 endif
 if v:version >= 800
     set tagcase=match

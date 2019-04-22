@@ -31,13 +31,11 @@ call plug#begin()
 " Tpopes' :) {{{
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
-Plug 'tpope/vim-speeddating'
 Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-surround'
     let g:surround_no_insert_mappings = 1
     imap <C-d> <Plug>Isurround
     imap <C-e> <Plug>ISurround
-Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-abolish'
     " MixedCase (crm)
     " camelCase (crc)
