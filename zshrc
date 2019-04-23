@@ -40,4 +40,5 @@ export LC_ALL="en_US.UTF-8"
 [[ -f ~/.zshrc.oh-my-zsh ]] && source ~/.zshrc.oh-my-zsh
 [[ -f ~/.aliases ]] && source ~/.aliases
 [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+[[ -f ~/Documents/Sync/zshrc.sync ]] && source ~/Documents/Sync/zshrc.sync
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
