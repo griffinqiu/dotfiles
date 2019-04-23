@@ -1,202 +1,263 @@
-Griffin's dotfiles
+thoughtbot dotfiles
 ===================
 
-This project structure refers to [thoughtbot dotfiles](https://github.com/thoughtbot/dotfiles)
+![prompt](http://images.thoughtbot.com/thoughtbot-dotfiles-prompt.png)
 
-Requirements
+requirements
 ------------
 
-Set zsh as your login shell:
+set zsh as your login shell:
 
     chsh -s $(which zsh)
 
-Install
+install
 -------
 
-Clone onto your laptop:
+clone onto your laptop:
 
-    git clone git://github.com/griffinqiu/dotfiles.git ~/dotfiles
+    git clone git://github.com/thoughtbot/dotfiles.git ~/dotfiles
 
-Install [rcm](https://github.com/thoughtbot/rcm):
+(or, [fork and keep your fork
+updated](http://robots.thoughtbot.com/keeping-a-github-fork-updated)).
+
+install [rcm](https://github.com/thoughtbot/rcm):
 
     brew tap thoughtbot/formulae
     brew install rcm
 
-Install the dotfiles:
+install the dotfiles:
 
-    env RCRC=$HOME/dotfiles/rcrc rcup
+    env rcrc=$home/dotfiles/rcrc rcup
 
-After the initial installation, you can run `rcup` without the one-time variable
-`RCRC` being set (`rcup` will symlink the repo's `rcrc` to `~/.rcrc` for future
-runs of `rcup`). [See
+after the initial installation, you can run `rcup` without the one-time variable
+`rcrc` being set (`rcup` will symlink the repo's `rcrc` to `~/.rcrc` for future
+runs of `rcup`). [see
 example](https://github.com/thoughtbot/dotfiles/blob/master/rcrc).
 
-This command will create symlinks for config files in your home directory.
-Setting the `RCRC` environment variable tells `rcup` to use standard
+this command will create symlinks for config files in your home directory.
+setting the `rcrc` environment variable tells `rcup` to use standard
 configuration options:
 
-* Exclude the `README.md` and `LICENSE` files, which are part of
+* exclude the `readme.md`, `readme-es.md` and `license` files, which are part of
   the `dotfiles` repository but do not need to be symlinked in.
-* Give precedence to personal overrides which by default are placed in
+* give precedence to personal overrides which by default are placed in
   `~/dotfiles-local`
+* please configure the `rcrc` file if you'd like to make personal
+  overrides in a different directory
 
-You can safely run `rcup` multiple times to update:
+
+update
+------
+
+from time to time you should pull down any updates to these dotfiles, and run
 
     rcup
 
-You should run `rcup` after pulling a new version of the repository to symlink
-any new files in the repository.
+to link any new files and install new vim plugins. **note** you _must_ run
+`rcup` after pulling to ensure that all files in plugins are properly installed,
+but you can safely run `rcup` multiple times so update early and update often!
 
-Make your own customizations
+make your own customizations
 ----------------------------
 
-Put your customizations in dotfiles appended with `.local`:
+create a directory for your personal customizations:
 
-* `~/.aliases.local`
-* `~/.git_template.local/*`
-* `~/.gitconfig.local`
-* `~/.gvimrc.local`
-* `~/.psqlrc.local` (we supply a blank `.psqlrc.local` to prevent `psql` from
+    mkdir ~/dotfiles-local
+
+put your customizations in `~/dotfiles-local` appended with `.local`:
+
+* `~/dotfiles-local/aliases.local`
+* `~/dotfiles-local/git_template.local/*`
+* `~/dotfiles-local/gitconfig.local`
+* `~/dotfiles-local/psqlrc.local` (we supply a blank `.psqlrc.local` to prevent `psql` from
   throwing an error, but you should overwrite the file with your own copy)
-* `~/.tmux.conf.local`
-* `~/.vimrc.local`
-* `~/.vimrc.bundles.local`
-* `~/.zshrc.local`
-* `~/.zsh/configs/*`
+* `~/dotfiles-local/tmux.conf.local`
+* `~/dotfiles-local/vimrc.local`
+* `~/dotfiles-local/vimrc.bundles.local`
+* `~/dotfiles-local/zshrc.local`
+* `~/dotfiles-local/zsh/configs/*`
 
-For example, your `~/.aliases.local` might look like this:
+for example, your `~/dotfiles-local/aliases.local` might look like this:
 
-    # Productivity
-    alias todo='$EDITOR ~/.todo'
+    # productivity
+    alias todo='$editor ~/.todo'
 
-Your `~/.gitconfig.local` might look like this:
+your `~/dotfiles-local/gitconfig.local` might look like this:
 
     [alias]
       l = log --pretty=colored
     [pretty]
-      colored = format:%Cred%h%Creset %s %Cgreen(%cr) %C(bold blue)%an%Creset
+      colored = format:%cred%h%creset %s %cgreen(%cr) %c(bold blue)%an%creset
     [user]
-      name = Dan Croak
+      name = dan croak
       email = dan@thoughtbot.com
 
-Your `~/.vimrc.local` might look like this:
+your `~/dotfiles-local/vimrc.local` might look like this:
 
-    " Color scheme
+    " color scheme
     colorscheme github
-    highlight NonText guibg=#060606
-    highlight Folded  guibg=#0A0A0A guifg=#9090D0
+    highlight nontext guibg=#060606
+    highlight folded  guibg=#0a0a0a guifg=#9090d0
 
-To extend your `git` hooks, create executable scripts in
-`~/.git_template.local/hooks/*` files.
+if you don't wish to install a vim plugin from the default set of vim plugins in
+`.vimrc.bundles`, you can ignore the plugin by calling it out with `unplug` in
+your `~/.vimrc.bundles.local`.
 
-Your `~/.zshrc.local` might look like this:
+    " don't install vim-scripts/tcomment
+    unplug 'tcomment'
+
+`unplug` can be used to install your own fork of a plugin or to install a shared
+plugin with different custom options.
+
+    " only load vim-coffee-script if a coffeescript buffer is created
+    unplug 'vim-coffee-script'
+    plug 'kchmck/vim-coffee-script', { 'for': 'coffee' }
+
+    " use a personal fork of vim-run-interactive
+    unplug 'vim-run-interactive'
+    plug '$home/plugins/vim-run-interactive'
+
+to extend your `git` hooks, create executable scripts in
+`~/dotfiles-local/git_template.local/hooks/*` files.
+
+your `~/dotfiles-local/zshrc.local` might look like this:
 
     # load pyenv if available
     if which pyenv &>/dev/null ; then
       eval "$(pyenv init -)"
     fi
 
-Your `~/.vimrc.bundles.local` might look like this:
+your `~/dotfiles-local/vimrc.bundles.local` might look like this:
 
-    Plug 'Lokaltog/vim-powerline'
-    Plug 'stephenmckinney/vim-solarized-powerline'
+    plug 'lokaltog/vim-powerline'
+    plug 'stephenmckinney/vim-solarized-powerline'
 
-zsh Configurations
+zsh configurations
 ------------------
 
-Additional zsh configuration can go under the `~/.zsh/configs` directory. This
+additional zsh configuration can go under the `~/dotfiles-local/zsh/configs` directory. this
 has two special subdirectories: `pre` for files that must be loaded first, and
 `post` for files that must be loaded last.
 
-For example, `~/.zsh/configs/pre/virtualenv` makes use of various shell
+for example, `~/dotfiles-local/zsh/configs/pre/virtualenv` makes use of various shell
 features which may be affected by your settings, so load it first:
 
-    # Load the virtualenv wrapper
+    # load the virtualenv wrapper
     . /usr/local/bin/virtualenvwrapper.sh
 
-Setting a key binding can happen in `~/.zsh/configs/keys`:
+setting a key binding can happen in `~/dotfiles-local/zsh/configs/keys`:
 
-    # Grep anywhere with ^G
-    bindkey -s '^G' ' | grep '
+    # grep anywhere with ^g
+    bindkey -s '^g' ' | grep '
 
-Some changes, like `chpwd`, must happen in `~/.zsh/configs/post/chpwd`:
+some changes, like `chpwd`, must happen in `~/dotfiles-local/zsh/configs/post/chpwd`:
 
-    # Show the entries in a directory whenever you cd in
+    # show the entries in a directory whenever you cd in
     function chpwd {
       ls
     }
 
-This directory is handy for combining dotfiles from multiple teams; one team
+this directory is handy for combining dotfiles from multiple teams; one team
 can add the `virtualenv` file, another `keys`, and a third `chpwd`.
 
-The `~/.zshrc.local` is loaded after `~/.zsh/configs`.
+the `~/dotfiles-local/zshrc.local` is loaded after `~/dotfiles-local/zsh/configs`.
 
-vim Configurations
+vim configurations
 ------------------
 
-Similarly to the zsh configuration directory as described above, vim
-automatically loads all files in the `~/.vim/plugin` directory. This does not
+similarly to the zsh configuration directory as described above, vim
+automatically loads all files in the `~/dotfiles-local/vim/plugin` directory. this does not
 have the same `pre` or `post` subdirectory support that our `zshrc` has.
 
-This is an example `~/.vim/plugin/c.vim`. It is loaded every time vim starts,
+this is an example `~/dotfiles-local/vim/plugin/c.vim`. it is loaded every time vim starts,
 regardless of the file name:
 
-    # Indent C programs according to BSD style(9)
+    # indent c programs according to bsd style(9)
     set cinoptions=:0,t0,+4,(4
-    autocmd BufNewFile,BufRead *.[ch] setlocal sw=0 ts=8 noet
+    autocmd bufnewfile,bufread *.[ch] setlocal sw=0 ts=8 noet
 
-What's in it?
+what's in it?
 -------------
 
 [vim](http://www.vim.org/) configuration:
 
-* [Ctrl-P](https://github.com/kien/ctrlp.vim) for fuzzy file/buffer/tag finding.
-* [Rails.vim](https://github.com/tpope/vim-rails) for enhanced navigation of
-  Rails file structure via `gf` and `:A` (alternate), `:Rextract` partials,
-  `:Rinvert` migrations, etc.
-* Run many kinds of tests [from vim]([https://github.com/janko-m/vim-test)
-* Set `<leader>` to a single space.
-* Switch between the last two files with space-space.
-* Syntax highlighting for CoffeeScript, Textile, Cucumber, Haml, Markdown, and
-  HTML.
-* Use [Ag](https://github.com/ggreer/the_silver_searcher) instead of Grep when
+* [ctrl-p](https://github.com/ctrlpvim/ctrlp.vim) for fuzzy file/buffer/tag finding.
+* [rails.vim](https://github.com/tpope/vim-rails) for enhanced navigation of
+  rails file structure via `gf` and `:a` (alternate), `:rextract` partials,
+  `:rinvert` migrations, etc.
+* run many kinds of tests [from vim]([https://github.com/janko-m/vim-test)
+* set `<leader>` to a single space.
+* switch between the last two files with space-space.
+* syntax highlighting for markdown, html, javascript, ruby, go, elixir, more.
+* use [ag](https://github.com/ggreer/the_silver_searcher) instead of grep when
   available.
-* Map `<leader>ct` to re-index [Exuberant Ctags](http://ctags.sourceforge.net/).
-* Use [vim-mkdir](https://github.com/pbrisbin/vim-mkdir) for automatically
+* map `<leader>ct` to re-index ctags.
+* use [vim-mkdir](https://github.com/pbrisbin/vim-mkdir) for automatically
   creating non-existing directories before writing the buffer.
-* Use [vim-plug](https://github.com/junegunn/vim-plug) to manage plugins.
+* use [vim-plug](https://github.com/junegunn/vim-plug) to manage plugins.
 
 [tmux](http://robots.thoughtbot.com/a-tmux-crash-course)
 configuration:
 
-* Improve color resolution.
-* Remove administrative debris (session name, hostname, time) in status bar.
-* Set prefix to `Ctrl+s`
-* Soften status bar color from harsh green to light gray.
+* improve color resolution.
+* remove administrative debris (session name, hostname, time) in status bar.
+* set prefix to `ctrl+s`
+* soften status bar color from harsh green to light gray.
 
 [git](http://git-scm.com/) configuration:
 
-* Adds a `create-branch` alias to create feature branches.
-* Adds a `delete-branch` alias to delete feature branches.
-* Adds a `merge-branch` alias to merge feature branches into master.
-* Adds an `up` alias to fetch and rebase `origin/master` into the feature
-  branch. Use `git up -i` for interactive rebases.
-* Adds `post-{checkout,commit,merge}` hooks to re-index your ctags.
-* Adds `pre-commit` and `prepare-commit-msg` stubs that delegate to your local
+* adds a `create-branch` alias to create feature branches.
+* adds a `delete-branch` alias to delete feature branches.
+* adds a `merge-branch` alias to merge feature branches into master.
+* adds an `up` alias to fetch and rebase `origin/master` into the feature
+  branch. use `git up -i` for interactive rebases.
+* adds `post-{checkout,commit,merge}` hooks to re-index your ctags.
+* adds `pre-commit` and `prepare-commit-msg` stubs that delegate to your local
   config.
+* adds `trust-bin` alias to append a project's `bin/` directory to `$path`.
 
-[Ruby](https://www.ruby-lang.org/en/) configuration:
+[ruby](https://www.ruby-lang.org/en/) configuration:
 
-* Add trusted binstubs to the `PATH`.
-* Load rbenv into the shell, adding shims onto our `PATH`.
+* add trusted binstubs to the `path`.
+* load the asdf version manager.
 
-Shell aliases and scripts:
+shell aliases and scripts:
 
 * `b` for `bundle`.
 * `g` with no arguments is `git status` and with arguments acts like `git`.
-* `git-churn` to show churn for the files changed in the branch.
 * `migrate` for `rake db:migrate && rake db:rollback && rake db:migrate`.
 * `mcd` to make a directory and change into it.
 * `replace foo bar **/*.rb` to find and replace within a given list of files.
 * `tat` to attach to tmux session named the same as the current directory.
-* `v` for `$VISUAL`.
+* `v` for `$visual`.
+
+thanks
+------
+
+thank you, [contributors](https://github.com/thoughtbot/dotfiles/contributors)!
+also, thank you to corey haines, gary bernhardt, and others for sharing your
+dotfiles and other shell scripts from which we derived inspiration for items
+in this project.
+
+license
+-------
+
+dotfiles is copyright © 2009-2018 thoughtbot. it is free software, and may be
+redistributed under the terms specified in the [`license`] file.
+
+[`license`]: /license
+
+about thoughtbot
+----------------
+
+![thoughtbot](http://presskit.thoughtbot.com/images/thoughtbot-logo-for-readmes.svg)
+
+dotfiles is maintained and funded by thoughtbot, inc.
+the names and logos for thoughtbot are trademarks of thoughtbot, inc.
+
+we love open source software!
+see [our other projects][community].
+we are [available for hire][hire].
+
+[community]: https://thoughtbot.com/community?utm_source=github
+[hire]: https://thoughtbot.com/hire-us?utm_source=github

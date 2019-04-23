@@ -65,5 +65,5 @@ command -v sha1sum > /dev/null || alias sha1sum="shasum"
 alias cleanup="find . -type f -name '*.DS_Store' -ls -delete"
 
 # Include custom aliases
-[[ -f ~/Sync/dotfiles-sync/aliases.sync ]] && source ~/Sync/dotfiles-sync/aliases.sync
+[[ -f ~/Documents/Sync/aliases.sync ]] && source ~/Documents/Sync/aliases.sync
 [[ -f ~/.aliases.local ]] && source ~/.aliases.local

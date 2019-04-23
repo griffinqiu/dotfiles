@@ -1,4 +1,9 @@
 #!/bin/sh
 set -e
 
-/usr/local/bin/ctags -R --languages=ruby .
+PATH="/usr/local/bin:$PATH"
+dir="$(git rev-parse --git-dir)"
+trap 'rm -f "$dir/$$.tags"' EXIT
+git ls-files | \
+  "${CTAGS:-ctags}" --tag-relative=yes -L - -f"$dir/$$.tags" --languages=-javascript,sql
+mv "$dir/$$.tags" "$dir/tags"
