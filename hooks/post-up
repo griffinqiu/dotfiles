@@ -28,6 +28,10 @@ if [ ! -e "$HOME"/.tmux ]; then
     "$HOME/.tmux/plugins/tpm/bin/install_plugins"
 fi
 
+if [ ! -e "$HOME"/tmp ]; then
+    mkdir -p "$HOME"/tmp
+fi
+
 if [ -e "$HOME"/.vim/autoload/plug.vim ]; then
   vim -E -s +PlugUpgrade +qa
 else
