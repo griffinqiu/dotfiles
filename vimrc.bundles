@@ -316,10 +316,10 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
     autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
     autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
     autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
+Plug 'mdempsky/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/vim/symlink.sh' }
 Plug 'Shougo/vimshell.vim', { 'for': 'go' }
 Plug 'Shougo/vimproc.vim', { 'for': 'go', 'do' : 'make'}
 Plug 'sebdah/vim-delve', { 'for': 'go' }
-" Plug 'mdempsky/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/vim/symlink.sh' }
 " }}}
 
 " Syntax {{{

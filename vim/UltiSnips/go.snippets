@@ -406,7 +406,7 @@ endsnippet
 # quick test server
 snippet tsrv "httptest.NewServer"
 ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    ${2}
+	${2}
 	fmt.Fprintln(w, ${1:`response`})
 }))
 defer ts.Close()
@@ -437,6 +437,7 @@ endsnippet
 
 snippet benchmark "func BenchmarkXYZ(b *testing.B) { ... }"
 func Benchmark${1:Method}(b *testing.B) {
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		${0:${VISUAL}}
 	}
