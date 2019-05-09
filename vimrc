@@ -22,7 +22,7 @@ set autoread
 " set autowrite
 " set autochdir
 set hidden
-set novisualbell
+set belloff=all
 set nojoinspaces
 set backspace=indent,eol,start
 set foldmethod=marker
