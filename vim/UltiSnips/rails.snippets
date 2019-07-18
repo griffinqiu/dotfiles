@@ -5,6 +5,12 @@ accepts_nested_attributes_for :${1:association_name}${2:${3:, :allow_destroy => 
 
 endsnippet
 
+snippet do "do block"
+do |${1:params}|
+	$0
+end
+endsnippet
+
 snippet tcbi "Create binary column"
 t.binary :${1:title}${2:, :limit => ${3:2}.megabytes}
 $0

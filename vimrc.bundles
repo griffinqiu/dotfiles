@@ -178,8 +178,8 @@ Plug 'ctrlpvim/ctrlp.vim'
     " for ctrlp plugin
     " Define bundles via Github repos
     let g:ctrlp_custom_ignore = {
-        \'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic|build|vendor)$',
-        \'file': '\v\.(exe|so|dll|meta|pyc|as|so|tags)$',
+        \'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic|build|node_modules|vendor)$',
+        \'file': '\v\.(exe|so|dll|meta|pyc|as|so|tags|yarn.lock)$',
         \'link': 'some_bad_symbolic_links'
     \}
     let g:ctrlp_prompt_mappings = {
@@ -404,10 +404,10 @@ Plug 'griffinqiu/vim-snippets'
 
 Plug 'mattn/emmet-vim'
     " let g:user_emmet_mode='i'
-    let g:user_emmet_mode='a'
-    autocmd FileType html,css,less,sass,eruby,erb,javascript EmmetInstall
+    let g:user_emmet_mode='i'
+    autocmd FileType html,css,less,sass,eruby,erb,javascript,jsx EmmetInstall
     let g:user_emmet_leader_key='<c-e>'
-    " let g:user_emmet_expandabbr_key='<C-V><C-V>'
+    let g:user_emmet_expandabbr_key='<c-e><c-e>'
     let g:user_emmet_expandword_key = '<C-e>v'
     let g:user_emmet_update_tag = '<C-e>u'
     let g:user_emmet_next_key='<C-e>n'
