@@ -241,7 +241,10 @@ Plug 'junegunn/fzf.vim'
     nnoremap <leader>f: :History:<CR>
     nnoremap <leader>f/ :History/<CR>
     nnoremap <leader>fC :Commands<CR>
-    nnoremap <leader>fm :Maps<CR>
+    nmap <leader>fmn :call fzf#vim#maps('n', 0)<cr>
+    nmap <leader>fmi :call fzf#vim#maps('i', 0)<cr>
+    nmap <leader>fmx :call fzf#vim#maps('x', 0)<cr>
+    nmap <leader>fmo :call fzf#vim#maps('o', 0)<cr>
     nnoremap <leader>fu :Snippets<CR>
     " nnoremap <leader>ag :Ag<CR>
     " nnoremap <leader>agt :Agt<CR>
@@ -251,10 +254,6 @@ Plug 'junegunn/fzf.vim'
     " imap <c-x><c-f> <plug>(fzf-complete-file-ag)
     " imap <c-x><c-f> <plug>(fzf-complete-path)
     " imap <c-x><c-l> <plug>(fzf-complete-line)
-
-    nmap <leader><tab> <plug>(fzf-maps-n)
-    xmap <leader><tab> <plug>(fzf-maps-x)
-    omap <leader><tab> <plug>(fzf-maps-o)
 endif
 " }}}
 
@@ -311,6 +310,7 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
     " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
     autocmd FileType go nmap <leader>gr  <Plug>(go-run)
     autocmd FileType go nmap <leader>gi  <Plug>(go-imports)
+    autocmd FileType go nmap <leader>gI :GoImport<SPACE>
     autocmd FileType go nmap <leader>gf  <Plug>(go-test-func)
     autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
     autocmd FileType go nmap <leader>gd  :GoDeclsDir<cr>
