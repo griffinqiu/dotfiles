@@ -64,19 +64,13 @@ augroup vimrcEx
     " Set syntax highlighting for specific file types
     autocmd BufRead,BufNewFile Appraisals set filetype=ruby
     autocmd BufRead,BufNewFile *.{md,mdown,mkd,mkdn,markdown,mdwn} set filetype=markdown
-    autocmd BufRead,BufNewFile .{jscs,jshint,eslint}rc set filetype=json
-    autocmd BufNewFile,BufRead *.hql set filetype=hive expandtab
-    autocmd BufNewFile,BufRead *.q set filetype=hive expandtab
     autocmd FileType c set omnifunc=ccomplete#Complete
     autocmd FileType python set omnifunc=pythoncomplete#Complete
-    autocmd FileType ada set omnifunc=adacomplete#Complete
     autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
     autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
-    autocmd FileType phtml set omnifunc=htmlcomplete#CompleteTags
     autocmd FileType css set omnifunc=csscomplete#CompleteCSS
     autocmd FileType xml set omnifunc=xmlcomplete#CompleteTags
     autocmd FileType php set omnifunc=phpcomplete#CompletePHP
-    autocmd FileType tpl set omnifunc=htmlcomplete#CompleteTags
     autocmd FileType sql set omnifunc=sqlcomplete#Completesql
     autocmd FileType css,scss,less,html setl iskeyword+=-
 augroup END

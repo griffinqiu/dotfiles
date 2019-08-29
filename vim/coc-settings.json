@@ -1,0 +1,26 @@
+{
+  "coc.preferences.formatOnSaveFiletypes": ["javascript", "vue", "html"],
+  "vetur.format.defaultFormatterOptions": {
+		"prettier": {
+			"singleQuote": true,
+			"semi": false,
+			"trailingComma": "es5"
+		}
+  },
+  "languageserver": {
+    "golang": {
+      "command": "gopls",
+      "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
+      "filetypes": ["go"]
+    },
+    "sorbet": {
+      "command": "solargraph",
+      "args": ["tc", "--lsp", "--enable-all-experimental-lsp-features"],
+      "filetypes": ["ruby"],
+      "rootPatterns": ["sorbet/config"],
+      "initializationOptions": {},
+      "settings": {}
+    }
+  },
+  "coc.preferences.extensionUpdateCheck": "daily"
+}
