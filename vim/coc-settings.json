@@ -1,12 +1,6 @@
 {
-  "coc.preferences.formatOnSaveFiletypes": ["javascript", "vue", "html"],
-  "vetur.format.defaultFormatterOptions": {
-		"prettier": {
-			"singleQuote": true,
-			"semi": false,
-			"trailingComma": "es5"
-		}
-  },
+  "coc.preferences.formatOnSaveFiletypes": ["javascript", "html", "vue"],
+  "vetur.format.defaultFormatter.html": "prettier",
   "languageserver": {
     "golang": {
       "command": "gopls",
@@ -22,5 +16,5 @@
       "settings": {}
     }
   },
-  "coc.preferences.extensionUpdateCheck": "daily"
+  "coc.preferences.extensionUpdateCheck": "weekly"
 }

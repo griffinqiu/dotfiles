@@ -95,10 +95,8 @@ Plug 'osyo-manga/vim-textobj-multiblock'     " ab | ib
 " }}}
 
 " Tools, Such as nerdtree, vimwiki {{{
-Plug 'rhlobo/vim-super-retab'
 Plug 'editorconfig/editorconfig-vim'
 " Plug 'zhuochun/vim-dicts'
-" Plug 'vim-scripts/ReplaceWithRegister'
 Plug 'christoomey/vim-sort-motion'
 Plug 'AndrewRadev/splitjoin.vim'
 
@@ -175,47 +173,7 @@ Plug 'houtsnip/vim-emacscommandline'
 " }}}
 
 " CtrlP or FZF {{{
-if has('gui_running')
-Plug 'ctrlpvim/ctrlp.vim'
-    " for ctrlp plugin
-    " Define bundles via Github repos
-    let g:ctrlp_custom_ignore = {
-        \'dir': '\v[\/](\.(git|hg|svn)|env|var|tmp|bower_components|node_modules|semantic|build|node_modules|vendor)$',
-        \'file': '\v\.(exe|so|dll|meta|pyc|as|so|tags|yarn.lock)$',
-        \'link': 'some_bad_symbolic_links'
-    \}
-    let g:ctrlp_prompt_mappings = {
-        \'AcceptSelection("v")': ['<C-V>', '<RightMouse>'],
-        \'AcceptSelection("h")': ['<C-S>', '<C-CR>'],
-        \'PrtClearCache()':            ['<F6>'],
-        \'PrtCurLeft()': ['<left>', '<c-h>']
-    \}
-    " let g:ctrlp_user_command = 'find %s -type f'
-    let g:ctrlp_by_filename = 1
-    let g:ctrlp_mruf_case_sensitive = 0
-    let g:ctrlp_use_caching = 1
-    let g:ctrlp_cache_dir = '~/tmp/ctrlp'
-    let g:ctrlp_working_path_mode = 'w'
-    let g:ctrlp_tabpage_position = 'f'
-
-Plug 'majutsushi/tagbar'
-    nnoremap <silent> <leader>2 :TagbarToggle<CR>
-    let g:tagbar_type_php = {
-        \'ctagstype' : 'php',
-        \'kinds'         : [
-            \'i:interfaces',
-            \'c:classes',
-            \'d:constant definitions',
-            \'f:functions',
-            \'j:javascript functions:1'
-        \]
-    \}"
-    let g:tagbar_width=30
-    let g:tagbar_sort=0
-    let g:tagbar_autofocus=1
-    let g:Tb_MaxSize=5
-
-else
+if !has('gui_running')
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
     let g:fzf_action = {
@@ -320,7 +278,6 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
     autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
     autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
     autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
-" Plug 'mdempsky/gocode', { 'rtp': 'vim', 'do': '~/.vim/plugged/gocode/vim/symlink.sh' }
 Plug 'Shougo/vimshell.vim', { 'for': 'go' }
 Plug 'Shougo/vimproc.vim', { 'for': 'go', 'do' : 'make'}
 Plug 'sebdah/vim-delve', { 'for': 'go' }
@@ -329,35 +286,13 @@ Plug 'sebdah/vim-delve', { 'for': 'go' }
 " Syntax {{{
 
 " Plug 'rstacruz/vim-hyperstyle'
-"
-" Plug 'altercation/vim-colors-solarized'
-    " let g:solarized_termcolors = 256
-    " let g:solarized_diffmode="high"
-    " colorscheme solarized
-
-Plug 'maksimr/vim-jsbeautify'
-    autocmd FileType javascript noremap <buffer> <leader>jf :call JsBeautify()<cr>
-    autocmd FileType json noremap <buffer> <leader>jf :call JsonBeautify()<cr>
-    autocmd FileType html noremap <buffer> <leader>jf :call HtmlBeautify()<cr>
-    autocmd FileType css noremap <buffer> <leader>jf :call CSSBeautify()<cr>
-    autocmd FileType javascript vnoremap <buffer> <leader>jf :call RangeJsBeautify()<cr>
-    autocmd FileType json vnoremap <buffer> <leader>jf :call RangeJsonBeautify()<cr>
-    autocmd FileType jsx vnoremap <buffer> <leader>jf :call RangeJsxBeautify()<cr>
-    autocmd FileType html vnoremap <buffer> <leader>jf :call RangeHtmlBeautify()<cr>
-    autocmd FileType css vnoremap <buffer> <leader>jf :call RangeCSSBeautify()<cr>
-Plug 'kchmck/vim-coffee-script', { 'for': 'coffee' }
-Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
+" Plug 'kchmck/vim-coffee-script', { 'for': 'coffee' }
+" Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
 " Plug 'mxw/vim-jsx', { 'for': 'javascript' }
 Plug 'posva/vim-vue'
     autocmd BufRead,BufNewFile *.vue set filetype=vue
     autocmd FileType vue syntax sync fromstart
     let g:vue_pre_processors = []
-
-Plug 'othree/html5.vim'
-Plug 'othree/csscomplete.vim', { 'for': ['css', 'scss', 'less'] }
-Plug 'hail2u/vim-css3-syntax', { 'for': ['css', 'scss', 'less'] }
-Plug 'cakebaker/scss-syntax.vim', { 'for': 'scss' }
-Plug 'groenewege/vim-less', { 'for': 'less' }
 
 Plug 'Keithbsmiley/rspec.vim', { 'for': 'ruby' }
 Plug 'ecomba/vim-ruby-refactoring', { 'for': 'ruby' }
@@ -365,35 +300,18 @@ Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
 Plug 'tpope/vim-rails', { 'for': 'ruby' }
 Plug 'tpope/vim-rbenv', { 'for': 'ruby' }
 Plug 'tpope/vim-bundler', { 'for': 'ruby' }
-" Plug 'tpope/vim-projectionist', { 'for': 'ruby' }
-" Plug 'tpope/vim-rake', { 'for': 'ruby' }
 Plug 'tpope/vim-pathogen', { 'for': 'ruby' }
-    " autocmd FileType ruby let &l:tags = pathogen#legacyjoin(pathogen#uniq(
-        " \ pathogen#split(&tags) +
-        " \ map(split($GEM_PATH,':'),'v:val."/gems/*/tags"')))
-Plug 'griffinqiu/vim-i18n'
-    vmap <leader>zz :call I18nTranslateString()<CR>
-    vmap <leader>zd :call I18nDisplayTranslation()<CR>
+" Plug 'griffinqiu/vim-i18n'
+    " vmap <leader>zz :call I18nTranslateString()<CR>
+    " vmap <leader>zd :call I18nDisplayTranslation()<CR>
 Plug 'AndrewRadev/switch.vim'
     let g:switch_mapping = "-"
-
-Plug 'StanAngeloff/php.vim', { 'for': 'php' }
-Plug 'shawncplus/phpcomplete.vim', { 'for': 'php' }
-    let g:phpcomplete_mappings = {
-        \ 'jump_to_def': ',g',
-    \ }
-
-Plug 'hynek/vim-python-pep8-indent', { 'for': 'python' }
-Plug 'chase/vim-ansible-yaml'
 
 Plug 'plasticboy/vim-markdown'
 Plug 'mzlogin/vim-markdown-toc'
     let g:vim_markdown_folding_disabled=1
     let g:vim_markdown_initial_foldlevel=1
-" }}}
 
-" Colorscheme {{{
-" Plug 'ap/vim-css-color'
 Plug 'yonchu/accelerated-smooth-scroll'
 " }}}
 
@@ -413,7 +331,7 @@ Plug 'yonchu/accelerated-smooth-scroll'
 Plug 'mattn/emmet-vim'
     " let g:user_emmet_mode='i'
     let g:user_emmet_mode='i'
-    autocmd FileType html,css,less,sass,eruby,erb,javascript,jsx EmmetInstall
+    autocmd FileType html,css,less,sass,eruby,erb,javascript,jsx,vue EmmetInstall
     let g:user_emmet_leader_key='<c-e>'
     let g:user_emmet_expandabbr_key='<c-e><c-e>'
     let g:user_emmet_expandword_key = '<C-e>v'
@@ -429,9 +347,6 @@ Plug 'mattn/emmet-vim'
     \      'extends' : 'jsx',
     \  }
     \}
-
-    " let g:user_emmet_togglecomment_key = '<C-V>/'
-    " let g:user_emmet_install_global=1
 " }}}
 
 " Airline {{{
@@ -455,55 +370,12 @@ Plug 'mattn/emmet-vim'
     " let g:tmuxline_theme = 'icebert'
 " }}}
 
-" Static language Complete {{{
-" Plug 'Valloric/YouCompleteMe'
-" noremap <c-[> :YcmCompleter GoToDefinitionElseDeclaration<CR>
-" set completeopt-=preview
-" let g:ycm_key_list_previous_completion=['<Up>']
-" let g:ycm_key_list_select_completion=['<Down>']
-" let g:ycm_seed_identifiers_with_syntax=1
-" let g:ycm_complete_in_comments=1
-" let g:ycm_confirm_extra_conf=0
-" " let g:ycm_collect_identifiers_from_tags_files=1
-" let g:ycm_key_invoke_completion='<C-Space>'
-" let g:ycm_auto_trigger=0
-" let g:ycm_filetype_blacklist = {
-" \ 'tagbar' : 1,
-" \ 'qf' : 1,
-" \ 'notes' : 1,
-" \ 'markdown' : 1,
-" \ 'unite' : 1,
-" \ 'text' : 1,
-" \ 'vimwiki' : 1,
-" \ 'pandoc' : 1,
-" \ 'infolog' : 1,
-" \ 'mail' : 1
-" \}
-" let g:ycm_semantic_triggers = {
-" \ 'c' : ['->', '.'],
-" \ 'objc' : ['->', '.'],
-" \ 'ocaml' : ['.', '#'],
-" \ 'cpp,objcpp' : ['->', '.', '::'],
-" \ 'perl' : ['->'],
-" \ 'php' : ['->', '::'],
-" \ 'cs,java,javascript,d,python,perl6,scala,vb,elixir,go' : ['.'],
-" \ 'vim' : ['re![_a-zA-Z]+[_\w]*\.'],
-" \ 'ruby' : ['.', '::'],
-" \ 'lua' : ['.', ':'],
-" \ 'erlang' : [':'],
-" \ }
-
-" Plug 'marijnh/tern_for_vim'
-" Plug 'OrangeT/vim-csharp'
-" Plug 'scrooloose/syntastic'
-" }}}
-
 if filereadable(expand("~/.vimrc.bundles.local"))
     source ~/.vimrc.bundles.local
 endif
 
-if filereadable(expand("~/.vimrc.bundles.coc"))
-    source ~/.vimrc.bundles.coc
+if filereadable(expand("~/.vimrc.coc"))
+    source ~/.vimrc.coc
 endif
 
 call plug#end()
