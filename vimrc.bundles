@@ -169,11 +169,13 @@ Plug 'Lokaltog/vim-easymotion'
     map ' <Plug>(easymotion-prefix)
     nmap <Leader>' <Plug>(easymotion-overwin-w)
 
-Plug 'houtsnip/vim-emacscommandline'
+if !has('nvim')
+  Plug 'houtsnip/vim-emacscommandline'
+end
+Plug 'morhetz/gruvbox'
 " }}}
 
 " CtrlP or FZF {{{
-if !has('gui_running')
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
     let g:fzf_action = {
@@ -212,7 +214,6 @@ Plug 'junegunn/fzf.vim'
     " imap <c-x><c-f> <plug>(fzf-complete-file-ag)
     " imap <c-x><c-f> <plug>(fzf-complete-path)
     " imap <c-x><c-l> <plug>(fzf-complete-line)
-endif
 " }}}
 
 " GO {{{
@@ -224,7 +225,7 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
     " let g:go_addtags_transform = "camelcase"
     " let g:go_def_mode = 'godef'
     let g:go_def_mode='gopls'
-    " let g:go_info_mode='gopls'
+    let g:go_info_mode='gopls'
     let g:go_decls_includes = "func,type"
     " let g:go_fmt_autosave = 0
     let g:go_list_height = 10
@@ -292,6 +293,7 @@ Plug 'sebdah/vim-delve', { 'for': 'go' }
 Plug 'posva/vim-vue'
     autocmd BufRead,BufNewFile *.vue set filetype=vue
     autocmd FileType vue syntax sync fromstart
+    autocmd FileType vue MatchDebug
     let g:vue_pre_processors = []
 
 Plug 'Keithbsmiley/rspec.vim', { 'for': 'ruby' }
@@ -316,17 +318,6 @@ Plug 'yonchu/accelerated-smooth-scroll'
 " }}}
 
 " Snips {{{
-"
-" Plug 'SirVer/ultisnips'
-    " let g:UltiSnipsExpandTrigger="<tab>"
-    " " link to fzf Snippets
-    " " let g:UltiSnipsListSnippets="<c-h>"
-    " let g:UltiSnipsJumpForwardTrigger="<c-j>"
-    " let g:UltiSnipsJumpBackwardTrigger="<c-k>"
-    " let g:UltiSnipsEditSplit="vertical"
-    " nnoremap <silent> <leader>uu :UltiSnipsEdit<cr>
-    " nnoremap <silent> <leader>ue :UltiSnipsEdit<space>
-" Plug 'griffinqiu/vim-snippets'
 
 Plug 'mattn/emmet-vim'
     " let g:user_emmet_mode='i'

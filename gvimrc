@@ -81,9 +81,8 @@ set guioptions-=L
 set guioptions-=T
 
 set t_Co=256
-" colorscheme solarized
-colorscheme desert
 set background=dark
+colorscheme desert
 set mouse+=a
 set mousehide
 

@@ -1,4 +1,6 @@
 {
+  "suggest.autoTrigger": "none",
+	"suggest.noselect": false,
   "coc.preferences.formatOnSaveFiletypes": ["javascript", "html", "vue"],
   "vetur.format.defaultFormatter.html": "prettier",
   "languageserver": {

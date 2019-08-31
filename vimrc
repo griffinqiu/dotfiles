@@ -155,11 +155,13 @@ set spellfile=$HOME/Sync/vim-spell-en.utf-8.add
     " \options,tabpages,winsize,resize,winpos,winsize
 
 set formatoptions+=mM
-set ttymouse=xterm2
+if !has('nvim')
+  set ttymouse=xterm2
+end
 
 set showcmd
 set showmode
-set shortmess=atI
+set shortmess=atIc
 
 set nrformats=
 " set tags=tags
@@ -224,7 +226,7 @@ nnoremap <leader>ct :silent ! ctags -R --languages=ruby --exclude=.git --exclude
 " inoremap <C-k> <C-o>gk
 "
 inoremap <C-]> <C-x><C-]>
-inoremap <C-g> <C-x><C-o>
+" inoremap <C-g> <C-x><C-o>
 inoremap <C-l> <C-x><c-l>
 
 " Convert all tabs to spaces
@@ -248,11 +250,5 @@ map <leader>s? z=
 
 " Remove the Windows ^M - when the encodings gets messed up
 noremap <leader><leader>m mmHmt:%s/<C-V><cr>//ge<cr>'tzt'm
-
-if executable('p4')
-    nnoremap @p4a :!p4 add %:p<cr>
-    nnoremap @p4e :!p4 edit %:p<cr>
-    nnoremap @p4d :!p4 diff %<cr>
-endif
 
 " }}}
