@@ -1,11 +1,4 @@
 {
-	"list.insertMappings": {
-		"<C-c>": "do:exit",
-		"<C-d>": "do:stop",
-		"<C-t>": "action:tabe",
-		"<C-x>": "action:split",
-		"<C-v>": "action:vsplit"
-	},
   "suggest.autoTrigger": "none",
 	"suggest.noselect": false,
   "coc.preferences.formatOnSaveFiletypes": ["javascript", "html", "vue"],
@@ -25,5 +18,12 @@
       "settings": {}
     }
   },
+	"list.insertMappings": {
+		"<C-c>": "do:exit",
+		"<C-d>": "do:stop",
+		"<C-t>": "action:tabe",
+		"<C-x>": "action:split",
+		"<C-v>": "action:vsplit"
+	},
   "coc.preferences.extensionUpdateCheck": "weekly"
 }
