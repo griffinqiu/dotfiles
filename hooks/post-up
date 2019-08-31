@@ -15,6 +15,7 @@ brew "stress"
 brew "watch"
 brew "sysbench"
 brew "macvim"
+brew "--HEAD neovim"
 EOF
 
 if [ ! -e "$HOME"/.oh-my-zsh ]; then
