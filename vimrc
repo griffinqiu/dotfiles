@@ -230,7 +230,7 @@ inoremap <C-]> <C-x><C-]>
 inoremap <C-l> <C-x><c-l>
 
 " Convert all tabs to spaces
-map <leader>ct :retab<cr>
+" map <leader>ct :retab<cr>
 
 map <leader>co :botright copen<cr>
 
