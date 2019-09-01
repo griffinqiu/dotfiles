@@ -114,10 +114,9 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
     nnoremap <silent> <leader>1 :NERDTreeToggle<CR>
     nnoremap <silent> <leader>nf :NERDTreeFind<CR>
     let g:NERDTreeMapPreview = "p"
-    let g:NERDTreeMapOpenSplit = "s"
-    let g:NERDTreeMapPreviewSplit = "<c-s>"
-    let g:NERDTreeMapOpenVSplit = "v"
-    let g:NERDTreeMapPreviewVSplit = "<c-v>"
+    let g:NERDTreeMapOpenSplit = "<c-s>"
+    let g:NERDTreeMapOpenVSplit = "<c-v>"
+    let g:NERDTreeMapOpenInTab = "<c-t>"
     let g:NERDTreeMapToggleHidden = "I"
     let g:NERDTreeIgnore=['\.meta$', '\.pyc$']
     " Set opened dir to workspace dir
@@ -177,7 +176,7 @@ Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
     let g:fzf_action = {
         \ 'ctrl-t': 'tab split',
-        \ 'ctrl-x': 'split',
+        \ 'ctrl-s': 'split',
         \ 'ctrl-v': 'vsplit' }
     let $FZF_DEFAULT_OPTS = '--bind ctrl-s:select-all,ctrl-d:deselect-all'
 
