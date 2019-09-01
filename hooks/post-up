@@ -34,28 +34,14 @@ if [ ! -e "$HOME"/tmp ]; then
 fi
 
 if [ -e "$HOME"/.vim/autoload/plug.vim ]; then
-  vim -E -s +PlugUpgrade +qa
+  nvim -E -s +PlugUpgrade +qa
 else
   echo 'Initing plug.vim'
   curl -fLo "$HOME"/.vim/autoload/plug.vim --create-dirs \
       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 fi
-vim -u "$HOME"/.vimrc.bundles +PlugUpdate +PlugClean! +qa
-vim +"CocInstall -sync coc-json coc-tsserver coc-html coc-css coc-vetur coc-solargraph coc-highlight coc-prettier" +qa
+
+nvim +PlugUpdate +PlugClean! +qa
+nvim +"CocInstall -sync coc-json coc-tsserver coc-html coc-css coc-vetur coc-solargraph coc-highlight coc-prettier" +qa
 
 reset -Q
-
-# detect old OS X broken /etc/zshenv and suggest rename
-if grep -qw path_helper /etc/zshenv 2>/dev/null; then
-  dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
-
-  cat <<MSG >&2
-Warning: \`/etc/zshenv' configuration file on your system may cause unexpected
-PATH changes on subsequent invocations of the zsh shell. The solution is to
-rename the file to \`zprofile':
-  sudo mv /etc/{zshenv,zprofile}
-
-(called from ${dir}/post-up:${LINENO})
-
-MSG
-fi
