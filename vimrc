@@ -192,6 +192,7 @@ nnoremap gV `[v`]
 " Copy filename to clipboard
 nmap ,cn :let @*=expand("%"). ':' . line(".")<CR>
 nmap ,cs :let @*=expand("%")<CR>
+nmap ,cf :let @*=expand("%:t")<CR>
 nmap ,cl :let @*=expand("%:p")<CR>
 
 " Move to prev/next buffer

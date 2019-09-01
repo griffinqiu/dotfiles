@@ -169,9 +169,6 @@ Plug 'Lokaltog/vim-easymotion'
     map ' <Plug>(easymotion-prefix)
     nmap <Leader>' <Plug>(easymotion-overwin-w)
 
-if !has('nvim')
-  Plug 'houtsnip/vim-emacscommandline'
-end
 Plug 'morhetz/gruvbox'
 " }}}
 
@@ -290,6 +287,7 @@ Plug 'sebdah/vim-delve', { 'for': 'go' }
 " Plug 'kchmck/vim-coffee-script', { 'for': 'coffee' }
 " Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
 " Plug 'mxw/vim-jsx', { 'for': 'javascript' }
+Plug 'chrisbra/csv.vim'
 Plug 'posva/vim-vue'
     autocmd BufRead,BufNewFile *.vue set filetype=vue
     autocmd FileType vue syntax sync fromstart
@@ -341,23 +339,17 @@ Plug 'mattn/emmet-vim'
 " }}}
 
 " Airline {{{
-" Plug 'Lokaltog/vim-powerline'
-" Plug 'vim-airline/vim-airline'
-" Plug 'vim-airline/vim-airline-themes'
-    " let g:airline_theme='simple'
-    " let g:airline_powerline_fonts=1
-    " let g:airline#extensions#branch#enabled = 1
-    " let g:airline#extensions#branch#empty_message = ''
-    " let g:airline#extensions#syntastic#enabled = 1
-    " let g:airline#extensions#default#section_truncate_width = {
-        " \ 'b': 79,
-        " \ 'x': 60,
-        " \ 'y': 88,
-        " \ 'z': 45,
-        " \ }
-    " " disable summary of changed hunks under source control.
-    " let g:airline#extensions#hunks#enabled = 0
-" Plug 'edkolev/tmuxline.vim'
+Plug 'vim-airline/vim-airline'
+  " let g:airline_statusline_ontop=1
+  let g:airline#extensions#tabline#enabled = 1
+  let g:airline#extensions#tabline#formatter = 'unique_tail'
+  " let g:airline#extensions#default#section_truncate_width = {
+      " \ 'c': 200,
+      " \ 'x': 60,
+      " \ 'y': 88,
+      " \ 'z': 45,
+      " \ }
+Plug 'edkolev/tmuxline.vim'
     " let g:tmuxline_theme = 'icebert'
 " }}}
 
