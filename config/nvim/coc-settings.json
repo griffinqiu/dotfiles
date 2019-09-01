@@ -1,6 +1,6 @@
 {
   "suggest.autoTrigger": "none",
-	"suggest.noselect": false,
+  "suggest.noselect": false,
   "coc.preferences.formatOnSaveFiletypes": ["javascript", "html", "vue"],
   "vetur.format.defaultFormatter.html": "prettier",
   "languageserver": {
@@ -18,12 +18,13 @@
       "settings": {}
     }
   },
-	"list.insertMappings": {
-		"<C-c>": "do:exit",
-		"<C-d>": "do:stop",
-		"<C-t>": "action:tabe",
-		"<C-x>": "action:split",
-		"<C-v>": "action:vsplit"
-	},
+  "list.insertMappings": {
+    "<C-c>": "do:exit",
+    "<C-d>": "do:stop",
+    "<C-t>": "action:tabe",
+    "<C-x>": "action:split",
+    "<C-v>": "action:vsplit"
+  },
+  "snippets.ultisnips.directories": ["coc/ultisnips"],
   "coc.preferences.extensionUpdateCheck": "weekly"
 }
