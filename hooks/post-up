@@ -13,8 +13,7 @@ brew "ncdu"
 brew "diff-so-fancy"
 brew "stress"
 brew "watch"
-# brew "sysbench"
-brew "macvim"
+brew "sysbench"
 brew "neovim", args: ["HEAD"]
 cask "homebrew/cask-fonts/font-hack-nerd-font"
 EOF
@@ -35,14 +34,14 @@ if [ ! -e "$HOME"/tmp ]; then
 fi
 
 if [ -e "$HOME"/.vim/autoload/plug.vim ]; then
-  nvim -E -s +PlugUpgrade +qa
+  vim -E -s +PlugUpgrade +qa
 else
   echo 'Initing plug.vim'
   curl -fLo "$HOME"/.vim/autoload/plug.vim --create-dirs \
       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 fi
-nvim -u "$HOME"/.vimrc.bundles +PlugUpdate +PlugClean! +qa
-nvim +"CocInstall -sync coc-json coc-tsserver coc-html coc-css coc-vetur coc-solargraph coc-highlight coc-prettier" +qa
+vim -u "$HOME"/.vimrc.bundles +PlugUpdate +PlugClean! +qa
+vim +"CocInstall -sync coc-json coc-tsserver coc-html coc-css coc-vetur coc-solargraph coc-highlight coc-prettier" +qa
 
 reset -Q
 
