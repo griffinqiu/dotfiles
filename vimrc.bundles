@@ -342,22 +342,15 @@ Plug 'vim-airline/vim-airline'
   " let g:airline_statusline_ontop=1
   let g:airline#extensions#tabline#enabled = 1
   let g:airline#extensions#tabline#formatter = 'unique_tail'
-  " let g:airline#extensions#default#section_truncate_width = {
-      " \ 'c': 200,
-      " \ 'x': 60,
-      " \ 'y': 88,
-      " \ 'z': 45,
-      " \ }
 Plug 'edkolev/tmuxline.vim'
-    " let g:tmuxline_theme = 'icebert'
 " }}}
-
-if filereadable(expand("~/.vimrc.bundles.local"))
-    source ~/.vimrc.bundles.local
-endif
 
 if filereadable(expand("~/.vimrc.coc"))
     source ~/.vimrc.coc
+endif
+
+if filereadable(expand("~/.vimrc.bundles.local"))
+    source ~/.vimrc.bundles.local
 endif
 
 call plug#end()
