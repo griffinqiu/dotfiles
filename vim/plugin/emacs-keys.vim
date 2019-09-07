@@ -8,11 +8,6 @@
 " forward one character
 :cnoremap <C-F>		<Right>
 
-" recall previous (older) command-line
-:cnoremap <C-P>		<Up>
-" recall newer command-line
-:cnoremap <C-N>		<Down>
-
 " back one word
 :cnoremap <Esc><C-B>    <S-Left>
 " forward one word

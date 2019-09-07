@@ -172,6 +172,15 @@ set lazyredraw
 
 " }}}
 
+" Theme {{{
+" set background=light
+set background=dark
+let g:gruvbox_invert_selection=0
+let g:gruvbox_contrast_dark='soft'
+let g:gruvbox_contrast_light='soft'
+colorscheme gruvbox
+" }}}
+
 " Mapping {{{
 nnoremap k gk
 nnoremap gk k

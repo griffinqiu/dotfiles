@@ -2,19 +2,7 @@ set runtimepath^=~/.vim runtimepath+=~/.vim/after
 let &packpath = &runtimepath
 source ~/.vimrc
 
-" set background=light
-" hard medium soft
-" colorscheme solarized
-" colorscheme onehalflight
-set background=dark
-let g:gruvbox_hls_cursor='blue'
-let g:gruvbox_invert_selection=0
-let g:gruvbox_contrast_dark='soft'
-let g:gruvbox_contrast_light='soft'
-colorscheme gruvbox
-" let g:lightline.colorscheme='onehalfdark'
-
-
+" FZF as a popover {{{
 " 让输入上方，搜索列表在下方
 let $FZF_DEFAULT_OPTS = '--layout=reverse'
 
@@ -50,3 +38,4 @@ function! OpenFloatingWin()
         \ norelativenumber
         \ signcolumn=no
 endfunction
+" }}}

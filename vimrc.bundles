@@ -342,7 +342,14 @@ Plug 'vim-airline/vim-airline'
   " let g:airline_statusline_ontop=1
   let g:airline#extensions#tabline#enabled = 1
   let g:airline#extensions#tabline#formatter = 'unique_tail'
-Plug 'edkolev/tmuxline.vim'
+
+" " Useage
+" " 1. Chose theme in vim
+" " :Tmuxline [theme] [preset]
+" " 2. Save snapshot to tmux.conf
+" " :TmuxlineSnapshot! ~/dotfiles/tmux-style.conf
+" Plug 'edkolev/tmuxline.vim'
+" }}}
 " }}}
 
 if filereadable(expand("~/.vimrc.coc"))

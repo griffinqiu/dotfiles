@@ -24,9 +24,7 @@ if(has("win32") || has("win64"))
       silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3 . eq
     endfunction
 
-    "set guifont=Monaco:h10:cANSI
-    set gfn=Bitstream\ Vera\ Sans\ Mono:h14
-
+    set gfn=Hack\ Nerd\ Font:h16
     set langmenu=en_US
     let $LANG='en_US'
     source $VIMRUNTIME/delmenu.vim
@@ -81,8 +79,8 @@ set guioptions-=L
 set guioptions-=T
 
 set t_Co=256
-set background=dark
-colorscheme desert
+" set background=dark
+" colorscheme desert
 set mouse+=a
 set mousehide
 
