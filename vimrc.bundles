@@ -1,24 +1,24 @@
 if &compatible
-    set nocompatible
+  set nocompatible
 end
 
 " Shim command and function to allow migration from Vundle to vim-plug. {{{
 function! VundleToPlug(vundle_command, arg, ...)
-    echom "You are using Vundle's `".a:vundle_command."` command to declare plugins. Dotfiles now uses vim-plug for plugin management. Please rename uses of `".a:vundle_command."` to `Plug`. Plugin was '".a:arg."'."
-    let vim_plug_options = {}
+  echom "You are using Vundle's `".a:vundle_command."` command to declare plugins. Dotfiles now uses vim-plug for plugin management. Please rename uses of `".a:vundle_command."` to `Plug`. Plugin was '".a:arg."'."
+  let vim_plug_options = {}
 
-    if a:0 > 0
-        if has_key(a:1, 'name')
-            let name = a:1.name
-            let vim_plug_options.dir = "$HOME/.vim/bundle/".a:1.name
-        endif
-
-        if has_key(a:1, 'rtp')
-            let vim_plug_options.rtp = a:1.rtp
-        endif
+  if a:0 > 0
+    if has_key(a:1, 'name')
+      let name = a:1.name
+      let vim_plug_options.dir = "$HOME/.vim/bundle/".a:1.name
     endif
 
-    Plug a:arg, vim_plug_options
+    if has_key(a:1, 'rtp')
+      let vim_plug_options.rtp = a:1.rtp
+    endif
+  endif
+
+  Plug a:arg, vim_plug_options
 endfunction
 
 com! -nargs=+ -bar Plugin call VundleToPlug("Plugin", <args>)
@@ -33,38 +33,38 @@ Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
 " Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-surround'
-    let g:surround_no_insert_mappings = 1
-    imap <C-d> <Plug>Isurround
-    imap <C-e> <Plug>ISurround
+  let g:surround_no_insert_mappings = 1
+  imap <C-d> <Plug>Isurround
+  imap <C-e> <Plug>ISurround
 Plug 'tpope/vim-abolish'
-    " MixedCase (crm)
-    " camelCase (crc)
-    " snake_case (crs) or (cr_)
-    " UPPER_CASE (cru)
-    " dash-case (cr-)
-    " dot.case (cr.)
-    " space case (cr<space>)
-    " and Title Case (crt)
+  " MixedCase (crm)
+  " camelCase (crc)
+  " snake_case (crs) or (cr_)
+  " UPPER_CASE (cru)
+  " dash-case (cr-)
+  " dot.case (cr.)
+  " space case (cr<space>)
+  " and Title Case (crt)
 " }}}
 
 " Git {{{
 Plug 'mhinz/vim-signify'
-    let g:signify_vcs_list = ['git']
-    omap ic <plug>(signify-motion-inner-pending)
-    xmap ic <plug>(signify-motion-inner-visual)
-    omap ac <plug>(signify-motion-outer-pending)
-    xmap ac <plug>(signify-motion-outer-visual)
-    nnoremap <leader>gt :SignifyToggle<CR>
-    nnoremap <leader>gh :SignifyToggleHighlight<CR>
-    nmap ]g <plug>(signify-next-hunk)
-    nmap [g <plug>(signify-prev-hunk)
-    nmap ]G 9999]g
-    nmap [G 9999[g
-    " nnoremap <leader>gr :SignifyRefresh<CR>
+  let g:signify_vcs_list = ['git']
+  omap ic <plug>(signify-motion-inner-pending)
+  xmap ic <plug>(signify-motion-inner-visual)
+  omap ac <plug>(signify-motion-outer-pending)
+  xmap ac <plug>(signify-motion-outer-visual)
+  nnoremap <leader>gt :SignifyToggle<CR>
+  nnoremap <leader>gh :SignifyToggleHighlight<CR>
+  nmap ]g <plug>(signify-next-hunk)
+  nmap [g <plug>(signify-prev-hunk)
+  nmap ]G 9999]g
+  nmap [G 9999[g
+  " nnoremap <leader>gr :SignifyRefresh<CR>
 Plug 'tpope/vim-fugitive'
-    nnoremap <Leader>gb :Gblame<CR>
+  nnoremap <Leader>gb :Gblame<CR>
 Plug 'tpope/vim-rhubarb'
-    " :Gbrowse
+  " :Gbrowse
 " }}}
 
 " kana/vim-textobj-user {{{
@@ -101,72 +101,72 @@ Plug 'christoomey/vim-sort-motion'
 Plug 'AndrewRadev/splitjoin.vim'
 
 Plug 'rizzatti/dash.vim'
-    nmap <silent> <leader>d <Plug>DashSearch
+  nmap <silent> <leader>d <Plug>DashSearch
 
 Plug 'vim-scripts/matchit.zip'
 Plug 'godlygeek/tabular'
-    vmap <leader>tz :Tabularize /=
+  vmap <leader>tz :Tabularize /=
 Plug 'liangfeng/vimcdoc'
 " }}}
 
 " Browse, Jump, motion {{{
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
-    nnoremap <silent> <leader>1 :NERDTreeToggle<CR>
-    nnoremap <silent> <leader>nf :NERDTreeFind<CR>
-    let g:NERDTreeMapPreview = "p"
-    let g:NERDTreeMapOpenSplit = "<c-s>"
-    let g:NERDTreeMapOpenVSplit = "<c-v>"
-    let g:NERDTreeMapOpenInTab = "<c-t>"
-    let g:NERDTreeMapToggleHidden = "I"
-    let g:NERDTreeIgnore=['\.meta$', '\.pyc$']
-    " Set opened dir to workspace dir
-    let NERDTreeChDirMode = 2
-    " let NERDTreeWinPos = 'right'
-    let NERDTreeShowBookmarks = 1
-    let NERDTreeWinSize = 30
+  nnoremap <silent> <leader>1 :NERDTreeToggle<CR>
+  nnoremap <silent> <leader>nf :NERDTreeFind<CR>
+  let g:NERDTreeMapPreview = "p"
+  let g:NERDTreeMapOpenSplit = "<c-s>"
+  let g:NERDTreeMapOpenVSplit = "<c-v>"
+  let g:NERDTreeMapOpenInTab = "<c-t>"
+  let g:NERDTreeMapToggleHidden = "I"
+  let g:NERDTreeIgnore=['\.meta$', '\.pyc$']
+  " Set opened dir to workspace dir
+  let NERDTreeChDirMode = 2
+  " let NERDTreeWinPos = 'right'
+  let NERDTreeShowBookmarks = 1
+  let NERDTreeWinSize = 30
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'scrooloose/nerdcommenter'
-    let g:NERDSpaceDelims=1
+  let g:NERDSpaceDelims=1
 
 Plug 'griffinqiu/star-search'
 Plug 'dyng/ctrlsf.vim'
-    nmap <C-G>g <Plug>CtrlSFPrompt
-    nmap <C-G>G <Plug>CtrlSFCwordPath
-    nmap <C-G><C-G> <Plug>CtrlSFCwordExec
-    vmap <C-G>g <Plug>CtrlSFVwordPath
-    vmap <C-G>G <Plug>CtrlSFVwordPath
-    vmap <C-G><C-G> <Plug>CtrlSFVwordExec
-    nmap <C-G>p <Plug>CtrlSFPwordPath
-    nmap <C-G><C-P> <Plug>CtrlSFPwordExec
-    nnoremap <C-G><C-O> :CtrlSFOpen<CR>
-    nmap <C-G>l <Plug>CtrlSFQuickfixPrompt
-    vmap <C-G>l <Plug>CtrlSFQuilkfixVwordPath
-    vmap <C-G>L <Plug>CtrSFQuickfixVwordPath
-    vmap <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
-    nmap <silent><leader>3 :CtrlSFToggle<CR>
-    let g:ctrlsf_toggle_map_key = '<leader>3'
-    let g:ctrlsf_mapping = {
-        \ "next": "<c-n>",
-        \ "prev": "<c-p>",
-        \ }
-    let g:ctrlsf_auto_close = 0
-    let g:ctrlsf_open_left = 0
-    let g:ctrlsf_position = 'right'
-    let g:ctrlsf_winsize = '30%'
-    "let g:ctrlsf_context = '-B 5 -A 3'
-    " let g:ctrlsf_debug_mode = 1
-    " let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp']
-    nnoremap \ :CtrlSF -filetype ruby<SPACE>
+  nmap <C-G>g <Plug>CtrlSFPrompt
+  nmap <C-G>G <Plug>CtrlSFCwordPath
+  nmap <C-G><C-G> <Plug>CtrlSFCwordExec
+  vmap <C-G>g <Plug>CtrlSFVwordPath
+  vmap <C-G>G <Plug>CtrlSFVwordPath
+  vmap <C-G><C-G> <Plug>CtrlSFVwordExec
+  nmap <C-G>p <Plug>CtrlSFPwordPath
+  nmap <C-G><C-P> <Plug>CtrlSFPwordExec
+  nnoremap <C-G><C-O> :CtrlSFOpen<CR>
+  nmap <C-G>l <Plug>CtrlSFQuickfixPrompt
+  vmap <C-G>l <Plug>CtrlSFQuilkfixVwordPath
+  vmap <C-G>L <Plug>CtrSFQuickfixVwordPath
+  vmap <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
+  nmap <silent><leader>3 :CtrlSFToggle<CR>
+  let g:ctrlsf_toggle_map_key = '<leader>3'
+  let g:ctrlsf_mapping = {
+    \ "next": "<c-n>",
+    \ "prev": "<c-p>",
+    \ }
+  let g:ctrlsf_auto_close = 0
+  let g:ctrlsf_open_left = 0
+  let g:ctrlsf_position = 'right'
+  let g:ctrlsf_winsize = '30%'
+  "let g:ctrlsf_context = '-B 5 -A 3'
+  " let g:ctrlsf_debug_mode = 1
+  " let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp']
+  nnoremap \ :CtrlSF -filetype ruby<SPACE>
 
 " Plug 'terryma/vim-multiple-cursors'
-    " let g:multi_cursor_start_key='<c-n>'
-    " let g:multi_cursor_start_word_key='g<c-n>'
-    " let g:multi_cursor_quit_key = '<Esc>'
+  " let g:multi_cursor_start_key='<c-n>'
+  " let g:multi_cursor_start_word_key='g<c-n>'
+  " let g:multi_cursor_quit_key = '<Esc>'
 
 Plug 'Lokaltog/vim-easymotion'
-    " let g:EasyMotion_leader_key = "'"
-    map ' <Plug>(easymotion-prefix)
-    nmap <Leader>' <Plug>(easymotion-overwin-w)
+  " let g:EasyMotion_leader_key = "'"
+  map ' <Plug>(easymotion-prefix)
+  nmap <Leader>' <Plug>(easymotion-overwin-w)
 
 Plug 'morhetz/gruvbox'
 " }}}
@@ -174,107 +174,107 @@ Plug 'morhetz/gruvbox'
 " CtrlP or FZF {{{
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
-    let g:fzf_action = {
-        \ 'ctrl-t': 'tab split',
-        \ 'ctrl-s': 'split',
-        \ 'ctrl-v': 'vsplit' }
-    let $FZF_DEFAULT_OPTS = '--bind ctrl-s:select-all,ctrl-d:deselect-all'
+  let g:fzf_action = {
+    \ 'ctrl-t': 'tab split',
+    \ 'ctrl-s': 'split',
+    \ 'ctrl-v': 'vsplit' }
+  let $FZF_DEFAULT_OPTS = '--bind ctrl-s:select-all,ctrl-d:deselect-all'
 
-    nnoremap <c-p> :GitFiles<CR>
-    nnoremap <leader>fg :GitFiles<CR>
-    nnoremap <leader>fgs :GFiles?<CR>
-    nnoremap <leader>ff :Files<CR>
-    nnoremap <leader>fd :Buffers<CR>
-    nnoremap <leader>ft :Tags<CR>
-    nnoremap <leader>fbt :BTags<CR>
-    nnoremap <leader>fc :Commits<CR>
-    nnoremap <leader>fbc :BCommits<CR>
-    nnoremap <leader>fl :Lines<CR>
-    nnoremap <leader>fbl :BLines<CR>
-    nnoremap <leader>fm :Marks<CR>
-    nnoremap <leader>fw :Windows<CR>
-    nnoremap <leader>fh :History<CR>
-    nnoremap <leader>f: :History:<CR>
-    nnoremap <leader>f/ :History/<CR>
-    nnoremap <leader>fC :Commands<CR>
-    nmap <leader>fmn :call fzf#vim#maps('n', 0)<cr>
-    nmap <leader>fmi :call fzf#vim#maps('i', 0)<cr>
-    nmap <leader>fmx :call fzf#vim#maps('x', 0)<cr>
-    nmap <leader>fmo :call fzf#vim#maps('o', 0)<cr>
-    nnoremap <leader>fu :Snippets<CR>
-    " nnoremap <leader>ag :Ag<CR>
-    " nnoremap <leader>agt :Agt<CR>
-    nnoremap <silent> <leader>at :let @"=&filetype \| Agt --<C-R>" <C-R><C-W><CR>
+  nnoremap <c-p> :GitFiles<CR>
+  nnoremap <leader>fg :GitFiles<CR>
+  nnoremap <leader>fgs :GFiles?<CR>
+  nnoremap <leader>ff :Files<CR>
+  nnoremap <leader>fd :Buffers<CR>
+  nnoremap <leader>ft :Tags<CR>
+  nnoremap <leader>fbt :BTags<CR>
+  nnoremap <leader>fc :Commits<CR>
+  nnoremap <leader>fbc :BCommits<CR>
+  nnoremap <leader>fl :Lines<CR>
+  nnoremap <leader>fbl :BLines<CR>
+  nnoremap <leader>fm :Marks<CR>
+  nnoremap <leader>fw :Windows<CR>
+  nnoremap <leader>fh :History<CR>
+  nnoremap <leader>f: :History:<CR>
+  nnoremap <leader>f/ :History/<CR>
+  nnoremap <leader>fC :Commands<CR>
+  nmap <leader>fmn :call fzf#vim#maps('n', 0)<cr>
+  nmap <leader>fmi :call fzf#vim#maps('i', 0)<cr>
+  nmap <leader>fmx :call fzf#vim#maps('x', 0)<cr>
+  nmap <leader>fmo :call fzf#vim#maps('o', 0)<cr>
+  nnoremap <leader>fu :Snippets<CR>
+  " nnoremap <leader>ag :Ag<CR>
+  " nnoremap <leader>agt :Agt<CR>
+  nnoremap <silent> <leader>at :let @"=&filetype \| Agt --<C-R>" <C-R><C-W><CR>
 
-    " imap <c-x><c-k> <plug>(fzf-complete-word)
-    " imap <c-x><c-f> <plug>(fzf-complete-file-ag)
-    " imap <c-x><c-f> <plug>(fzf-complete-path)
-    " imap <c-x><c-l> <plug>(fzf-complete-line)
+  " imap <c-x><c-k> <plug>(fzf-complete-word)
+  " imap <c-x><c-f> <plug>(fzf-complete-file-ag)
+  " imap <c-x><c-f> <plug>(fzf-complete-path)
+  " imap <c-x><c-l> <plug>(fzf-complete-line)
 " }}}
 
 " GO {{{
 Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
-    " let g:go_fmt_command = "goimports"
-    let g:go_fmt_command = "gofmt"
-    let g:go_fmt_fail_silently = 1
-    let g:go_highlight_trailing_whitespace_error = 0
-    " let g:go_addtags_transform = "camelcase"
-    " let g:go_def_mode = 'godef'
-    let g:go_def_mode='gopls'
-    let g:go_info_mode='gopls'
-    let g:go_decls_includes = "func,type"
-    " let g:go_fmt_autosave = 0
-    let g:go_list_height = 10
-    let g:go_list_type='locationlist'
-    " run :GoBuild or :GoTestCompile based on the go file
-    function! s:build_go_files()
-      let l:file = expand('%')
-      if l:file =~# '^\f\+_test\.go$'
-        call go#test#Test(0, 1)
-      elseif l:file =~# '^\f\+\.go$'
-        call go#cmd#Build(0)
-      endif
-    endfunction
-    " Mappings or Tips
-    " - <c-x><c-o>
-    " - <c-]>
-    " - vif
-    " - gJ
-    " - gS
-    " - GoDoc
-    " - GoDocBrowser
-    " - GoDef
-    " - gd or c-]
-    " - c-t
-    " - c-o
-    " - c-i
-    " - GoDefStack
-    " - GoSameIds
-    " - GoRename
-    " - GoFreevars
-    " - GoReferrers
-    " - GoDescribe
-    " - GoImplements
-    " - GoWhicherrs
-    " - GoChannelPeers
-    " - GoCallees
-    " - GoCallers
-    " - GoImpl
-    " - GoPlay
-    autocmd FileType go nmap <leader>gg :<C-u>call <SID>build_go_files()<CR>
-    " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
-    autocmd FileType go nmap <leader>gr  <Plug>(go-run)
-    autocmd FileType go nmap <leader>gi  <Plug>(go-imports)
-    autocmd FileType go nmap <leader>gI :GoImport<SPACE>
-    autocmd FileType go nmap <leader>gf  <Plug>(go-test-func)
-    autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
-    autocmd FileType go nmap <leader>gd  :GoDeclsDir<cr>
-    " autocmd FileType go nmap <Leader>gi <Plug>(go-info)
-    autocmd FileType go nmap <Leader>gh <Plug>(go-sameids-toggle)
-    autocmd Filetype go command! -bang A  call go#alternate#Switch(<bang>0, 'edit')
-    autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
-    autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
-    autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
+  " let g:go_fmt_command = "goimports"
+  let g:go_fmt_command = "gofmt"
+  let g:go_fmt_fail_silently = 1
+  let g:go_highlight_trailing_whitespace_error = 0
+  " let g:go_addtags_transform = "camelcase"
+  " let g:go_def_mode = 'godef'
+  let g:go_def_mode='gopls'
+  let g:go_info_mode='gopls'
+  let g:go_decls_includes = "func,type"
+  " let g:go_fmt_autosave = 0
+  let g:go_list_height = 10
+  let g:go_list_type='locationlist'
+  " run :GoBuild or :GoTestCompile based on the go file
+  function! s:build_go_files()
+   let l:file = expand('%')
+   if l:file =~# '^\f\+_test\.go$'
+    call go#test#Test(0, 1)
+   elseif l:file =~# '^\f\+\.go$'
+    call go#cmd#Build(0)
+   endif
+  endfunction
+  " Mappings or Tips
+  " - <c-x><c-o>
+  " - <c-]>
+  " - vif
+  " - gJ
+  " - gS
+  " - GoDoc
+  " - GoDocBrowser
+  " - GoDef
+  " - gd or c-]
+  " - c-t
+  " - c-o
+  " - c-i
+  " - GoDefStack
+  " - GoSameIds
+  " - GoRename
+  " - GoFreevars
+  " - GoReferrers
+  " - GoDescribe
+  " - GoImplements
+  " - GoWhicherrs
+  " - GoChannelPeers
+  " - GoCallees
+  " - GoCallers
+  " - GoImpl
+  " - GoPlay
+  autocmd FileType go nmap <leader>gg :<C-u>call <SID>build_go_files()<CR>
+  " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
+  autocmd FileType go nmap <leader>gr  <Plug>(go-run)
+  autocmd FileType go nmap <leader>gi  <Plug>(go-imports)
+  autocmd FileType go nmap <leader>gI :GoImport<SPACE>
+  autocmd FileType go nmap <leader>gf  <Plug>(go-test-func)
+  autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
+  autocmd FileType go nmap <leader>gd  :GoDeclsDir<cr>
+  " autocmd FileType go nmap <Leader>gi <Plug>(go-info)
+  autocmd FileType go nmap <Leader>gh <Plug>(go-sameids-toggle)
+  autocmd Filetype go command! -bang A  call go#alternate#Switch(<bang>0, 'edit')
+  autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
+  autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+  autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
 Plug 'Shougo/vimshell.vim', { 'for': 'go' }
 Plug 'Shougo/vimproc.vim', { 'for': 'go', 'do' : 'make'}
 Plug 'sebdah/vim-delve', { 'for': 'go' }
@@ -288,10 +288,10 @@ Plug 'sebdah/vim-delve', { 'for': 'go' }
 " Plug 'mxw/vim-jsx', { 'for': 'javascript' }
 Plug 'chrisbra/csv.vim'
 Plug 'posva/vim-vue'
-    autocmd BufRead,BufNewFile *.vue set filetype=vue
-    autocmd FileType vue syntax sync fromstart
-    autocmd FileType vue MatchDebug
-    let g:vue_pre_processors = []
+  autocmd BufRead,BufNewFile *.vue set filetype=vue
+  autocmd FileType vue syntax sync fromstart
+  autocmd FileType vue MatchDebug
+  let g:vue_pre_processors = []
 
 Plug 'Keithbsmiley/rspec.vim', { 'for': 'ruby' }
 Plug 'ecomba/vim-ruby-refactoring', { 'for': 'ruby' }
@@ -301,15 +301,15 @@ Plug 'tpope/vim-rbenv', { 'for': 'ruby' }
 Plug 'tpope/vim-bundler', { 'for': 'ruby' }
 Plug 'tpope/vim-pathogen', { 'for': 'ruby' }
 " Plug 'griffinqiu/vim-i18n'
-    " vmap <leader>zz :call I18nTranslateString()<CR>
-    " vmap <leader>zd :call I18nDisplayTranslation()<CR>
+  " vmap <leader>zz :call I18nTranslateString()<CR>
+  " vmap <leader>zd :call I18nDisplayTranslation()<CR>
 Plug 'AndrewRadev/switch.vim'
-    let g:switch_mapping = "-"
+  let g:switch_mapping = "-"
 
 Plug 'plasticboy/vim-markdown'
 Plug 'mzlogin/vim-markdown-toc'
-    let g:vim_markdown_folding_disabled=1
-    let g:vim_markdown_initial_foldlevel=1
+  let g:vim_markdown_folding_disabled=1
+  let g:vim_markdown_initial_foldlevel=1
 
 Plug 'yonchu/accelerated-smooth-scroll'
 " }}}
@@ -317,31 +317,31 @@ Plug 'yonchu/accelerated-smooth-scroll'
 " Snips {{{
 
 Plug 'mattn/emmet-vim'
-    " let g:user_emmet_mode='i'
-    let g:user_emmet_mode='i'
-    autocmd FileType html,css,less,sass,eruby,erb,javascript,jsx,vue EmmetInstall
-    let g:user_emmet_leader_key='<c-e>'
-    let g:user_emmet_expandabbr_key='<c-e><c-e>'
-    let g:user_emmet_expandword_key = '<C-e>v'
-    let g:user_emmet_update_tag = '<C-e>u'
-    let g:user_emmet_next_key='<C-e>n'
-    let g:user_emmet_prev_key='<C-e>p'
+  " let g:user_emmet_mode='i'
+  let g:user_emmet_mode='i'
+  autocmd FileType html,css,less,sass,eruby,erb,javascript,jsx,vue EmmetInstall
+  let g:user_emmet_leader_key='<c-e>'
+  let g:user_emmet_expandabbr_key='<c-e><c-e>'
+  let g:user_emmet_expandword_key = '<C-e>v'
+  let g:user_emmet_update_tag = '<C-e>u'
+  let g:user_emmet_next_key='<C-e>n'
+  let g:user_emmet_prev_key='<C-e>p'
 
-    let g:user_emmet_settings = {
-    \  'html' : {
-    \      'quote_char': "'",
-    \  },
-    \  'javascript' : {
-    \      'extends' : 'jsx',
-    \  }
-    \}
+  let g:user_emmet_settings = {
+  \  'html' : {
+  \      'quote_char': "'",
+  \  },
+  \  'javascript' : {
+  \      'extends' : 'jsx',
+  \  }
+  \}
 " }}}
 
 " Airline {{{
 Plug 'vim-airline/vim-airline'
-  " let g:airline_statusline_ontop=1
-  let g:airline#extensions#tabline#enabled = 1
-  let g:airline#extensions#tabline#formatter = 'unique_tail'
+ " let g:airline_statusline_ontop=1
+ let g:airline#extensions#tabline#enabled = 1
+ let g:airline#extensions#tabline#formatter = 'unique_tail'
 
 " " Useage
 " " 1. Chose theme in vim
@@ -353,11 +353,11 @@ Plug 'vim-airline/vim-airline'
 " }}}
 
 if !has("gui_running") && filereadable(expand("~/.vimrc.coc"))
-    source ~/.vimrc.coc
+  source ~/.vimrc.coc
 endif
 
 if filereadable(expand("~/.vimrc.bundles.local"))
-    source ~/.vimrc.bundles.local
+  source ~/.vimrc.bundles.local
 endif
 
 call plug#end()

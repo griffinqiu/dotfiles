@@ -40,33 +40,33 @@ set sidescrolloff=10
 " set list listchars=tab:»·,trail:·,nbsp:·
 
 if filereadable(expand("~/.vimrc.bundles"))
-    source ~/.vimrc.bundles
+  source ~/.vimrc.bundles
 endif
 
 set nocompatible
 filetype plugin indent on
 augroup vimrcEx
-    autocmd!
+  autocmd!
 
-    " When editing a file, always jump to the last known cursor position.
-    " Don't do it for commit messages, when the position is invalid, or when
-    " inside an event handler (happens when dropping a file on gvim).
-    autocmd BufReadPost *
-        \ if &ft != 'gitcommit' && line("'\"") > 0 && line("'\"") <= line("$") |
-        \     exe "normal g`\"" |
-        \ endif
+  " When editing a file, always jump to the last known cursor position.
+  " Don't do it for commit messages, when the position is invalid, or when
+  " inside an event handler (happens when dropping a file on gvim).
+  autocmd BufReadPost *
+    \ if &ft != 'gitcommit' && line("'\"") > 0 && line("'\"") <= line("$") |
+    \     exe "normal g`\"" |
+    \ endif
 
-    " Set syntax highlighting for specific file types
-    autocmd BufRead,BufNewFile Appraisals set filetype=ruby
-    autocmd BufRead,BufNewFile *.{md,mdown,mkd,mkdn,markdown,mdwn} set filetype=markdown
-    autocmd FileType c set omnifunc=ccomplete#Complete
-    autocmd FileType python set omnifunc=pythoncomplete#Complete
-    " autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
-    autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
-    autocmd FileType css set omnifunc=csscomplete#CompleteCSS
-    autocmd FileType php set omnifunc=phpcomplete#CompletePHP
-    autocmd FileType sql set omnifunc=sqlcomplete#Completesql
-    autocmd FileType css,scss,less,html setl iskeyword+=-
+  " Set syntax highlighting for specific file types
+  autocmd BufRead,BufNewFile Appraisals set filetype=ruby
+  autocmd BufRead,BufNewFile *.{md,mdown,mkd,mkdn,markdown,mdwn} set filetype=markdown
+  autocmd FileType c set omnifunc=ccomplete#Complete
+  autocmd FileType python set omnifunc=pythoncomplete#Complete
+  " autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
+  autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
+  autocmd FileType css set omnifunc=csscomplete#CompleteCSS
+  autocmd FileType php set omnifunc=phpcomplete#CompletePHP
+  autocmd FileType sql set omnifunc=sqlcomplete#Completesql
+  autocmd FileType css,scss,less,html setl iskeyword+=-
 augroup END
 
 " When the type of shell script is /bin/sh, assume a POSIX-compatible
@@ -74,11 +74,11 @@ augroup END
 let g:is_posix = 1
 
 if v:version >= 703
-    set undofile
-    set undodir=~/tmp
+  set undofile
+  set undodir=~/tmp
 endif
 if v:version >= 800
-    set tagcase=match
+  set tagcase=match
 endif
 set backupdir=~/tmp/backups
 set directory=~/tmp/
@@ -146,8 +146,8 @@ set complete-=t
 set spellfile=$HOME/Sync/vim-spell-en.utf-8.add
 
 " set sessionoptions=
-    " \blank,buffers,curdir,folds,globals,help,localoptions,
-    " \options,tabpages,winsize,resize,winpos,winsize
+  " \blank,buffers,curdir,folds,globals,help,localoptions,
+  " \options,tabpages,winsize,resize,winpos,winsize
 
 set formatoptions+=mM
 if !has('nvim')
