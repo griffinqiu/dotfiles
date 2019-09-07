@@ -288,10 +288,29 @@ Plug 'sebdah/vim-delve', { 'for': 'go' }
 " Plug 'mxw/vim-jsx', { 'for': 'javascript' }
 Plug 'chrisbra/csv.vim'
 Plug 'posva/vim-vue'
-  autocmd BufRead,BufNewFile *.vue set filetype=vue
-  autocmd FileType vue syntax sync fromstart
-  autocmd FileType vue MatchDebug
+  " autocmd BufRead,BufNewFile *.vue set filetype=vue
   let g:vue_pre_processors = []
+  autocmd FileType vue MatchDebug
+  let g:ft = ''
+  fu! NERDCommenter_before()
+    if &ft == 'vue'
+      let g:ft = 'vue'
+      let stack = synstack(line('.'), col('.'))
+      if len(stack) > 0
+        let syn = synIDattr((stack)[0], 'name')
+        if len(syn) > 0
+          let syn = tolower(syn)
+          exe 'setf '.syn
+        endif
+      endif
+    endif
+  endfu
+  fu! NERDCommenter_after()
+    if g:ft == 'vue'
+      setf vue
+      g:ft
+    endif
+  endfu
 
 Plug 'Keithbsmiley/rspec.vim', { 'for': 'ruby' }
 Plug 'ecomba/vim-ruby-refactoring', { 'for': 'ruby' }
