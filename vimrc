@@ -182,13 +182,8 @@ nnoremap gk k
 nnoremap j gj
 nnoremap gj j
 
-nnoremap gT :tabprevious<CR>
-nnoremap gt :tabnext<CR>
-nnoremap t<C-]> :tabnew %<CR>g<C-]>
-" vnoremap t<C-]> <Esc>:tabnew %<CR>gvg<C-]>
-
-" nnoremap B ^
-" nnoremap E $
+nnoremap B ^
+nnoremap E $
 
 " highlight last inserted text
 nnoremap gV `[v`]
@@ -204,6 +199,8 @@ noremap <right> gt
 noremap <left>  gT
 noremap <up> :lprevious<CR>
 noremap <down>  :lnext<CR>
+nnoremap gT :tabprevious<CR>
+nnoremap gt :tabnext<CR>
 
 noremap <silent> <C-s> :update!<CR>
 vnoremap <silent> <C-s> <C-c>:update!<CR>
@@ -217,6 +214,8 @@ nnoremap g, g,zz
 
 nmap <leader><c-g> <c-g>
 nmap <leader><c-l> <c-l>
+
+nnoremap t<C-]> :tabnew %<CR>g<C-]>
 nnoremap <leader>ct :silent ! ctags -R --languages=ruby --exclude=.git --exclude=log -f tags<cr>
 
 " inoremap <C-e> <C-k>
@@ -230,9 +229,9 @@ nnoremap <leader>ct :silent ! ctags -R --languages=ruby --exclude=.git --exclude
 " inoremap <C-j> <C-o>gj
 " inoremap <C-k> <C-o>gk
 "
-inoremap <C-]> <C-x><C-]>
+imap <C-]> <C-x><C-]>
 " inoremap <C-g> <C-x><C-o>
-inoremap <C-l> <C-x><c-l>
+imap <C-l> <C-x><c-l>
 
 " Convert all tabs to spaces
 " map <leader>ct :retab<cr>
@@ -241,10 +240,7 @@ map <leader>co :botright copen<cr>
 
 " When pressing <leader>cd switch to the directory of the open buffer
 map <leader>cd :cd %:p:h<cr>
-
 map <silent> <leader><cr> :nohlsearch<cr>
-map <silent> <leader><bs> :set noincsearch<cr>
-map <silent> <leader><leader><bs> :set incsearch<cr>
 
 " Spell
 map <leader>ss :setlocal spell!<cr>
