@@ -3,6 +3,9 @@
 " end of line
 :cnoremap <C-E>		<End>
 
+" multiple lines
+:cnoremap <C-G>     <C-F>
+
 " back one character
 :cnoremap <C-B>		<Left>
 " forward one character
@@ -12,6 +15,3 @@
 :cnoremap <Esc><C-B>    <S-Left>
 " forward one word
 :cnoremap <Esc><C-F>    <S-Right>
-
-" search command line
-:cnoremap <C-R>     <C-F>?
