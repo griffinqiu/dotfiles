@@ -5,6 +5,7 @@ map <space> <nop>
 let mapleader = " "
 " let g:mapleader = " "
 
+syntax on
 set encoding=utf-8
 set fileencodings=utf-8,chinese,latin-1
 set fileformats=unix,dos,mac
@@ -37,12 +38,6 @@ set sidescroll=1 " zh zl
 set sidescrolloff=10
 " set nolist
 " set list listchars=tab:»·,trail:·,nbsp:·
-
-" Switch syntax highlighting on, when the terminal has colors
-" Also switch on highlighting the last used search pattern.
-if (&t_Co > 2 || has("gui_running")) && !exists("syntax_on")
-    syntax on
-endif
 
 if filereadable(expand("~/.vimrc.bundles"))
     source ~/.vimrc.bundles
