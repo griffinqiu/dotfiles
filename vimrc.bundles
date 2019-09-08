@@ -31,7 +31,6 @@ call plug#begin()
 " Tpopes' :) {{{
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
-" Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-surround'
   let g:surround_no_insert_mappings = 1
   imap <C-d> <Plug>Isurround
@@ -44,7 +43,7 @@ Plug 'tpope/vim-abolish'
   " dash-case (cr-)
   " dot.case (cr.)
   " space case (cr<space>)
-  " and Title Case (crt)
+  " Title Case (crt)
 " }}}
 
 " Git {{{
@@ -69,29 +68,15 @@ Plug 'tpope/vim-rhubarb'
 
 " kana/vim-textobj-user {{{
 Plug 'kana/vim-textobj-user'
-Plug 'kana/vim-textobj-help'
-Plug 'kana/vim-textobj-line'                 " al | il
-Plug 'kana/vim-textobj-syntax'               " ay | iy
+Plug 'thinca/vim-textobj-between'            " af{char} | if{char}
+Plug 'fvictorio/vim-textobj-backticks'       " a` | i`
 Plug 'kana/vim-textobj-indent'               " ai | ii
-Plug 'kana/vim-textobj-datetime'             " ada| ida
-Plug 'kana/vim-textobj-lastpat'              " a/ | i/
-Plug 'Julian/vim-textobj-brace'              " aj | ij
-Plug 'vimtaku/vim-textobj-keyvalue'          " ak | iv
 Plug 'sgur/vim-textobj-parameter'            " a, | i,
-Plug 'paulhybryant/vim-textobj-path'         " aP | iP
-Plug 'beloglazov/vim-textobj-quotes'         " aq | iq
-Plug 'saihoooooooo/vim-textobj-space'        " aS | iS
 Plug 'whatyouhide/vim-textobj-xmlattr'       " ax | ix
+
 Plug 'nelstrom/vim-textobj-rubyblock'        " ar | ir
 Plug 'bootleq/vim-textobj-rubysymbol'        " a: | i:
 Plug 'whatyouhide/vim-textobj-erb'           " aE | iE
-Plug 'osyo-manga/vim-textobj-multiblock'     " ab | ib
-" Plug 'jceb/vim-textobj-uri'                  " au | iu
-" Plug 'idbrii/textobj-word-column.vim'        " ac | ic
-" plug 'kana/vim-textobj-entire'               " ae | ie
-" plug 'bps/vim-textobj-python'                " af | if, ac | ic
-" plug 'akiyan/vim-textobj-php'                " ap | ip
-" plug 'julian/vim-textobj-variable-segment'   " av | iv
 " }}}
 
 " Tools, Such as nerdtree, vimwiki {{{
@@ -167,8 +152,6 @@ Plug 'Lokaltog/vim-easymotion'
   " let g:EasyMotion_leader_key = "'"
   map ' <Plug>(easymotion-prefix)
   nmap <Leader>' <Plug>(easymotion-overwin-w)
-
-Plug 'morhetz/gruvbox'
 " }}}
 
 " CtrlP or FZF {{{
@@ -329,8 +312,6 @@ Plug 'plasticboy/vim-markdown'
 Plug 'mzlogin/vim-markdown-toc'
   let g:vim_markdown_folding_disabled=1
   let g:vim_markdown_initial_foldlevel=1
-
-Plug 'yonchu/accelerated-smooth-scroll'
 " }}}
 
 " Snips {{{
@@ -356,7 +337,10 @@ Plug 'mattn/emmet-vim'
   \}
 " }}}
 
-" Airline {{{
+" Theme {{{
+Plug 'yonchu/accelerated-smooth-scroll'
+Plug 'morhetz/gruvbox'
+
 Plug 'vim-airline/vim-airline'
  " let g:airline_statusline_ontop=1
  let g:airline#extensions#tabline#enabled = 1
