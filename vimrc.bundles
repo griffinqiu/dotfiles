@@ -268,7 +268,7 @@ Plug 'sebdah/vim-delve', { 'for': 'go' }
 " Plug 'rstacruz/vim-hyperstyle'
 " Plug 'kchmck/vim-coffee-script', { 'for': 'coffee' }
 " Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
-" Plug 'mxw/vim-jsx', { 'for': 'javascript' }
+Plug 'mxw/vim-jsx', { 'for': 'javascript' }
 Plug 'chrisbra/csv.vim'
 Plug 'posva/vim-vue'
   " autocmd BufRead,BufNewFile *.vue set filetype=vue
@@ -342,9 +342,14 @@ Plug 'yonchu/accelerated-smooth-scroll'
 Plug 'morhetz/gruvbox'
 
 Plug 'vim-airline/vim-airline'
- " let g:airline_statusline_ontop=1
- let g:airline#extensions#tabline#enabled = 1
- let g:airline#extensions#tabline#formatter = 'unique_tail'
+  " let g:airline_statusline_ontop=1
+  let g:airline#extensions#tabline#enabled = 1
+  let g:airline#extensions#tabline#formatter = 'unique_tail'
+  let g:airline#extensions#tabline#show_buffers = 0
+  let g:airline#extensions#tabline#show_splits = 0
+  let g:airline#extensions#tabline#show_tabs = 1
+  let g:airline#extensions#tabline#show_close_button = 0
+  let g:airline#extensions#tabline#tab_min_count = 2
 
 " " Useage
 " " 1. Chose theme in vim
