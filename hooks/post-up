@@ -33,6 +33,10 @@ if [ ! -e "$HOME"/tmp ]; then
     mkdir -p "$HOME"/tmp
 fi
 
+if [ ! -e "$HOME"/tmp/tags ]; then
+    mkdir -p "$HOME"/tmp/tags
+fi
+
 if [ -e "$HOME"/.vim/autoload/plug.vim ]; then
   nvim -E -s +PlugUpgrade +qa
 else
