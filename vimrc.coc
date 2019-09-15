@@ -1,5 +1,7 @@
 Plug 'neoclide/coc.nvim', {'tag': '*', 'branch': 'release'}
 
+let g:coc_global_extensions =["coc-json", "coc-tsserver", "coc-html", "coc-css", "coc-vetur", "coc-solargraph", "coc-highlight", "coc-prettier", "coc-snippets"]
+
 " You will have bad experience for diagnostic messages when it's default 4000.
 set updatetime=500
 
@@ -153,11 +155,10 @@ endfunction
 " " Use <C-j> for select text for visual placeholder of snippet.
 " vmap <C-j> <Plug>(coc-snippets-select)
 
-" Use <C-j> for jump to next placeholder, it's default of coc.nvim
 let g:coc_snippet_next = '<c-j>'
-
-" Use <C-k> for jump to previous placeholder, it's default of coc.nvim
 let g:coc_snippet_prev = '<c-k>'
+let g:coc_status_error_sign = '•'
+let g:coc_status_warning_sign = '•'
 
 " Use <C-j> for both expand and jump (make expand higher priority.)
 imap <C-j> <Plug>(coc-snippets-expand-jump)

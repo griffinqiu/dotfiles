@@ -42,6 +42,5 @@ else
 fi
 
 nvim +PlugUpdate +PlugClean! +qa
-nvim +"CocInstall -sync coc-json coc-tsserver coc-html coc-css coc-vetur coc-solargraph coc-highlight coc-prettier coc-snippets" +qa
 
 reset -Q
