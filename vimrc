@@ -103,6 +103,10 @@ set linespace=3
 set history=1024
 set undoreload=1024
 
+set timeoutlen=500
+set ttimeoutlen=10
+set updatetime=100
+
 " Always use vertical diffs
 set diffopt+=vertical
 set whichwrap=b,s

@@ -110,6 +110,16 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
   let NERDTreeShowBookmarks = 1
   let NERDTreeWinSize = 30
 Plug 'Xuyuanp/nerdtree-git-plugin'
+  " let g:NERDTreeIndicatorMapCustom = {
+    " \ 'Modified'  : '•',
+    " \ 'Staged'    : '✚',
+    " \ 'Untracked' : 'ᵁ',
+    " \ 'Renamed'   : '≫',
+    " \ 'Unmerged'  : '≠',
+    " \ 'Ignored'   : 'ⁱ',
+    " \ 'Deleted'   : '✖',
+    " \ 'Unknown'   : '⁇'
+    " \ }
 Plug 'scrooloose/nerdcommenter'
   let g:NERDSpaceDelims=1
 
@@ -367,5 +377,19 @@ endif
 if filereadable(expand("~/.vimrc.bundles.local"))
   source ~/.vimrc.bundles.local
 endif
+
+Plug 'ludovicchabant/vim-gutentags'
+    let g:gutentags_cache_dir = '~/tmp/tags'
+    let g:gutentags_generate_on_write = 1
+    let g:gutentags_generate_on_missing = 0
+    let g:gutentags_generate_on_new = 0
+    let g:gutentags_ctags_exclude_wildignore = 1
+    let g:gutentags_ctags_exclude = [
+      \ '*/application/vendor', '*/vendor/ckeditor', '*/media/vendor'
+      \ ]
+
+Plug 'liuchengxu/vim-which-key'
+  set timeoutlen=500
+  nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
 
 call plug#end()
