@@ -353,6 +353,7 @@ Plug 'morhetz/gruvbox'
 
 Plug 'vim-airline/vim-airline'
   " let g:airline_statusline_ontop=1
+  let airline#extensions#gutentags#enabled = 1
   let g:airline#extensions#tabline#enabled = 1
   let g:airline#extensions#tabline#formatter = 'unique_tail'
   let g:airline#extensions#tabline#show_buffers = 0
@@ -379,15 +380,13 @@ if filereadable(expand("~/.vimrc.bundles.local"))
 endif
 
 Plug 'ludovicchabant/vim-gutentags'
+  " Config g:gutentags_ctags_extra_args in ~/ctags.d/config.ctags
   let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
   let g:gutentags_cache_dir = '~/tmp/tags'
   let g:gutentags_generate_on_write = 1
   let g:gutentags_generate_on_missing = 0
   let g:gutentags_generate_on_new = 0
   let g:gutentags_ctags_exclude_wildignore = 1
-  let g:gutentags_ctags_exclude = [
-    \ '*/application/vendor', '*/vendor/ckeditor', '*/media/vendor'
-    \ ]
 
 Plug 'liuchengxu/vim-which-key'
   set timeoutlen=500
