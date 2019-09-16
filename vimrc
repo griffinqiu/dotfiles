@@ -163,7 +163,6 @@ set showmode
 set shortmess=atIc
 
 set nrformats=
-" set tags=tags
 set tags+=gems.tags
 
 " Speed up for macros
