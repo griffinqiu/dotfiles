@@ -17,6 +17,7 @@ set noswapfile
 set history=1024
 set ruler
 set showcmd
+set showmode
 set wrap
 set linebreak
 set autoread
@@ -158,10 +159,7 @@ if !has('nvim')
   set ttymouse=xterm2
 end
 
-set showcmd
-set showmode
 set shortmess=atIc
-
 set nrformats=
 set tags+=gems.tags
 

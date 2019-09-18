@@ -193,6 +193,7 @@ Plug 'junegunn/fzf.vim'
   nmap <leader>fmn :call fzf#vim#maps('n', 0)<cr>
   nmap <leader>fmi :call fzf#vim#maps('i', 0)<cr>
   nmap <leader>fmx :call fzf#vim#maps('x', 0)<cr>
+  nmap <leader>fmv :call fzf#vim#maps('v', 0)<cr>
   nmap <leader>fmo :call fzf#vim#maps('o', 0)<cr>
   nnoremap <leader>fu :Snippets<CR>
   " nnoremap <leader>ag :Ag<CR>
@@ -219,6 +220,9 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
   " let g:go_fmt_autosave = 0
   let g:go_list_height = 10
   let g:go_list_type='locationlist'
+  " To disable the vim-go <c-]>, gd and so on mapping
+  " To use the LSP of coc.nvim
+  let g:go_def_mapping_enabled = 0
   " run :GoBuild or :GoTestCompile based on the go file
   function! s:build_go_files()
    let l:file = expand('%')
@@ -257,8 +261,9 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
   autocmd FileType go nmap <leader>gg :<C-u>call <SID>build_go_files()<CR>
   " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
   autocmd FileType go nmap <leader>gr  <Plug>(go-run)
-  autocmd FileType go nmap <leader>gi  <Plug>(go-imports)
-  autocmd FileType go nmap <leader>gI :GoImport<SPACE>
+  autocmd FileType go nmap <leader>gi  <Plug>(go-implements)
+  autocmd FileType go nmap <leader>go  <Plug>(go-imports)
+  autocmd FileType go nmap <leader>gO :GoImport<SPACE>
   autocmd FileType go nmap <leader>gf  <Plug>(go-test-func)
   autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
   autocmd FileType go nmap <leader>gd  :GoDeclsDir<cr>

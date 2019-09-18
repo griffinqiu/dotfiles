@@ -54,6 +54,9 @@ alias path='echo $PATH | tr -s ":" "\n"'
 alias tmux_plugins_install="~/.tmux/plugins/tpm/bin/install_plugins"
 alias tmux_plugins_update="~/.tmux/plugins/tpm/bin/update_plugins all"
 
+# postgres
+alias psql='psql -h $POSTGRES_HOST -U postgres'
+
 alias mux="tmuxinator"
 
 # macOS has no `md5sum`, so use `md5` as a fallback

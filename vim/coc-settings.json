@@ -39,12 +39,12 @@
   "diagnostic.warningSign": "●",
   "diagnostic.displayByAle": false,
   "diagnostic.refreshOnInsertMode": true,
-//  "languageserver": {
-//    "golang": {
-//      "command": "gopls",
-//      "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
-//      "filetypes": ["go"]
-//    },
+  "languageserver": {
+    "golang": {
+      "command": "gopls",
+      "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
+      "filetypes": ["go"]
+    },
 //    "sorbet": {
 //      "command": "solargraph",
 //      "args": ["tc", "--lsp", "--enable-all-experimental-lsp-features"],
@@ -53,7 +53,7 @@
 //      "initializationOptions": {},
 //      "settings": {}
 //    }
-//  },
+  },
   "list.insertMappings": {
     "<C-c>": "do:exit",
     "<C-d>": "do:stop",
@@ -61,9 +61,10 @@
     "<C-x>": "action:split",
     "<C-v>": "action:vsplit"
   },
-  "snippets.extends": {"javascriptreact": ["javascript"]},
+  "snippets.extends": {"javascriptreact": ["javascript"], "vue": ["vue", "javascript"]},
   "snippets.userSnippetsDirectory": "~/.vim/snippets",
   "snippets.ultisnips.enable": false,
+  "coc.preferences.jumpCommand": "edit",
   "coc.preferences.extensionUpdateCheck": "weekly",
   "coc.preferences.snippetStatusText": "Ⓢ ",
   "coc.preferences.formatOnSaveFiletypes": ["javascript", "html", "vue", "css", "javascriptreact"],
