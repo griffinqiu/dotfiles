@@ -164,7 +164,24 @@ Plug 'Lokaltog/vim-easymotion'
   nmap <Leader>' <Plug>(easymotion-overwin-w)
 " }}}
 
-" CtrlP or FZF {{{
+" Tagbar and FZF {{{
+Plug 'majutsushi/tagbar'
+    nnoremap <silent> <leader>2 :TagbarToggle<CR>
+    let g:tagbar_type_php = {
+        \'ctagstype' : 'php',
+        \'kinds'         : [
+            \'i:interfaces',
+            \'c:classes',
+            \'d:constant definitions',
+            \'f:functions',
+            \'j:javascript functions:1'
+        \]
+    \}"
+    let g:tagbar_width=30
+    let g:tagbar_sort=0
+    let g:tagbar_autofocus=1
+    let g:Tb_MaxSize=5
+
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
   let g:fzf_action = {
@@ -179,13 +196,10 @@ Plug 'junegunn/fzf.vim'
   nnoremap <leader>ff :Files<CR>
   nnoremap <leader>fd :Buffers<CR>
   nnoremap <leader>ft :Tags<CR>
-  nnoremap <leader>fbt :BTags<CR>
+  nnoremap <leader>4 :BTags<CR>
   nnoremap <leader>fc :Commits<CR>
   nnoremap <leader>fbc :BCommits<CR>
-  nnoremap <leader>fl :Lines<CR>
-  nnoremap <leader>fbl :BLines<CR>
   nnoremap <leader>fm :Marks<CR>
-  nnoremap <leader>fw :Windows<CR>
   nnoremap <leader>fh :History<CR>
   nnoremap <leader>f: :History:<CR>
   nnoremap <leader>f/ :History/<CR>
@@ -195,7 +209,6 @@ Plug 'junegunn/fzf.vim'
   nmap <leader>fmx :call fzf#vim#maps('x', 0)<cr>
   nmap <leader>fmv :call fzf#vim#maps('v', 0)<cr>
   nmap <leader>fmo :call fzf#vim#maps('o', 0)<cr>
-  nnoremap <leader>fu :Snippets<CR>
   " nnoremap <leader>ag :Ag<CR>
   " nnoremap <leader>agt :Agt<CR>
   nnoremap <silent> <leader>at :let @"=&filetype \| Agt --<C-R>" <C-R><C-W><CR>
@@ -392,9 +405,5 @@ Plug 'ludovicchabant/vim-gutentags'
   let g:gutentags_generate_on_missing = 0
   let g:gutentags_generate_on_new = 0
   let g:gutentags_ctags_exclude_wildignore = 1
-
-Plug 'liuchengxu/vim-which-key'
-  set timeoutlen=500
-  nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
 
 call plug#end()
