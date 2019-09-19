@@ -30,7 +30,7 @@ call plug#begin()
 
 " Tpopes' :) {{{
 Plug 'tpope/vim-repeat'
-Plug 'tpope/vim-unimpaired'
+" Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-surround'
   let g:surround_no_insert_mappings = 1
   imap <C-d> <Plug>Isurround
@@ -73,7 +73,6 @@ Plug 'fvictorio/vim-textobj-backticks'       " a` | i`
 Plug 'kana/vim-textobj-indent'               " ai | ii
 Plug 'sgur/vim-textobj-parameter'            " a, | i,
 Plug 'whatyouhide/vim-textobj-xmlattr'       " ax | ix
-
 Plug 'nelstrom/vim-textobj-rubyblock'        " ar | ir
 Plug 'bootleq/vim-textobj-rubysymbol'        " a: | i:
 Plug 'whatyouhide/vim-textobj-erb'           " aE | iE
@@ -166,7 +165,7 @@ Plug 'Lokaltog/vim-easymotion'
 
 " Tagbar and FZF {{{
 Plug 'majutsushi/tagbar'
-    nnoremap <silent> <leader>2 :TagbarToggle<CR>
+    nnoremap <silent> <leader>4 :TagbarToggle<CR>
     let g:tagbar_type_php = {
         \'ctagstype' : 'php',
         \'kinds'         : [
@@ -196,7 +195,7 @@ Plug 'junegunn/fzf.vim'
   nnoremap <leader>ff :Files<CR>
   nnoremap <leader>fd :Buffers<CR>
   nnoremap <leader>ft :Tags<CR>
-  nnoremap <leader>4 :BTags<CR>
+  nnoremap <leader>5 :BTags<CR>
   nnoremap <leader>fc :Commits<CR>
   nnoremap <leader>fbc :BCommits<CR>
   nnoremap <leader>fm :Marks<CR>
@@ -272,11 +271,10 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
   " - GoImpl
   " - GoPlay
   autocmd FileType go nmap <leader>gg :<C-u>call <SID>build_go_files()<CR>
-  " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
-  autocmd FileType go nmap <leader>gr  <Plug>(go-run)
-  autocmd FileType go nmap <leader>gi  <Plug>(go-implements)
   autocmd FileType go nmap <leader>go  <Plug>(go-imports)
   autocmd FileType go nmap <leader>gO :GoImport<SPACE>
+  " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
+  autocmd FileType go nmap <leader>gi  <Plug>(go-implements)
   autocmd FileType go nmap <leader>gf  <Plug>(go-test-func)
   autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
   autocmd FileType go nmap <leader>gd  :GoDeclsDir<cr>

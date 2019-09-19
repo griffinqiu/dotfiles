@@ -196,12 +196,10 @@ nmap ,cf :let @*=expand("%:t")<CR>
 nmap ,cl :let @*=expand("%:p")<CR>
 
 " Move to prev/next buffer
-noremap <right> gt
-noremap <left>  gT
-noremap <up> :lprevious<CR>
-noremap <down>  :lnext<CR>
-nnoremap gT :tabprevious<CR>
-nnoremap gt :tabnext<CR>
+nnoremap [l :lprevious<CR>
+nnoremap ]l  :lnext<CR>
+nnoremap [t :tabprevious<CR>
+nnoremap ]t :tabnext<CR>
 
 noremap <silent> <C-s> :update!<CR>
 vnoremap <silent> <C-s> <C-c>:update!<CR>
@@ -232,7 +230,7 @@ nnoremap <leader>ct :silent ! ctags -R --languages=ruby --exclude=.git --exclude
 "
 imap <C-]> <C-x><C-]>
 " inoremap <C-g> <C-x><C-o>
-imap <C-l> <C-x><c-l>
+" imap <C-l> <C-x><c-l>
 
 " Convert all tabs to spaces
 " map <leader>ct :retab<cr>

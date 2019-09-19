@@ -4,7 +4,7 @@ source ~/.vimrc
 
 " FZF as a popover {{{
 " 让输入上方，搜索列表在下方
-let $FZF_DEFAULT_OPTS = '--layout=reverse'
+" let $FZF_DEFAULT_OPTS = '--layout=reverse'
 
 " 打开 fzf 的方式选择 floating window
 " let g:fzf_layout = { 'window': 'call OpenFloatingWin()' }
