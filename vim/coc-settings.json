@@ -69,7 +69,7 @@
   "coc.preferences.jumpCommand": "edit",
   "coc.preferences.extensionUpdateCheck": "weekly",
   "coc.preferences.snippetStatusText": "Ⓢ ",
-  "coc.preferences.formatOnSaveFiletypes": ["javascript", "html", "vue", "css", "javascriptreact"],
+  "coc.preferences.formatOnSaveFiletypes": ["javascript", "html", "vue", "css", "javascriptreact", ""],
   "vetur.format.defaultFormatter.html": "prettier",
   "prettier.statusItemText": "ⓟ ",
   "prettier.eslintIntegration": true,
