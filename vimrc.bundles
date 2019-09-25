@@ -271,7 +271,7 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
   " - GoCallers
   " - GoImpl
   " - GoPlay
-  autocmd FileType go nmap <leader>gg :<C-u>call <SID>build_go_files()<CR>
+  " autocmd FileType go nmap <leader>gg :<C-u>call <SID>build_go_files()<CR>
   autocmd FileType go nmap <leader>go  <Plug>(go-imports)
   autocmd FileType go nmap <leader>gO :GoImport<SPACE>
   " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
@@ -342,6 +342,17 @@ Plug 'mzlogin/vim-markdown-toc'
 " }}}
 
 " Snips {{{
+
+Plug 'SirVer/ultisnips', { 'for': 'xyz' }
+    " let g:UltiSnipsExpandTrigger="<tab>"
+    " " link to fzf Snippets
+    " " let g:UltiSnipsListSnippets="<c-h>"
+    " let g:UltiSnipsJumpForwardTrigger="<c-j>"
+    " let g:UltiSnipsJumpBackwardTrigger="<c-k>"
+    " let g:UltiSnipsEditSplit="vertical"
+    " nnoremap <silent> <leader>uu :UltiSnipsEdit<cr>
+    " nnoremap <silent> <leader>ue :UltiSnipsEdit<space>
+" Plug 'griffinqiu/vim-snippets'
 
 Plug 'mattn/emmet-vim'
   " let g:user_emmet_mode='i'
