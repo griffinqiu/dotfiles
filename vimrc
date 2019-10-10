@@ -223,11 +223,11 @@ nnoremap <leader>ct :silent ! ctags -R --languages=ruby --exclude=.git --exclude
 " map <C-h> <C-w>h
 " map <C-l> <C-w>l
 " map <C-w>; <C-w>p
-" inoremap <C-h> <left>
-" inoremap <C-l> <right>
-" inoremap <C-j> <C-o>gj
-" inoremap <C-k> <C-o>gk
-"
+noremap <right> gt
+noremap <left>  gT
+noremap <up> :lprevious<CR>
+noremap <down>  :lnext<CR>
+
 imap <C-]> <C-x><C-]>
 " inoremap <C-g> <C-x><C-o>
 " imap <C-l> <C-x><c-l>

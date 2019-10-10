@@ -229,8 +229,8 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
   " let g:go_def_mode = 'godef'
   let g:go_def_mode='gopls'
   let g:go_info_mode='gopls'
-  let g:go_def_mapping_enabled = 0
   let g:go_decls_includes = "func,type"
+  let g:go_def_mapping_enabled = 1
   " let g:go_fmt_autosave = 0
   let g:go_list_height = 10
   let g:go_list_type='locationlist'
@@ -271,16 +271,16 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
   " - GoCallers
   " - GoImpl
   " - GoPlay
-  " autocmd FileType go nmap <leader>gg :<C-u>call <SID>build_go_files()<CR>
   autocmd FileType go nmap <leader>go  <Plug>(go-imports)
+  autocmd FileType go nmap <leader>gg :<C-u>call <SID>build_go_files()<CR>
   autocmd FileType go nmap <leader>gO :GoImport<SPACE>
-  " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
-  " autocmd FileType go nmap <leader>gi  <Plug>(go-implements)
-  autocmd FileType go nmap <leader>gf  <Plug>(go-test-func)
-  autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
+  autocmd FileType go nmap <leader>gi  <Plug>(go-implements)
   autocmd FileType go nmap <leader>gd  :GoDeclsDir<cr>
-  " autocmd FileType go nmap <Leader>gi <Plug>(go-info)
   autocmd FileType go nmap <Leader>gh <Plug>(go-sameids-toggle)
+  autocmd FileType go nmap <Leader>gf <Plug>(go-info)
+  " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
+  " autocmd FileType go nmap <leader>gf  <Plug>(go-test-func)
+  " autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
   autocmd Filetype go command! -bang A  call go#alternate#Switch(<bang>0, 'edit')
   autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
   autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')

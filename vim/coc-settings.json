@@ -7,7 +7,6 @@
   "suggest.detailField": "preview",
   "suggest.triggerCompletionWait": 100,
   "suggest.snippetIndicator": "⭐︎",
-  // "suggest.snippetIndicator": "🌟",
   "suggest.echodocSupport": true,
   "suggest.completionItemKindLabels": {
     "keyword": "\uf1de",
