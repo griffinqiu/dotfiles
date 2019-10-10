@@ -109,8 +109,8 @@ set ttimeoutlen=10
 set updatetime=100
 
 " Always use vertical diffs
-set diffopt+=vertical
-set whichwrap=b,s
+" set diffopt+=vertical
+" set whichwrap=b,s
 
 set wildmenu
 " set wildmode=list:longest,list:full
@@ -161,6 +161,7 @@ end
 
 set shortmess=atIc
 set nrformats=
+" set tags=tags
 set tags+=gems.tags
 
 " Speed up for macros

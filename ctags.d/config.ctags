@@ -2,12 +2,14 @@
 --exclude=node_modules
 --exclude=vendor
 --exclude=public
+--languages=-scss
 --languages=-css
 --languages=-html
 --languages=-markdown
 --languages=-JSON
 --languages=-svg
 --langdef=jsx
+--format=1
 --langmap=jsx:+.vue
 --regex-jsx=/[ \t.]([A-Z][A-Z0-9._$]+)[ \t]*[=:][ \t]*([0-9"'\[\{]|null)/\1/n,constant/
 --regex-jsx=/\.([A-Za-z0-9._$]+)[ \t]*=[ \t]*\{/\1/o,object/
