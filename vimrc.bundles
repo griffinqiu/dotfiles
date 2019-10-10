@@ -102,6 +102,9 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
   let g:NERDTreeMapOpenVSplit = "<c-v>"
   let g:NERDTreeMapOpenInTab = "<c-t>"
   let g:NERDTreeMapToggleHidden = "I"
+  let g:NERDTreeMapJumpRoot = "<c-p>"
+  let g:NERDTreeMapJumpParent = "P"
+  let g:NERDTreeMapJumpFirstChild = "^"
   let g:NERDTreeIgnore=['\.meta$', '\.pyc$']
   " Set opened dir to workspace dir
   let NERDTreeChDirMode = 2
