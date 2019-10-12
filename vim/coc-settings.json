@@ -63,7 +63,7 @@
     "<C-v>": "action:vsplit"
   },
   "snippets.extends": {"javascriptreact": ["javascript"], "vue": ["vue", "javascript"]},
-// "snippets.userSnippetsDirectory": "~/.vim/snippets",
+  "snippets.editSnippetsCommand": "vsplit",
   "snippets.ultisnips.enable": true,
   "coc.preferences.jumpCommand": "edit",
   "coc.preferences.extensionUpdateCheck": "weekly",

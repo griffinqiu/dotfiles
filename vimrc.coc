@@ -123,6 +123,7 @@ nnoremap <silent> <leader>oj  :<C-u>CocNext<CR>
 nnoremap <silent> <leader>ok  :<C-u>CocPrev<CR>
 " Resume latest coc list
 nnoremap <silent> <leader>op  :<C-u>CocListResume<CR>
+nnoremap <silent> <leader>uu  :<C-u>CocCommand snippets.editSnippets<CR>
 
 command! -nargs=+ -complete=custom,s:GrepArgs Rg exe 'CocList grep '.<q-args>
 
