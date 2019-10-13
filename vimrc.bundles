@@ -68,7 +68,6 @@ Plug 'tpope/vim-rhubarb'
 
 " kana/vim-textobj-user {{{
 Plug 'kana/vim-textobj-user'
-Plug 'thinca/vim-textobj-between'            " af{char} | if{char}
 Plug 'fvictorio/vim-textobj-backticks'       " a` | i`
 Plug 'kana/vim-textobj-indent'               " ai | ii
 Plug 'sgur/vim-textobj-parameter'            " a, | i,
@@ -76,6 +75,8 @@ Plug 'whatyouhide/vim-textobj-xmlattr'       " ax | ix
 Plug 'nelstrom/vim-textobj-rubyblock'        " ar | ir
 Plug 'bootleq/vim-textobj-rubysymbol'        " a: | i:
 Plug 'whatyouhide/vim-textobj-erb'           " aE | iE
+Plug 'thinca/vim-textobj-between'            " af{char} | if{char}
+Plug 'griffinqiu/vim-textobj-numeral'        " an | in, ad | id
 " }}}
 
 " Tools, Such as nerdtree, vimwiki {{{
