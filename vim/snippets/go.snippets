@@ -1,264 +1,274 @@
-snippet v "shorthand variable declaration"
-	${1} := ${2}
-
-snippet vr "variable initialization"
-	var ${1:t} ${0:string}
-
-snippet var "variable declaration"
-	var ${1} ${2} = ${3}
-
-snippet vars "variables declaration"
-	var (
-		${1} ${2} = ${3}
-	)
-
-snippet ap "append"
+snippet : shorthand variable declaration
+	${1} := ${0}
+snippet anon anonymous function
+	${1:fn} := func() {
+		${0}
+	}
+snippet ap append
 	append(${1:slice}, ${0:value})
-
-snippet bl "bool"
-	bool
-
-snippet bt "byte"
-	byte
-
-snippet br "break"
+snippet ap= append assign
+  ${1:slice} = append($1, ${0:value})
+snippet br break
 	break
-
-snippet ch "channel"
+snippet ch channel
 	chan ${0:int}
-
-snippet cs "case"
+snippet case case
 	case ${1:value}:
-		${0:${VISUAL}}
-
-snippet co "constants with iota"
+		${0}
+snippet con constant
+	const ${1:NAME} ${2:Type} = ${0:0}
+snippet cons constants
 	const (
-		${1:NAME1} = iota
-		${0:NAME2}
+		${1:NAME} ${2:Type} = ${3:value}
+		${0}
 	)
-
-snippet cn "continue"
+# constants with iota
+snippet iota constants with iota
+	const (
+		${1:NAME} ${2:Type} = iota
+		${0}
+	)
+snippet cn continue
 	continue
+snippet default default case
+	default:
+		${0}
 
-snippet df "defer"
-	defer ${0:func}()
-
-snippet dfr "defer recover"
+snippet df defer
+	defer ${1:func}(${2})
+	${0}
+snippet dfa defer with anonymous function
+	defer func() {
+		${0}
+	}()
+snippet dfr defer with recover
 	defer func() {
 		if err := recover(); err != nil {
-			${0:${VISUAL}}
+			${0}
 		}
 	}()
+snippet gpl
+	/*
+	 * This program is free software; you can redistribute it and/or modify
+	 * it under the terms of the GNU General Public License as published by
+	 * the Free Software Foundation; either version 2 of the License, or
+	 * (at your option) any later version.
+	 *
+	 * This program is distributed in the hope that it will be useful,
+	 * but WITHOUT ANY WARRANTY; without even the implied warranty of
+	 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	 * GNU General Public License for more details.
+	 *
+	 * You should have received a copy of the GNU General Public License
+	 * along with this program; if not, see <http://www.gnu.org/licenses/>.
+	 *
+	 * Copyright (C) ${1:Author}, `strftime("%Y")`
+	 */
 
-snippet im "import"
+	${0}
+snippet import import
 	import (
 		"${1:package}"
 	)
-
-snippet in "interface"
-	interface{}
-
-snippet inf "full interface "
-	interface ${1:name} {
-		${2:/* methods */}
+snippet interface full interface snippet
+	type ${1:Interface} interface {
+		${2:/* TODO: add methods */}
 	}
-
-snippet if "if condition"
-	if ${1:/* condition */} {
-		${2:${VISUAL}}
+snippet if condition
+	if ${1:condition} {
+		${0}
 	}
-
-
-snippet ife "if else condition"
-	if ${1:/* condition */} {
-		${2:${VISUAL}}
-	} else {
+snippet else else snippet
+	else {
 		${0}
 	}
 
-snippet el "else"
-	else {
-		${0:${VISUAL}}
+snippet ife if inline error
+	if err := ${1:condition}; err != nil {
+		${0}
 	}
 
-snippet ir "if error not nil, return err"
+snippet errn error snippet
 	if err != nil {
 		return err
 	}
 	${0}
-
-snippet f "false"
-	false
-
-snippet ft "fallthrough"
-	fallthrough
-
-snippet fl "float"
-	float32
-
-snippet f3 "float32"
-	float32
-
-snippet f6 "float64"
-	float64
-
-snippet for "for loop"
-	for ${1}{
-		${0:${VISUAL}}
+snippet errt error snippet in TestFunc
+	if err != nil {
+		t.Fatal(err)
 	}
 
-snippet fori "for int loop"
-	for ${2:i} := 0; $2 < ${1:count}; $2${3:++} {
-		${0:${VISUAL}}
+snippet errl error snippet in log.Fatal
+	if err != nil {
+		log.Fatal(err)
 	}
 
-snippet forr "for range loop"
-	for ${1:e} := range ${2:collection} {
-		${0:${VISUAL}}
-	}
-
-snippet fun "function"
-	func ${1:funcName}(${2}) ${3:error} {
-		${4}
+snippet errn, error snippet with two return values
+	if err != nil {
+		return ${1:nil}, err
 	}
 	${0}
 
-snippet fum "method"
-	func (${1:receiver} ${2:type}) ${3:funcName}(${4}) ${5:error} {
-		${6}
-	}
-	${0}
-
-snippet fumh "http handler function on reciever"
-	func (${1:receiver} ${2:type}) ${3:funcName}(${4:w} http.ResponseWriter, ${5:r} *http.Request) {
-		${0:${VISUAL}}
-	}
-
-snippet lf "log printf"
-	log.Printf("%${1:s}", ${2:var})
-
-snippet lp "log println"
-	log.Println("${1}")
-
-snippet mk "make"
-	make(${1:[]string}, ${0:0})
-
-snippet mp "map"
-	map[${1:string}]${0:int}
-
-snippet main "func main()"
-	func main() {
+snippet errh error snippet handle and return
+	if err != nil {
 		${1}
+		return
 	}
 	${0}
 
-snippet nw "new"
-	new(${0:type})
+snippet errp error snippet with panic
+	if err != nil {
+		panic(${1})
+	}
+	${0}
 
-snippet pa "package"
+snippet ft fallthrough
+	fallthrough
+snippet for for loop
+	for ${1} {
+		${0}
+	}
+snippet fori for integer loop
+	for ${1:i} := 0; $1 < ${2:N}; $1++ {
+		${0}
+	}
+snippet forr for range loop
+	for ${2:k}, ${3:v} := range ${1} {
+		${0}
+	}
+snippet func function
+	func ${1:function}(${2}) ${3:error }{
+		${0}
+	}
+snippet ff Fmt Printf debug
+	fmt.Printf("${1} = %+v\n", $1)
+	${0}
+snippet fn Fmt Println debug
+	fmt.Println("${1}")
+snippet fe Fmt Errorf
+	fmt.Errorf("${1}")
+snippet lf log printf
+	log.Printf("${1} = %+v\n", $1)
+snippet ln log println
+	log.Println("${1}")
+snippet make make
+	make(${1:[]string}, ${2:0})${0}
+snippet map map
+	map[${1:string}]${0:int}
+snippet main main()
+	func main() {
+		${0}
+	}
+snippet meth method
+	func (${1:self} ${2:Type}) ${3:Do}(${4}) ${5:error }{
+		${0}
+	}
+snippet ok ok
+	if !ok {
+		${0}
+	}
+snippet package package
+	// Package $1 provides ${2:...}
 	package ${1:main}
-
-snippet pn "panic"
-	panic("${0:msg}")
-
-snippet pf "fmt.Printf()"
-	fmt.Printf("%${1:s}\n", ${2:var})
-
-snippet pl "fmt.Println()"
-	fmt.Println("${1:s}")
-
-snippet rn "range"
-	range ${0}
-
-snippet rt "return"
-	return ${0}
-
-snippet rs "result"
-	result
-
-snippet sl "select"
+	${0}
+snippet panic panic
+	panic("${0}")
+snippet select select
 	select {
 	case ${1:v1} := <-${2:chan1}
-		${3}
-	default:
 		${0}
 	}
-
-snippet sr "string"
-	string
-
-snippet st "struct"
-	struct ${1:name} {
-		${2:/* data */}
+snippet st struct
+	type ${1:Type} struct {
+		${0}
 	}
-	${0}
-
-snippet sw "switch"
+snippet switch switch
 	switch ${1:var} {
 	case ${2:value1}:
-		${3}
-	case ${4:value2}:
-		${5}
-	default:
 		${0}
 	}
-
-snippet ps "fmt.Sprintf"
+snippet sp sprintf
 	fmt.Sprintf("%${1:s}", ${2:var})
-
-snippet t "true"
-	true
-
-snippet g "goroutine named function"
+snippet go goroutine named function
 	go ${1:funcName}(${0})
-
-snippet ga "goroutine anonymous function"
-	go func(${1} ${2:type}) {
-		${3:/* code */}
-	}(${0})
-
-snippet test "test function"
-	func Test${1:name}(t *testing.T) {
-		${0:${VISUAL}}
+snippet goa goroutine anonymous function
+	go func(${1}) {
+		${3:/* TODO */}
+	}(${2})
+snippet test test function
+	func Test${1:Function}(t *testing.T) {
+		${0}
 	}
+snippet tt test table snippet
+    var tests = []struct {
+        name string
+        expected string
+        given string
+    }{
+        {"${2}", "${3}", "${4}",},
+    }
+    for _, tt := range tests {
+        tt := tt
+        t.Run(tt.name, func(t *testing.T){
+            actual := ${1:Function}(tt.given)
+            if actual != tt.expected {
+                t.Errorf("given(%s): expected %s, actual %s", tt.given, tt.expected, actual)
+            }
+        })
+    }
+snippet tsrv test server
+  ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintln(w, ${1:`response`})
+  }))
+  defer ts.Close()
 
-snippet testt "table test function"
-	func Test${1:name}(t *testing.T) {
-		tests := []struct {
-			name string 
-		}{
-			{
-				name: "${2:test name}",
-			},
-		}
-
-		for _, test := range tests {
-			t.Run(test.name, func(t *testing.T) {
-				${0:${VISUAL}}
-			}
-		}
+  //Use testing server url (type string) somewhere
+  ${0:someUrl} = ts.URL
+snippet ter test error
+  if err != nil {
+    t.Errorf("${1}")
+  }
+snippet terf test fatal error
+  if err != nil {
+    t.Fatalf("${1}")
+  }
+snippet example test example
+	func Example${1:Method}() {
+		${0}
+		// Output:
 	}
-
-snippet bench "benchmark function"
-	func Benchmark${1:name}(b *testing.B) {
+snippet benchmark test benchmark
+	func Benchmark${1:Method}(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			${2}
+			${0}
 		}
 	}
-	${0}
+snippet var variable declaration
+	var ${1:x} ${2:Type}${3: = ${0:value}}
 
-snippet cl "composite literals"
-	type ${1:name} struct {
-		${2:attrName} ${3:attrType}
-	}
+snippet vars variables declaration
+	var (
+		${1:x} ${2:Type}${3: = ${0:value}}
+	)
+snippet eq equals fails the test if exp is not equal to act.
+  if !reflect.DeepEqual(${1:expected}, ${2:actual}) {
+    _, file, line, _ := runtime.Caller(0)
+    fmt.Printf("%s:%d:\n\n\texp: %#v\n\n\tgot: %#v\n\n", filepath.Base(file), line, $1, $2)
+    t.FailNow()
+  }
 
-snippet om "if key in a map"
+snippet hf
+  func ${1:handler}(w http.ResponseWriter, r *http.Request) {
+    ${0:fmt.Fprintf(w, "hello world")}
+  }
+
+
+snippet om if key in a map
 	if ${1:value}, ok := ${2:map}[${3:key}]; ok == true {
 		${4:/* code */}
 	}
 
-
-snippet gg "Grouped globals with anonymous struct"
+snippet gg Grouped globals with anonymous struct
 	var ${1:var} = struct{
 		${2:name} ${3:type}
 	}{
