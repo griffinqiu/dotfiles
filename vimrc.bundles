@@ -220,6 +220,9 @@ Plug 'junegunn/fzf.vim'
   " imap <c-x><c-f> <plug>(fzf-complete-file-ag)
   " imap <c-x><c-f> <plug>(fzf-complete-path)
   " imap <c-x><c-l> <plug>(fzf-complete-line)
+Plug 'zackhsi/fzf-tags'
+  nmap g] <Plug>(fzf_tags)
+  nmap g<c-]> <Plug>(fzf_tags)
 " }}}
 
 " GO {{{
@@ -227,14 +230,14 @@ Plug 'junegunn/fzf.vim'
 Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
   " let g:go_fmt_command = "goimports"
   let g:go_fmt_command = "gofmt"
-  let g:go_fmt_fail_silently = 1
+  let g:go_fmt_fail_silently = 0
   let g:go_highlight_trailing_whitespace_error = 0
   " let g:go_addtags_transform = "camelcase"
   " let g:go_def_mode = 'godef'
   let g:go_def_mode='gopls'
   let g:go_info_mode='gopls'
   let g:go_decls_includes = "func,type"
-  let g:go_def_mapping_enabled = 1
+  " let g:go_def_mapping_enabled = 1
   " let g:go_fmt_autosave = 0
   let g:go_list_height = 10
   let g:go_list_type='locationlist'

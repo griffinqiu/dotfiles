@@ -14,7 +14,7 @@ brew "diff-so-fancy"
 brew "stress"
 brew "watch"
 brew "sysbench"
-brew "neovim"
+brew "neovim", args: ["HEAD"]
 cask "homebrew/cask-fonts/font-hack-nerd-font"
 EOF
 

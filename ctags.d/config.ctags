@@ -2,7 +2,6 @@
 --exclude=node_modules
 --exclude=vendor
 --exclude=public
---languages=-scss
 --languages=-css
 --languages=-html
 --languages=-markdown
