@@ -4,14 +4,12 @@
 extends html
 
 # Rails *****************************
-snippet rc
-	<% ${0} %>
-snippet rce
-	<%= ${1} %>
 snippet %
 	<% ${0} %>
 snippet =
 	<%= ${1} %>
+snippet else
+	<% else %>
 snippet end
 	<% end %>
 snippet ead
@@ -26,30 +24,14 @@ snippet rp
 	<%= render partial: '${0:item}' %>
 snippet rpl
 	<%= render partial: '${1:item}', locals: { :${2:name} => '${3:value}'${0} } %>
-snippet rps
-	<%= render partial: '${1:item}', status: ${0:500} %>
 snippet rpc
 	<%= render partial: '${1:item}', collection: ${0:items} %>
-snippet lia
-	<%= link_to '${1:link text...}', action: '${0:index}' %>
-snippet liai
-	<%= link_to '${1:link text...}', action: '${2:edit}', id: ${0:@item} %>
-snippet lic
-	<%= link_to '${1:link text...}', controller: '${0:items}' %>
-snippet lica
-	<%= link_to '${1:link text...}', controller: '${2:items}', action: '${0:index}' %>
-snippet licai
-	<%= link_to '${1:link text...}', controller: '${2:items}', action: '${3:edit}', id: ${0:@item} %>
 snippet yield
 	<%= yield ${1::content_symbol} %>
 snippet conf
 	<% content_for :${1:head} do %>
 		${0}
 	<% end %>
-snippet cs
-	<%= collection_select <+object+>, <+method+>, <+collection+>, <+value_method+>, <+text_method+><+, <+[options]+>, <+[html_options]+>+> %>
-snippet ct
-	<%= content_tag '${1:DIV}', ${2:content}${0:,options} %>
 snippet ff
 	<%= form_for @${1:model} do |f| %>
 		${0}
@@ -60,7 +42,6 @@ snippet ffcb
 	<%= ${1:f}.check_box :${0:attribute} %>
 snippet ffe
 	<% error_messages_for :${1:model} %>
-
 	<%= form_for @${2:model} do |f| %>
 		${0}
 	<% end %>
@@ -94,10 +75,6 @@ snippet jsit
 	<%= javascript_include_tag "${0}" %>
 snippet lim
 	<%= link_to ${1:model}.${2:name}, ${3:$1}_path(${0:$1}) %>
-snippet linp
-	<%= link_to "${1:Link text...}", ${2:parent}_${3:child}_path(${4:@$2}, ${0:@$3}) %>
-snippet linpp
-	<%= link_to "${1:Link text...}", ${2:parent}_${3:child}_path(${0:@$2}) %>
 snippet lip
 	<%= link_to "${1:Link text...}", ${2:model}_path(${0:@$2}) %>
 snippet lipp
@@ -130,3 +107,5 @@ snippet ife
 	<% end %>
 snippet pry
 	<% require 'pry'; binding.pry %>
+snippet byebug
+	<% byebug %>
