@@ -7,7 +7,7 @@ snippet anon anonymous function
 snippet ap append
 	append(${1:slice}, ${0:value})
 snippet ap= append assign
-  ${1:slice} = append($1, ${0:value})
+	${1:slice} = append($1, ${0:value})
 snippet br break
 	break
 snippet ch channel
@@ -56,7 +56,7 @@ snippet gpl
 	 *
 	 * This program is distributed in the hope that it will be useful,
 	 * but WITHOUT ANY WARRANTY; without even the implied warranty of
-	 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	 * GNU General Public License for more details.
 	 *
 	 * You should have received a copy of the GNU General Public License
@@ -140,8 +140,11 @@ snippet func function
 	func ${1:function}(${2}) ${3:error }{
 		${0}
 	}
-snippet ff Fmt Printf debug
+snippet fd Fmt Printf debug
 	fmt.Printf("${1} = %+v\n", $1)
+	${0}
+snippet ff Fmt Printf
+	fmt.Printf("${1}\n", ${2})
 	${0}
 snippet fn Fmt Println debug
 	fmt.Println("${1}")
@@ -200,38 +203,38 @@ snippet test test function
 		${0}
 	}
 snippet tt test table snippet
-    var tests = []struct {
-        name string
-        expected string
-        given string
-    }{
-        {"${2}", "${3}", "${4}",},
-    }
-    for _, tt := range tests {
-        tt := tt
-        t.Run(tt.name, func(t *testing.T){
-            actual := ${1:Function}(tt.given)
-            if actual != tt.expected {
-                t.Errorf("given(%s): expected %s, actual %s", tt.given, tt.expected, actual)
-            }
-        })
-    }
+	var tests = []struct {
+		name string
+		expected string
+		given string
+	}{
+		{"${2}", "${3}", "${4}",},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T){
+			actual := ${1:Function}(tt.given)
+			if actual != tt.expected {
+					t.Errorf("given(%s): expected %s, actual %s", tt.given, tt.expected, actual)
+			}
+		})
+	}
 snippet tsrv test server
-  ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintln(w, ${1:`response`})
-  }))
-  defer ts.Close()
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, ${1:`response`})
+	}))
+	defer ts.Close()
 
-  //Use testing server url (type string) somewhere
-  ${0:someUrl} = ts.URL
+	//Use testing server url (type string) somewhere
+	${0:someUrl} = ts.URL
 snippet ter test error
-  if err != nil {
-    t.Errorf("${1}")
-  }
+	if err != nil {
+		t.Errorf("${1}")
+	}
 snippet terf test fatal error
-  if err != nil {
-    t.Fatalf("${1}")
-  }
+	if err != nil {
+		t.Fatalf("${1}")
+	}
 snippet example test example
 	func Example${1:Method}() {
 		${0}
@@ -251,16 +254,16 @@ snippet vars variables declaration
 		${1:x} ${2:Type}${3: = ${0:value}}
 	)
 snippet eq equals fails the test if exp is not equal to act.
-  if !reflect.DeepEqual(${1:expected}, ${2:actual}) {
-    _, file, line, _ := runtime.Caller(0)
-    fmt.Printf("%s:%d:\n\n\texp: %#v\n\n\tgot: %#v\n\n", filepath.Base(file), line, $1, $2)
-    t.FailNow()
-  }
+	if !reflect.DeepEqual(${1:expected}, ${2:actual}) {
+		_, file, line, _ := runtime.Caller(0)
+		fmt.Printf("%s:%d:\n\n\texp: %#v\n\n\tgot: %#v\n\n", filepath.Base(file), line, $1, $2)
+		t.FailNow()
+	}
 
 snippet hf
-  func ${1:handler}(w http.ResponseWriter, r *http.Request) {
-    ${0:fmt.Fprintf(w, "hello world")}
-  }
+	func ${1:handler}(w http.ResponseWriter, r *http.Request) {
+		${0:fmt.Fprintf(w, "hello world")}
+	}
 
 
 snippet om if key in a map

@@ -1,5 +1,4 @@
 {
-  // "coc.preferences.useQuickfixForLocations": true,
   "suggest.autoTrigger": "none",
   "suggest.noselect": false,
   "suggest.triggerAfterInsertEnter": false,

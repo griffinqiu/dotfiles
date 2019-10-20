@@ -109,22 +109,10 @@ inoremap <silent><expr> <c-g> coc#refresh()
 
 " Using CocList
 " Show all diagnostics
-nnoremap <silent> <leader>oa  :<C-u>CocList diagnostics<cr>
-" Manage extensions
-nnoremap <silent> <leader>oe  :<C-u>CocList extensions<cr>
+nnoremap <silent> <leader>oo :<C-u>CocList diagnostics<cr>
 " Show commands
-nnoremap <silent> <leader>oc  :<C-u>CocList commands<cr>
-" Find symbol of current document
-nnoremap <silent> <leader>oo  :<C-u>CocList outline<cr>
-" Search workspace symbols
-nnoremap <silent> <leader>os  :<C-u>CocList -I symbols<cr>
-" Do default action for next item.
-nnoremap <silent> <leader>oj  :<C-u>CocNext<CR>
-" Do default action for previous item.
-nnoremap <silent> <leader>ok  :<C-u>CocPrev<CR>
+nnoremap <silent> <leader>oc :<C-u>CocList commands<cr>
 " Resume latest coc list
-nnoremap <silent> <leader>op  :<C-u>CocListResume<CR>
-nnoremap <silent> <leader>uu  :<C-u>CocCommand snippets.editSnippets<CR>
 
 command! -nargs=+ -complete=custom,s:GrepArgs Rg exe 'CocList grep '.<q-args>
 
@@ -160,5 +148,5 @@ let g:coc_snippet_next = '<c-j>'
 let g:coc_snippet_prev = '<c-k>'
 " Use <C-j> for both expand and jump (make expand higher priority.)
 imap <C-j> <Plug>(coc-snippets-expand-jump)
-nmap <leader>es :CocCommand snippets.editSnippets<cr>
+nmap <leader>oe :CocCommand snippets.editSnippets<cr>
 """ }}}

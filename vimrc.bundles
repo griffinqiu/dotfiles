@@ -81,7 +81,6 @@ Plug 'griffinqiu/vim-textobj-numeral'        " an | in, ad | id
 
 " Tools, Such as nerdtree, vimwiki {{{
 Plug 'editorconfig/editorconfig-vim'
-" Plug 'zhuochun/vim-dicts'
 Plug 'christoomey/vim-sort-motion'
 Plug 'AndrewRadev/splitjoin.vim'
 
@@ -99,14 +98,15 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
   nnoremap <silent> <leader>1 :NERDTreeToggle<CR>
   nnoremap <silent> <leader>nf :NERDTreeFind<CR>
   let g:NERDTreeMapPreview = "p"
-  let g:NERDTreeMapOpenSplit = "<c-s>"
-  let g:NERDTreeMapOpenVSplit = "<c-v>"
-  let g:NERDTreeMapOpenInTab = "<c-t>"
+  let g:NERDTreeMapOpenSplit = "s"
+  let g:NERDTreeMapOpenVSplit = "v"
+  let g:NERDTreeMapOpenInTab = "t"
   let g:NERDTreeMapToggleHidden = "I"
   let g:NERDTreeMapJumpRoot = "<c-p>"
   let g:NERDTreeMapJumpParent = "P"
   let g:NERDTreeMapJumpFirstChild = "^"
   let g:NERDTreeIgnore=['\.meta$', '\.pyc$']
+  let g:NERDTreeMapOpenExpl="<nop>"
   " Set opened dir to workspace dir
   let NERDTreeChDirMode = 2
   " let NERDTreeWinPos = 'right'
@@ -142,7 +142,6 @@ Plug 'dyng/ctrlsf.vim'
   vmap <C-G>L <Plug>CtrSFQuickfixVwordPath
   vmap <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
   nmap <silent><leader>3 :CtrlSFToggle<CR>
-  let g:ctrlsf_toggle_map_key = '<leader>3'
   let g:ctrlsf_mapping = {
     \ "next": "<c-n>",
     \ "prev": "<c-p>",
@@ -154,17 +153,30 @@ Plug 'dyng/ctrlsf.vim'
   "let g:ctrlsf_context = '-B 5 -A 3'
   " let g:ctrlsf_debug_mode = 1
   " let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp']
-  nnoremap \ :CtrlSF -filetype ruby<SPACE>
+  nnoremap \ :CtrlSF <SPACE>
 
-" Plug 'terryma/vim-multiple-cursors'
-  " let g:multi_cursor_start_key='<c-n>'
-  " let g:multi_cursor_start_word_key='g<c-n>'
-  " let g:multi_cursor_quit_key = '<Esc>'
+Plug 'terryma/vim-multiple-cursors'
+  let g:multi_cursor_start_key='<c-n>'
+  let g:multi_cursor_start_word_key='g<c-n>'
+  let g:multi_cursor_quit_key = '<Esc>'
 
 Plug 'Lokaltog/vim-easymotion'
   " let g:EasyMotion_leader_key = "'"
   map ' <Plug>(easymotion-prefix)
   nmap <Leader>' <Plug>(easymotion-overwin-w)
+
+Plug 'ludovicchabant/vim-gutentags'
+  " Config g:gutentags_ctags_extra_args in ~/ctags.d/config.ctags
+  let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
+  let g:gutentags_cache_dir = '~/tmp/tags'
+  let g:gutentags_generate_on_write = 1
+  let g:gutentags_generate_on_missing = 0
+  let g:gutentags_generate_on_new = 0
+  let g:gutentags_ctags_exclude_wildignore = 1
+
+Plug 'Valloric/ListToggle'
+  let g:lt_location_list_toggle_map = '<leader>l'
+  let g:lt_quickfix_list_toggle_map = '<leader>q'
 " }}}
 
 " Tagbar and FZF {{{
@@ -180,7 +192,20 @@ Plug 'majutsushi/tagbar'
             \'j:javascript functions:1'
         \]
     \}"
-    let g:tagbar_width=30
+    let g:tagbar_map_jump=["o", "<cr>"]
+    let g:tagbar_map_openfold="zo"
+    let g:tagbar_map_closefold="zc"
+    let g:tagbar_map_togglefold="za"
+    let g:tagbar_map_openallfolds="zR"
+    let g:tagbar_map_closeallfolds="zM"
+    let g:tagbar_map_hidenonpublic="I"
+    let g:tagbar_map_zoomwin="A"
+    let g:tagbar_map_previewwin="<nop>"
+    let g:tagbar_map_showproto="<nop>"
+    let g:tagbar_map_incrementfolds="<nop>"
+    let g:tagbar_map_decrementfolds="<nop>"
+    let g:tagbar_map_toggleautoclose="<nop>"
+    let g:tagbar_width=40
     let g:tagbar_sort=0
     let g:tagbar_autofocus=1
     let g:Tb_MaxSize=5
@@ -191,7 +216,7 @@ Plug 'junegunn/fzf.vim'
     \ 'ctrl-t': 'tab split',
     \ 'ctrl-s': 'split',
     \ 'ctrl-v': 'vsplit' }
-  let $FZF_DEFAULT_OPTS = '--bind ctrl-s:select-all,ctrl-d:deselect-all'
+  let $FZF_DEFAULT_OPTS = '--bind ctrl-a:select-all,ctrl-d:deselect-all'
 
   nnoremap <c-p> :GitFiles<CR>
   nnoremap <leader>fg :GitFiles<CR>
@@ -199,7 +224,7 @@ Plug 'junegunn/fzf.vim'
   nnoremap <leader>ff :Files<CR>
   nnoremap <leader>fd :Buffers<CR>
   nnoremap <leader>ft :Tags<CR>
-  nnoremap <leader>5 :BTags<CR>
+  nnoremap <leader>fbt :BTags<CR>
   nnoremap <leader>fc :Commits<CR>
   nnoremap <leader>fbc :BCommits<CR>
   nnoremap <leader>fm :Marks<CR>
@@ -221,7 +246,6 @@ Plug 'junegunn/fzf.vim'
   " imap <c-x><c-f> <plug>(fzf-complete-path)
   " imap <c-x><c-l> <plug>(fzf-complete-line)
 Plug 'zackhsi/fzf-tags'
-  nmap g] <Plug>(fzf_tags)
   nmap g<c-]> <Plug>(fzf_tags)
 " }}}
 
@@ -381,7 +405,7 @@ Plug 'mattn/emmet-vim'
 " }}}
 
 " Theme {{{
-Plug 'yonchu/accelerated-smooth-scroll'
+" Plug 'yonchu/accelerated-smooth-scroll'
 Plug 'morhetz/gruvbox'
 
 Plug 'vim-airline/vim-airline'
@@ -404,21 +428,12 @@ Plug 'vim-airline/vim-airline'
 " }}}
 " }}}
 
-if !has("gui_running") && filereadable(expand("~/.vimrc.coc"))
+if filereadable(expand("~/.vimrc.coc"))
   source ~/.vimrc.coc
 endif
 
 if filereadable(expand("~/.vimrc.bundles.local"))
   source ~/.vimrc.bundles.local
 endif
-
-Plug 'ludovicchabant/vim-gutentags'
-  " Config g:gutentags_ctags_extra_args in ~/ctags.d/config.ctags
-  let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
-  let g:gutentags_cache_dir = '~/tmp/tags'
-  let g:gutentags_generate_on_write = 1
-  let g:gutentags_generate_on_missing = 0
-  let g:gutentags_generate_on_new = 0
-  let g:gutentags_ctags_exclude_wildignore = 1
 
 call plug#end()
