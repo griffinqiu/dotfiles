@@ -152,7 +152,7 @@ Plug 'dyng/ctrlsf.vim'
   let g:ctrlsf_winsize = '30%'
   "let g:ctrlsf_context = '-B 5 -A 3'
   " let g:ctrlsf_debug_mode = 1
-  " let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp']
+  let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp', 'proto']
   nnoremap \ :CtrlSF <SPACE>
 
 Plug 'terryma/vim-multiple-cursors'
@@ -216,7 +216,7 @@ Plug 'junegunn/fzf.vim'
     \ 'ctrl-t': 'tab split',
     \ 'ctrl-s': 'split',
     \ 'ctrl-v': 'vsplit' }
-  let $FZF_DEFAULT_OPTS = '--bind ctrl-a:select-all,ctrl-d:deselect-all'
+  let $FZF_DEFAULT_OPTS = '--bind ctrl-s:select-all,ctrl-d:deselect-all'
 
   nnoremap <c-p> :GitFiles<CR>
   nnoremap <leader>fg :GitFiles<CR>
@@ -356,7 +356,7 @@ Plug 'posva/vim-vue'
 Plug 'Keithbsmiley/rspec.vim', { 'for': 'ruby' }
 Plug 'ecomba/vim-ruby-refactoring', { 'for': 'ruby' }
 Plug 'vim-ruby/vim-ruby', { 'for': 'ruby' }
-Plug 'tpope/vim-rails', { 'for': 'ruby' }
+Plug 'tpope/vim-rails', { 'for': ['ruby', 'eruby'] }
 Plug 'tpope/vim-rbenv', { 'for': 'ruby' }
 Plug 'tpope/vim-bundler', { 'for': 'ruby' }
 Plug 'tpope/vim-pathogen', { 'for': 'ruby' }

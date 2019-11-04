@@ -66,6 +66,7 @@ command -v sha1sum > /dev/null || alias sha1sum="shasum"
 
 # Recursively delete `.DS_Store` files
 alias cleanup="find . -type f -name '*.DS_Store' -ls -delete"
+alias vim='nvim'
 
 # Include custom aliases
 [[ -f ~/Documents/Sync/aliases.sync ]] && source ~/Documents/Sync/aliases.sync
