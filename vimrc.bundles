@@ -53,8 +53,8 @@ Plug 'mhinz/vim-signify'
   xmap ic <plug>(signify-motion-inner-visual)
   omap ac <plug>(signify-motion-outer-pending)
   xmap ac <plug>(signify-motion-outer-visual)
-  nnoremap <leader>gt :SignifyToggle<CR>
-  nnoremap <leader>gh :SignifyToggleHighlight<CR>
+  " nnoremap <leader>gt :SignifyToggle<CR>
+  " nnoremap <leader>gh :SignifyToggleHighlight<CR>
   nmap ]g <plug>(signify-next-hunk)
   nmap [g <plug>(signify-prev-hunk)
   nmap ]G 9999]g
@@ -254,19 +254,18 @@ Plug 'zackhsi/fzf-tags'
 Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
   " let g:go_fmt_command = "goimports"
   let g:go_fmt_command = "gofmt"
-  let g:go_fmt_fail_silently = 0
-  let g:go_highlight_trailing_whitespace_error = 0
+  let g:go_fmt_fail_silently = 1
+  let g:go_highlight_trailing_whitespace_error = 1
   " let g:go_addtags_transform = "camelcase"
   " let g:go_def_mode = 'godef'
   let g:go_def_mode='gopls'
   let g:go_info_mode='gopls'
   let g:go_decls_includes = "func,type"
-  " let g:go_def_mapping_enabled = 1
   " let g:go_fmt_autosave = 0
   let g:go_list_height = 10
   let g:go_list_type='locationlist'
-  " To disable the vim-go <c-]>, gd and so on mapping
-  " To use the LSP of coc.nvim
+  " " To disable the vim-go <c-]>, gd and so on mapping for use the LSP of coc.nvim
+  let g:go_def_mapping_enabled = 0
   " run :GoBuild or :GoTestCompile based on the go file
   function! s:build_go_files()
    let l:file = expand('%')
@@ -305,13 +304,13 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
   autocmd FileType go nmap <leader>go  <Plug>(go-imports)
   autocmd FileType go nmap <leader>gg :<C-u>call <SID>build_go_files()<CR>
   autocmd FileType go nmap <leader>gO :GoImport<SPACE>
-  autocmd FileType go nmap <leader>gi  <Plug>(go-implements)
+  " autocmd FileType go nmap <leader>gi  <Plug>(go-implements)
   autocmd FileType go nmap <leader>gd  :GoDeclsDir<cr>
-  autocmd FileType go nmap <Leader>gh <Plug>(go-sameids-toggle)
-  autocmd FileType go nmap <Leader>gf <Plug>(go-info)
+  " autocmd FileType go nmap <Leader>gh <Plug>(go-sameids-toggle)
+  autocmd FileType go nmap <Leader>gh <Plug>(go-info)
   " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
   " autocmd FileType go nmap <leader>gf  <Plug>(go-test-func)
-  " autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
+  autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
   autocmd Filetype go command! -bang A  call go#alternate#Switch(<bang>0, 'edit')
   autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
   autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
