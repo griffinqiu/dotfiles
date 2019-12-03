@@ -45,14 +45,14 @@
       "rootPatterns": ["go.mod"],
       "filetypes": ["go"]
     },
-    "sorbet": {
-      "command": "solargraph",
-      "args": ["tc", "--lsp", "--enable-all-experimental-lsp-features"],
-      "filetypes": ["ruby"],
-      "rootPatterns": ["sorbet/config"],
-      "initializationOptions": {},
-      "settings": {}
-    }
+    //"sorbet": {
+    //  "command": "solargraph",
+    //  "args": ["tc", "--lsp", "--enable-all-experimental-lsp-features"],
+    //  "filetypes": ["ruby"],
+    //  "rootPatterns": ["sorbet/config"],
+    //  "initializationOptions": {},
+    //  "settings": {}
+    //}
   },
   "list.insertMappings": {
     "<C-c>": "do:exit",
