@@ -83,6 +83,8 @@ Plug 'griffinqiu/vim-textobj-numeral'        " an | in, ad | id
 Plug 'editorconfig/editorconfig-vim'
 Plug 'christoomey/vim-sort-motion'
 Plug 'AndrewRadev/splitjoin.vim'
+Plug 'diepm/vim-rest-console'
+  let b:vrc_header_content_type = 'application/json; charset=utf-8'
 
 Plug 'rizzatti/dash.vim'
   nmap <silent> <leader>d <Plug>DashSearch
