@@ -15,7 +15,10 @@ brew "stress"
 brew "watch"
 brew "sysbench"
 brew "neovim", args: ["HEAD"]
-cask "homebrew/cask-fonts/font-hack-nerd-font"
+brew "tmuxinator"
+cask "vagrant"
+tap "homebrew/cask-fonts"
+cask "font-hack-nerd-font"
 EOF
 
 if [ ! -e "$HOME"/.config/nvim/coc-settings.json ]; then
