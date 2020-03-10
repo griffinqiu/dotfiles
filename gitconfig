@@ -28,4 +28,4 @@
 [diff]
   colorMoved = zebra
 [include]
-    path = ~/.gitconfig.local
+    path = ~/Documents/Sync/gitconfig.sync
