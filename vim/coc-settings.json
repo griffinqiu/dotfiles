@@ -64,7 +64,7 @@
  // "solargraph.useBundler":true,
  // "solargraph.diagnostics": true,
 //  "solargraph.autoformat": true,
-  "solargraph.formatting": true,
+  //"solargraph.formatting": true,
 //  "solargraph.hover": true,
   "snippets.extends": {"javascriptreact": ["javascript"], "vue": ["vue", "javascript"]},
   "snippets.editSnippetsCommand": "vsplit",
