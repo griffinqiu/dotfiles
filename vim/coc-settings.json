@@ -46,18 +46,15 @@
       "filetypes": ["go"]
     },
     "sorbet": {
-      "command": "solargraph",
-      "args": ["tc", "--lsp", "--enable-all-experimental-lsp-features"],
+      "command": "srb",
+      "args": ["tc", "--typed", "true", "--enable-all-experimental-lsp-features", "--lsp", "--disable-watchman", "--dir", "."],
       "filetypes": ["ruby"],
       "rootPatterns": ["sorbet/config"],
       "initializationOptions": {},
       "settings": {}
     }
   },
-  "jedi.diagnostics.enabled": true,
-  "jedi.diagnostics.didOpen": true,
-  "jedi.diagnostics.didChange": true,
-  "jedi.diagnostics.didSave": true,
+  "list.previewSplitRight": true,
   "list.insertMappings": {
     "<C-c>": "do:exit",
     "<C-d>": "do:stop",
