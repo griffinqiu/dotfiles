@@ -30,9 +30,9 @@ set backspace=indent,eol,start
 set foldmethod=marker
 set nospell spelllang=en_us,cjk
 
-set shiftwidth=4
-set softtabstop=4
-set tabstop=4
+set shiftwidth=2
+set softtabstop=2
+set tabstop=2
 set expandtab
 set scrolloff=5
 set sidescroll=1 " zh zl

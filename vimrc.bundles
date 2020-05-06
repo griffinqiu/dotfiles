@@ -310,6 +310,7 @@ Plug 'junegunn/fzf.vim'
     \ 'ctrl-s': 'split',
     \ 'ctrl-v': 'vsplit' }
   let $FZF_DEFAULT_OPTS = '--bind ctrl-s:select-all,ctrl-d:deselect-all'
+  let g:fzf_preview_window = ''
 
   nnoremap <c-p> :GitFiles<CR>
   nnoremap <leader>fg :GitFiles<CR>

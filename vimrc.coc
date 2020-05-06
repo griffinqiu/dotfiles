@@ -1,6 +1,6 @@
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
-let g:coc_global_extensions =["coc-json", "coc-tsserver", "coc-html", "coc-css", "coc-vetur", "coc-highlight", "coc-prettier", "coc-snippets", "coc-eslint"]
+let g:coc_global_extensions =["coc-json", "coc-tsserver", "coc-html", "coc-css", "coc-vetur", "coc-highlight", "coc-prettier", "coc-snippets", "coc-eslint", "coc-jedi", "coc-solargraph"]
 
 " You will have bad experience for diagnostic messages when it's default 4000.
 set updatetime=500
