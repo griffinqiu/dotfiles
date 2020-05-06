@@ -10,6 +10,7 @@ echo ""
 brew bundle --file=- <<EOF
 brew "tig"
 brew "ncdu"
+brew "bob"
 brew "diff-so-fancy"
 brew "stress"
 brew "watch"
@@ -17,6 +18,7 @@ brew "sysbench"
 brew "neovim", args: ["HEAD"]
 brew "tmuxinator"
 cask "vagrant"
+brew cask "bob"
 tap "homebrew/cask-fonts"
 cask "font-hack-nerd-font"
 EOF
