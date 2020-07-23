@@ -44,23 +44,6 @@
       "command": "gopls",
       "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
       "filetypes": ["go"]
-    },
-    "sorbet": {
-      "command": "srb",
-      "args": [
-        "tc",
-        "--typed",
-        "true",
-        "--enable-all-experimental-lsp-features",
-        "--lsp",
-        "--disable-watchman",
-        "--dir",
-        "."
-      ],
-      "filetypes": ["ruby"],
-      "rootPatterns": ["sorbet/config"],
-      "initializationOptions": {},
-      "settings": {}
     }
   },
   "list.previewSplitRight": true,
