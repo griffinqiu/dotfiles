@@ -80,6 +80,13 @@ Plug 'griffinqiu/vim-textobj-numeral'        " an | in, ad | id
 " }}}
 
 " Tools, Such as nerdtree, vimwiki {{{
+Plug 'skywind3000/vim-quickui'
+Plug 'xfyuan/vim-mac-dictionary'
+  let g:vim_mac_dictionary_use_format = 1
+  nnoremap <silent><leader>ww :MacDictPopup<CR>
+  nnoremap <silent><leader>wd :MacDictWord<CR>
+  nnoremap <silent><leader>wq :MacDictQuery<CR>
+
 Plug 'editorconfig/editorconfig-vim'
 Plug 'christoomey/vim-sort-motion'
 Plug 'AndrewRadev/splitjoin.vim'
