@@ -29,3 +29,5 @@
   colorMoved = zebra
 [include]
     path = ~/Documents/Sync/gitconfig.sync
+[init]
+	defaultBranch = main

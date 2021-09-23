@@ -198,9 +198,11 @@ nmap ,cl :let @*=expand("%:p")<CR>
 
 " Move to prev/next buffer
 nnoremap [l :lprevious<CR>
-nnoremap ]l  :lnext<CR>
+nnoremap ]l :lnext<CR>
 nnoremap [t :tabprevious<CR>
 nnoremap ]t :tabnext<CR>
+nnoremap [c :cprevious<CR>
+nnoremap ]c :cnext<CR>
 
 noremap <silent> <C-s> :update!<CR>
 vnoremap <silent> <C-s> <C-c>:update!<CR>

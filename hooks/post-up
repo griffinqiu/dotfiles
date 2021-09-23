@@ -10,15 +10,17 @@ echo ""
 brew bundle --file=- <<EOF
 brew "tig"
 brew "ncdu"
-brew "bob"
 brew "diff-so-fancy"
 brew "stress"
 brew "watch"
 brew "sysbench"
 brew "neovim", args: ["HEAD"]
 brew "tmuxinator"
+brew "gpg"
+brew "coreutils"
+brew "reattach-to-user-namespace"
+brew "yarn"
 cask "vagrant"
-brew cask "bob"
 tap "homebrew/cask-fonts"
 cask "font-hack-nerd-font"
 EOF
@@ -32,22 +34,22 @@ if [ ! -e "$HOME"/.config/tmuxinator ]; then
 fi
 
 if [ ! -e "$HOME"/.oh-my-zsh ]; then
-    echo 'Installing oh-my-zsh'
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+  echo 'Installing oh-my-zsh'
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 fi
 
 if [ ! -e "$HOME"/.tmux ]; then
-    echo 'Installing tpm'
-    git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
-    "$HOME/.tmux/plugins/tpm/bin/install_plugins"
+  echo 'Installing tpm'
+  git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
+  "$HOME/.tmux/plugins/tpm/bin/install_plugins"
 fi
 
 if [ ! -e "$HOME"/tmp ]; then
-    mkdir -p "$HOME"/tmp
+  mkdir -p "$HOME"/tmp
 fi
 
 if [ ! -e "$HOME"/tmp/tags ]; then
-    mkdir -p "$HOME"/tmp/tags
+  mkdir -p "$HOME"/tmp/tags
 fi
 
 if [ -e "$HOME"/.vim/autoload/plug.vim ]; then
@@ -55,9 +57,8 @@ if [ -e "$HOME"/.vim/autoload/plug.vim ]; then
 else
   echo 'Initing plug.vim'
   curl -fLo "$HOME"/.vim/autoload/plug.vim --create-dirs \
-      https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 fi
 
 nvim +PlugUpdate +PlugClean! +qa
-
 reset -Q
