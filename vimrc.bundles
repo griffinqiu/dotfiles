@@ -1,7 +1,7 @@
 if &compatible
   set nocompatible
 end
-let nvim_lsp = 1
+let nvim_lsp = 0
 
 " Shim command and function to allow migration from Vundle to vim-plug. {{{
 function! VundleToPlug(vundle_command, arg, ...)

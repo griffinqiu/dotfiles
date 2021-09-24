@@ -2,7 +2,7 @@
 
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
-let g:coc_global_extensions =["coc-json", "coc-tsserver", "coc-html", "coc-css", "coc-vetur", "coc-highlight", "coc-prettier", "coc-snippets", "coc-eslint", "coc-python"]
+let g:coc_global_extensions =["coc-json", "coc-tsserver", "coc-html", "coc-css", "coc-vetur", "coc-highlight", "coc-prettier", "coc-snippets", "coc-eslint", "coc-python", "coc-rust-analyzer"]
 
 " You will have bad experience for diagnostic messages when it's default 4000.
 set updatetime=500
@@ -48,7 +48,6 @@ nmap <silent> gt <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 nnoremap <silent> <leader>2 :CocListResume<CR>
-inoremap <silent><expr> <c-l> coc#refresh()
 " textobj function if af
 
 " Use K to show documentation in preview window
@@ -149,6 +148,6 @@ endfunction
 let g:coc_snippet_next = '<c-j>'
 let g:coc_snippet_prev = '<c-k>'
 " Use <C-j> for both expand and jump (make expand higher priority.)
-imap <C-j> <Plug>(coc-snippets-expand-jump)
+imap <C-l> <Plug>(coc-snippets-expand-jump)
 nmap <leader>oe :CocCommand snippets.editSnippets<cr>
 """ }}}
