@@ -1,7 +1,7 @@
 if &compatible
   set nocompatible
 end
-let nvim_lsp = 0
+let nvim_lsp = 1
 
 " Shim command and function to allow migration from Vundle to vim-plug. {{{
 function! VundleToPlug(vundle_command, arg, ...)
@@ -352,8 +352,9 @@ Plug 'zackhsi/fzf-tags'
   nmap g<c-]> <Plug>(fzf_tags)
 " }}}
 
-" GO {{{
-"
+" Rust, Golang {{{
+Plug 'rust-lang/rust.vim'
+
 Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
   let g:go_fmt_fail_silently = 1
   let g:go_highlight_trailing_whitespace_error = 0

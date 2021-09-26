@@ -35,7 +35,7 @@ endfunction
 execute('silent! iunmap <buffer> <cr>')
 inoremap <expr> <cr> pumvisible() ? "\<c-y>" : "\<c-g>u\<cr>"
 
-" Use `[e` and `]e` to navigate diagnostics
+" Use `[d` and `]d` to navigate diagnostics
 nmap <silent> [d <Plug>(coc-diagnostic-prev)
 nmap <silent> ]d <Plug>(coc-diagnostic-next)
 
