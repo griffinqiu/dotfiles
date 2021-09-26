@@ -45,3 +45,29 @@ Plug 'hrsh7th/vim-vsnip-integ'
   let g:vsnip_filetypes = {}
   let g:vsnip_filetypes.javascriptreact = ['javascript']
   let g:vsnip_filetypes.typescriptreact = ['typescript']
+
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim'
+" Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
+
+nnoremap <c-p> <cmd>Telescope git_files<cr>
+nnoremap <leader>ff <cmd>Telescope find_files<cr>
+nnoremap <leader>fg <cmd>Telescope live_grep<cr>
+nnoremap <leader>fb <cmd>Telescope buffers<cr>
+nnoremap <leader>fh <cmd>Telescope oldfiles<cr>
+nnoremap <leader>fH <cmd>Telescope help_tags<cr>
+nnoremap <leader>f/ <cmd>Telescope search_history<cr>
+nnoremap <leader>f: <cmd>Telescope command_history<cr>
+nnoremap <leader>fm <cmd>Telescope marks<cr>
+nnoremap <leader>fq <cmd>Telescope quickfix<cr>
+nnoremap <leader>fl <cmd>Telescope loclist<cr>
+nnoremap <leader>fM <cmd>Telescope keymaps<cr>
+nnoremap <leader>fc <cmd>Telescope git_commits<cr>
+nnoremap <leader>fbc <cmd>Telescope git_bcommits<cr>
+" LSP
+nnoremap <leader>fr <cmd>Telescope lsp_references<cr>
+nnoremap <leader>fa <cmd>Telescope lsp_code_actions<cr>
+nnoremap <leader>fi <cmd>Telescope lsp_implementations<cr>
+nnoremap <leader>fd <cmd>Telescope lsp_definitions<cr>
+nnoremap <leader>ft <cmd>Telescope lsp_type_definitions<cr>

@@ -281,77 +281,6 @@ Plug 'Valloric/ListToggle'
   let g:lt_quickfix_list_toggle_map = '<leader>q'
 " }}}
 
-" Tagbar and FZF {{{
-Plug 'majutsushi/tagbar'
-    nnoremap <silent> <leader>4 :TagbarToggle<CR>
-    let g:tagbar_type_php = {
-        \'ctagstype' : 'php',
-        \'kinds'         : [
-            \'i:interfaces',
-            \'c:classes',
-            \'d:constant definitions',
-            \'f:functions',
-            \'j:javascript functions:1'
-        \]
-    \}"
-    let g:tagbar_map_jump=["o", "<cr>"]
-    let g:tagbar_map_openfold="zo"
-    let g:tagbar_map_closefold="zc"
-    let g:tagbar_map_togglefold="za"
-    let g:tagbar_map_openallfolds="zR"
-    let g:tagbar_map_closeallfolds="zM"
-    let g:tagbar_map_hidenonpublic="I"
-    let g:tagbar_map_zoomwin="A"
-    let g:tagbar_map_previewwin="<nop>"
-    let g:tagbar_map_showproto="<nop>"
-    let g:tagbar_map_incrementfolds="<nop>"
-    let g:tagbar_map_decrementfolds="<nop>"
-    let g:tagbar_map_toggleautoclose="<nop>"
-    let g:tagbar_width=40
-    let g:tagbar_sort=0
-    let g:tagbar_autofocus=1
-    let g:Tb_MaxSize=5
-
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plug 'junegunn/fzf.vim'
-  let g:fzf_action = {
-    \ 'ctrl-t': 'tab split',
-    \ 'ctrl-s': 'split',
-    \ 'ctrl-v': 'vsplit' }
-  let $FZF_DEFAULT_OPTS = '--bind ctrl-s:select-all,ctrl-d:deselect-all'
-  let g:fzf_preview_window = ''
-
-  nnoremap <c-p> :GitFiles<CR>
-  nnoremap <leader>fg :GitFiles<CR>
-  nnoremap <leader>fgs :GFiles?<CR>
-  nnoremap <leader>ff :Files<CR>
-  nnoremap <leader>fd :Buffers<CR>
-  nnoremap <leader>ft :Tags<CR>
-  nnoremap <leader>fbt :BTags<CR>
-  nnoremap <leader>fc :Commits<CR>
-  nnoremap <leader>fbc :BCommits<CR>
-  nnoremap <leader>fm :Marks<CR>
-  nnoremap <leader>fh :History<CR>
-  nnoremap <leader>f: :History:<CR>
-  nnoremap <leader>f/ :History/<CR>
-  nnoremap <leader>fC :Commands<CR>
-  nmap <leader>fmn :call fzf#vim#maps('n', 0)<cr>
-  nmap <leader>fmi :call fzf#vim#maps('i', 0)<cr>
-  nmap <leader>fmx :call fzf#vim#maps('x', 0)<cr>
-  nmap <leader>fmv :call fzf#vim#maps('v', 0)<cr>
-  nmap <leader>fmo :call fzf#vim#maps('o', 0)<cr>
-  " nnoremap <leader>ag :Ag<CR>
-  " nnoremap <leader>agt :Agt<CR>
-  nnoremap <silent> <leader>at :let @"=&filetype \| Agt --<C-R>" <C-R><C-W><CR>
-
-  " imap <c-x><c-k> <plug>(fzf-complete-word)
-  " imap <c-x><c-f> <plug>(fzf-complete-file-ag)
-  " imap <c-x><c-f> <plug>(fzf-complete-path)
-  " imap <c-x><c-l> <plug>(fzf-complete-line)
-Plug 'zackhsi/fzf-tags'
-  nmap g<c-]> <Plug>(fzf_tags)
-" }}}
-
 " Rust, Golang {{{
 Plug 'rust-lang/rust.vim'
 
@@ -406,7 +335,7 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
   autocmd FileType go nmap <Leader>gh <Plug>(go-info)
   autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
   " autocmd FileType go nmap <leader>gi  <Plug>(go-implements)
-  " autocmd FileType go nmap <Leader>gh <Plug>(go-sameids-toggle)
+  " autocmd FileType go nmap <Leader>gs <Plug>(go-sameids-toggle)
   " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
   " autocmd FileType go nmap <leader>gf  <Plug>(go-test-func)
   autocmd Filetype go command! -bang A  call go#alternate#Switch(<bang>0, 'edit')
@@ -535,6 +464,77 @@ if filereadable(expand("~/.nvim.lsp")) && has('nvim') && nvim_lsp == 1
 endif
 
 if filereadable(expand("~/.vimrc.coc")) && !has("gui_macvim") && nvim_lsp != 1
+" Tagbar and FZF {{{
+Plug 'majutsushi/tagbar'
+    nnoremap <silent> <leader>4 :TagbarToggle<CR>
+    let g:tagbar_type_php = {
+        \'ctagstype' : 'php',
+        \'kinds'         : [
+            \'i:interfaces',
+            \'c:classes',
+            \'d:constant definitions',
+            \'f:functions',
+            \'j:javascript functions:1'
+        \]
+    \}"
+    let g:tagbar_map_jump=["o", "<cr>"]
+    let g:tagbar_map_openfold="zo"
+    let g:tagbar_map_closefold="zc"
+    let g:tagbar_map_togglefold="za"
+    let g:tagbar_map_openallfolds="zR"
+    let g:tagbar_map_closeallfolds="zM"
+    let g:tagbar_map_hidenonpublic="I"
+    let g:tagbar_map_zoomwin="A"
+    let g:tagbar_map_previewwin="<nop>"
+    let g:tagbar_map_showproto="<nop>"
+    let g:tagbar_map_incrementfolds="<nop>"
+    let g:tagbar_map_decrementfolds="<nop>"
+    let g:tagbar_map_toggleautoclose="<nop>"
+    let g:tagbar_width=40
+    let g:tagbar_sort=0
+    let g:tagbar_autofocus=1
+    let g:Tb_MaxSize=5
+
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
+  let g:fzf_action = {
+    \ 'ctrl-t': 'tab split',
+    \ 'ctrl-s': 'split',
+    \ 'ctrl-v': 'vsplit' }
+  let $FZF_DEFAULT_OPTS = '--bind ctrl-s:select-all,ctrl-d:deselect-all'
+  let g:fzf_preview_window = ''
+
+  nnoremap <c-p> :GitFiles<CR>
+  nnoremap <leader>ff :Files<CR>
+  nnoremap <leader>fg :Rg
+  nnoremap <leader>fb :Buffers<CR>
+  nnoremap <leader>fh :History<CR>
+  nnoremap <leader>fH :Helptags<CR>
+  nnoremap <leader>f/ :History/<CR>
+  nnoremap <leader>f: :History:<CR>
+
+  nnoremap <leader>ft :Tags<CR>
+  nnoremap <leader>fbt :BTags<CR>
+  nnoremap <leader>fc :Commits<CR>
+  nnoremap <leader>fbc :BCommits<CR>
+  nnoremap <leader>fm :Marks<CR>
+  nnoremap <leader>fC :Commands<CR>
+  nmap <leader>fmn :call fzf#vim#maps('n', 0)<cr>
+  nmap <leader>fmi :call fzf#vim#maps('i', 0)<cr>
+  nmap <leader>fmx :call fzf#vim#maps('x', 0)<cr>
+  nmap <leader>fmv :call fzf#vim#maps('v', 0)<cr>
+  nmap <leader>fmo :call fzf#vim#maps('o', 0)<cr>
+  " nnoremap <leader>ag :Ag<CR>
+  " nnoremap <leader>agt :Agt<CR>
+  nnoremap <silent> <leader>at :let @"=&filetype \| Agt --<C-R>" <C-R><C-W><CR>
+
+  " imap <c-x><c-k> <plug>(fzf-complete-word)
+  " imap <c-x><c-f> <plug>(fzf-complete-file-ag)
+  " imap <c-x><c-f> <plug>(fzf-complete-path)
+  " imap <c-x><c-l> <plug>(fzf-complete-line)
+Plug 'zackhsi/fzf-tags'
+  nmap g<c-]> <Plug>(fzf_tags)
+" }}}
   source ~/.vimrc.coc
 endif
 " }}}
