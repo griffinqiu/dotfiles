@@ -1,7 +1,7 @@
 if &compatible
   set nocompatible
 end
-let nvim_lsp = 1
+let nvim_lsp = 0
 
 " Shim command and function to allow migration from Vundle to vim-plug. {{{
 function! VundleToPlug(vundle_command, arg, ...)
@@ -62,7 +62,7 @@ Plug 'mhinz/vim-signify'
   nmap [G 9999[g
   " nnoremap <leader>gr :SignifyRefresh<CR>
 Plug 'tpope/vim-fugitive'
-  nnoremap <Leader>gb :Gblame<CR>
+  nnoremap <Leader>gb :Git blame<CR>
 Plug 'tpope/vim-rhubarb'
   " :Gbrowse
 " }}}
@@ -459,6 +459,12 @@ Plug 'vim-airline/vim-airline'
 " }}}
 
 " LSP {{{
+
+Plug 'github/copilot.vim'
+  imap <silent><script><expr> <C-J> copilot#Accept("\<CR>")
+  let g:copilot_no_tab_map = v:true
+  let b:copilot_enabled = 1
+
 if filereadable(expand("~/.nvim.lsp")) && has('nvim') && nvim_lsp == 1
   source ~/.nvim.lsp
 endif

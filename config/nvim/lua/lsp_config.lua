@@ -137,6 +137,9 @@ require('telescope').setup {
         ["<C-k>"] = require('telescope.actions').move_selection_previous,
       },
     },
+    layout_config = {
+      vertical = { width = 0.5 },
+    },
   },
   -- extensions = {
     -- fzf = {

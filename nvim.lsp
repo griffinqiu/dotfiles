@@ -51,23 +51,23 @@ Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 " Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
 
-nnoremap <c-p> <cmd>Telescope git_files<cr>
-nnoremap <leader>ff <cmd>Telescope find_files<cr>
-nnoremap <leader>fg <cmd>Telescope live_grep<cr>
-nnoremap <leader>fb <cmd>Telescope buffers<cr>
-nnoremap <leader>fh <cmd>Telescope oldfiles<cr>
-nnoremap <leader>fH <cmd>Telescope help_tags<cr>
-nnoremap <leader>f/ <cmd>Telescope search_history<cr>
-nnoremap <leader>f: <cmd>Telescope command_history<cr>
-nnoremap <leader>fm <cmd>Telescope marks<cr>
-nnoremap <leader>fq <cmd>Telescope quickfix<cr>
-nnoremap <leader>fl <cmd>Telescope loclist<cr>
-nnoremap <leader>fM <cmd>Telescope keymaps<cr>
-nnoremap <leader>fc <cmd>Telescope git_commits<cr>
-nnoremap <leader>fbc <cmd>Telescope git_bcommits<cr>
+nnoremap <c-p> <cmd>Telescope git_files theme=dropdown<cr>
+nnoremap <leader>ff <cmd>Telescope find_files theme=dropdown<cr>
+nnoremap <leader>fg <cmd>Telescope live_grep theme=dropdown<cr>
+nnoremap <leader>fb <cmd>Telescope buffers theme=dropdown<cr>
+nnoremap <leader>fh <cmd>Telescope oldfiles theme=dropdown<cr>
+nnoremap <leader>fH <cmd>Telescope help_tags theme=dropdown<cr>
+nnoremap <leader>f/ <cmd>Telescope search_history theme=dropdown<cr>
+nnoremap <leader>f: <cmd>Telescope command_history theme=dropdown<cr>
+nnoremap <leader>fm <cmd>Telescope marks theme=dropdown<cr>
+nnoremap <leader>fq <cmd>Telescope quickfix theme=dropdown<cr>
+nnoremap <leader>fl <cmd>Telescope loclist theme=dropdown<cr>
+nnoremap <leader>fM <cmd>Telescope keymaps theme=dropdown<cr>
+nnoremap <leader>fc <cmd>Telescope git_commits theme=dropdown<cr>
+nnoremap <leader>fbc <cmd>Telescope git_bcommits theme=dropdown<cr>
 " LSP
-nnoremap <leader>fr <cmd>Telescope lsp_references<cr>
-nnoremap <leader>fa <cmd>Telescope lsp_code_actions<cr>
-nnoremap <leader>fi <cmd>Telescope lsp_implementations<cr>
-nnoremap <leader>fd <cmd>Telescope lsp_definitions<cr>
-nnoremap <leader>ft <cmd>Telescope lsp_type_definitions<cr>
+nnoremap <leader>fr <cmd>Telescope lsp_references theme=dropdown<cr>
+nnoremap <leader>fa <cmd>Telescope lsp_code_actions theme=dropdown<cr>
+nnoremap <leader>fi <cmd>Telescope lsp_implementations theme=dropdown<cr>
+nnoremap <leader>fd <cmd>Telescope lsp_definitions theme=dropdown<cr>
+nnoremap <leader>ft <cmd>Telescope lsp_type_definitions theme=dropdown<cr>
