@@ -122,7 +122,7 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
   let NERDTreeShowBookmarks = 1
   let NERDTreeWinSize = 30
 Plug 'Xuyuanp/nerdtree-git-plugin'
-  let g:NERDTreeIndicatorMapCustom = {
+  let g:NERDTreeGitStatusIndicatorMapCustom = {
     \ 'Modified'  : '•',
     \ 'Staged'    : '✚',
     \ 'Untracked' : 'ᵁ',
@@ -136,12 +136,12 @@ Plug 'scrooloose/nerdcommenter'
   let g:NERDSpaceDelims=1
 
 Plug 'griffinqiu/star-search'
+Plug 'griffinqiu/powerful-vim'
 Plug 'dyng/ctrlsf.vim'
   nmap <C-G>g <Plug>CtrlSFPrompt
   nmap <C-G>G <Plug>CtrlSFCwordPath
   nmap <C-G><C-G> <Plug>CtrlSFCwordExec
   vmap <C-G>g <Plug>CtrlSFVwordPath
-  vmap <C-G>G <Plug>CtrlSFVwordPath
   vmap <C-G><C-G> <Plug>CtrlSFVwordExec
   nmap <C-G>p <Plug>CtrlSFPwordPath
   nmap <C-G><C-P> <Plug>CtrlSFPwordExec
@@ -151,6 +151,7 @@ Plug 'dyng/ctrlsf.vim'
   vmap <C-G>L <Plug>CtrSFQuickfixVwordPath
   vmap <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
   nmap <silent><leader>3 :CtrlSFToggle<CR>
+  nnoremap \ :CtrlSF <SPACE>
   let g:ctrlsf_mapping = {
     \ "next": "<c-n>",
     \ "prev": "<c-p>",
@@ -162,7 +163,6 @@ Plug 'dyng/ctrlsf.vim'
   "let g:ctrlsf_context = '-B 5 -A 3'
   " let g:ctrlsf_debug_mode = 1
   let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp', 'proto']
-  nnoremap \ :CtrlSF <SPACE>
 
 Plug 'terryma/vim-multiple-cursors'
   let g:multi_cursor_start_key='<c-n>'
@@ -177,7 +177,7 @@ Plug 'Lokaltog/vim-easymotion'
 Plug 'ludovicchabant/vim-gutentags'
   " Config g:gutentags_ctags_extra_args in ~/ctags.d/config.ctags
   let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
-  let g:gutentags_cache_dir = '~/tmp/tags'
+  let g:gutentags_cache_dir='~/.cache/nvim/backups'
   let g:gutentags_generate_on_write = 1
   let g:gutentags_generate_on_missing = 0
   let g:gutentags_generate_on_new = 0
@@ -344,13 +344,6 @@ Plug 'morhetz/gruvbox'
 Plug 'vim-airline/vim-airline'
   " let g:airline_statusline_ontop=1
   let airline#extensions#gutentags#enabled = 1
-  let g:airline#extensions#tabline#enabled = 1
-  let g:airline#extensions#tabline#formatter = 'unique_tail'
-  let g:airline#extensions#tabline#show_buffers = 0
-  let g:airline#extensions#tabline#show_splits = 0
-  let g:airline#extensions#tabline#show_tabs = 1
-  let g:airline#extensions#tabline#show_close_button = 0
-  let g:airline#extensions#tabline#tab_min_count = 2
   if !exists('g:airline_symbols')
     let g:airline_symbols = {}
   endif
@@ -374,7 +367,9 @@ Plug 'github/copilot.vim'
 
 " }}}
 
-source ~/.vimrc.coc
+if !has("gui_macvim")
+  source ~/.vimrc.coc
+endif
 
 call plug#end()
 

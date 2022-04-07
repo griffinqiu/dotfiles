@@ -53,10 +53,9 @@ vim.o.sidescrolloff=10
 
 
 vim.o.undofile=true
-vim.o.undodir='~/tmp'
+vim.o.undodir= vim.fn.stdpath('cache') .. '/undoes'
 vim.o.tagcase='match'
-vim.o.backupdir='~/tmp/backups'
-vim.o.directory='~/tmp/'
+vim.o.backupdir= vim.fn.stdpath('cache') .. '/backups'
 vim.o.colorcolumn=81
 vim.o.numberwidth=4
 vim.o.sidescroll=1

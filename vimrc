@@ -76,15 +76,13 @@ let g:is_posix = 1
 
 if v:version >= 703
   set undofile
-  set undodir=~/tmp
+  set undodir=~/.cache/vim/undoes
 endif
 if v:version >= 800
   set tagcase=match
 endif
-set backupdir=~/tmp/backups
-set directory=~/tmp/
-
-" set textwidth=80
+set backupdir=~/.cache/vim/backups
+" set directory=~/tmp/
 set colorcolumn=81
 
 set nonumber

@@ -9,15 +9,7 @@ return function(use)
   use {
     'vim-airline/vim-airline',
     config = function()
-      vim.cmd[[let airline#extensions#gutentags#enabled=1]]
       vim.cmd[[let g:airline#extensions#gutentags#enabled=1]]
-      vim.cmd[[let g:airline#extensions#tabline#enabled=1]]
-      vim.cmd[[let g:airline#extensions#tabline#formatter='unique_tail']]
-      vim.cmd[[let g:airline#extensions#tabline#show_buffers=0]]
-      vim.cmd[[let g:airline#extensions#tabline#show_splits=0]]
-      vim.cmd[[let g:airline#extensions#tabline#show_tabs=1]]
-      vim.cmd[[let g:airline#extensions#tabline#show_close_button=0]]
-      vim.cmd[[let g:airline#extensions#tabline#tab_min_count=2]]
       if vim.fn.exists('g:airline_symbols') == 0 then
         vim.cmd[[let g:airline_symbols={}]]
       end

@@ -1,42 +1,4 @@
 return function(use)
-  use {
-    'scrooloose/nerdtree',
-    on = 'NERDTreeToggle',
-    config = function()
-      vim.g.NERDTreeMapPreview = "p"
-      vim.g.NERDTreeMapOpenSplit = "s"
-      vim.g.NERDTreeMapOpenVSplit = "v"
-      vim.g.NERDTreeMapOpenInTab = "t"
-      vim.g.NERDTreeMapToggleHidden = "I"
-      vim.g.NERDTreeMapJumpRoot = "<c-p>"
-      vim.g.NERDTreeMapJumpParent = "P"
-      vim.g.NERDTreeMapJumpFirstChild = "^"
-      vim.g.NERDTreeIgnore={ '.meta$', '.pyc$' }
-      vim.g.NERDTreeMapOpenExpl="<nop>"
-    end,
-  }
-  nnoremap("<leader>1", ":NERDTreeToggle<cr>", "silent")
-  nnoremap("<leader>nf", ":NERDTreeFind<cr>", "silent")
-
-  use {
-    'Xuyuanp/nerdtree-git-plugin',
-    config = function()
-      vim.g.NERDTreeGitStatusIndicatorMapCustom = {
-        Modified  = '✹',
-        Staged    = '✚',
-        Untracked = '✭',
-        Renamed   = '➜',
-        Unmerged  = '═',
-        Deleted   = '✖',
-        Dirty     = '✗',
-        Ignored   = '☒',
-        Clean     = '✔︎',
-        Unknown   = '?',
-      }
-      vim.g.NERDTreeGitStatusUseNerdFonts = 1
-    end
-  }
-
 	use {
     'scrooloose/nerdcommenter',
     config = function()
@@ -45,7 +7,8 @@ return function(use)
   }
 
   use('griffinqiu/star-search')
-  use 'dyng/ctrlsf.vim'
+  use('griffinqiu/powerful-vim')
+  use('dyng/ctrlsf.vim')
   vim.g.ctrlsf_mapping = {
     next = "<c-n>",
     prev = "<c-p>",
@@ -56,20 +19,18 @@ return function(use)
   vim.g.ctrlsf_winsize = '30%'
   vim.g.ctrlsf_ignore_dir = { 'node_modules', 'build', 'tmp', 'proto' }
   vim.g.ctrlsf_position = 'right'
-  nmap('<C-G>g', '<Plug>CtrlSFPrompt', 'buffer')
-  nmap('<C-G>G', '<Plug>CtrlSFCwordPath', 'buffer')
-  nmap('<C-G><C-G>', '<Plug>CtrlSFCwordExec', 'buffer')
-  vmap('<C-G>g', '<Plug>CtrlSFVwordPath', 'buffer')
-  vmap('<C-G>G', '<Plug>CtrlSFVwordPath', 'buffer')
-  vmap('<C-G><C-G>', '<Plug>CtrlSFVwordExec', 'buffer')
-  nmap('<C-G>p', '<Plug>CtrlSFPwordPath', 'buffer')
-  nmap('<C-G><C-P>', '<Plug>CtrlSFPwordExec', 'buffer')
-  nnoremap('<C-G><C-O>', ':CtrlSFOpen<CR>', 'buffer')
-  nmap('<C-G>l', '<Plug>CtrlSFQuickfixPrompt', 'buffer')
-  vmap('<C-G>l', '<Plug>CtrlSFQuilkfixVwordPath', 'buffer')
-  vmap('<C-G>L', '<Plug>CtrSFQuickfixVwordPath', 'buffer')
-  vmap('<C-G><C-L>', '<Plug>CtrlSFQuickfixVwordExec', 'buffer')
-  nmap('<leader>3', ':CtrlSFToggle<CR>', 'buffer', 'silent')
+  nmap('<C-G>g', '<Plug>CtrlSFPrompt')
+  nmap('<C-G>G', '<Plug>CtrlSFCwordPath')
+  nmap('<C-G><C-G>', '<Plug>CtrlSFCwordExec')
+  vmap('<C-G>g', '<Plug>CtrlSFVwordPath')
+  vmap('<C-G><C-G>', '<Plug>CtrlSFVwordExec')
+  nmap('<C-G>p', '<Plug>CtrlSFPwordPath')
+  nmap('<C-G><C-P>', '<Plug>CtrlSFPwordExec')
+  nnoremap('<C-G><C-O>', ':CtrlSFOpen<CR>')
+  nmap('<C-G>l', '<Plug>CtrlSFQuickfixPrompt')
+  vmap('<C-G>l', '<Plug>CtrlSFQuilkfixVwordPath')
+  vmap('<C-G>L', '<Plug>CtrSFQuickfixVwordPath')
+  vmap('<C-G><C-L>', '<Plug>CtrlSFQuickfixVwordExec')
   nmap('<leader>3', ':CtrlSFToggle<CR>')
   nnoremap('\\', ':CtrlSF<SPACE>')
 
@@ -85,15 +46,11 @@ return function(use)
   use('ludovicchabant/vim-gutentags')
   -- Config g:gutentags_ctags_extra_args in ~/ctags.d/config.ctags
   vim.g.gutentags_project_root = { '.root', '.svn', '.git', '.project' }
-  vim.g.gutentags_cache_dir = '~/tmp/tags'
+  vim.g.gutentags_cache_dir = vim.fn.stdpath('cache') .. '/tags'
   vim.g.gutentags_generate_on_write = 1
   vim.g.gutentags_generate_on_missing = 0
   vim.g.gutentags_generate_on_new = 0
   vim.g.gutentags_ctags_exclude_wildignore = 1
-
-  use('Valloric/ListToggle')
-  vim.g.lt_location_list_toggle_map = '<leader>l'
-  vim.g.lt_quickfix_list_toggle_map = '<leader>q'
   -- }}}
 
   use('mattn/emmet-vim')
@@ -114,4 +71,8 @@ return function(use)
       extends = 'jsx',
     }
   }
+
+  -- Nvim Tree
+  use 'kyazdani42/nvim-web-devicons'
+  use {'kyazdani42/nvim-tree.lua', config = "require('tree-config')"}
 end

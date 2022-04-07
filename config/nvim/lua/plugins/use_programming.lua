@@ -17,9 +17,8 @@ return function(use)
   vim.g.vim_markdown_folding_disabled=1
   vim.g.vim_markdown_initial_foldlevel=1
 
-
   -- Treesitter
-  use {'nvim-treesitter/nvim-treesitter', config = "require('plugins/configs/treesitter')"}
+  use {'nvim-treesitter/nvim-treesitter', config = "require('treesitter-config')"}
   use {'nvim-treesitter/nvim-treesitter-textobjects', after = {'nvim-treesitter'}}
   use {'RRethy/nvim-treesitter-textsubjects', after = {'nvim-treesitter'}}
 
