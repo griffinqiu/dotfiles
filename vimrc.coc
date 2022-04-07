@@ -1,5 +1,75 @@
 " vim: set ft=vim:
 
+" Tagbar and FZF {{{
+Plug 'majutsushi/tagbar'
+    nnoremap <silent> <leader>4 :TagbarToggle<CR>
+    let g:tagbar_type_php = {
+        \'ctagstype' : 'php',
+        \'kinds'         : [
+            \'i:interfaces',
+            \'c:classes',
+            \'d:constant definitions',
+            \'f:functions',
+            \'j:javascript functions:1'
+        \]
+    \}"
+    let g:tagbar_map_jump=["o", "<cr>"]
+    let g:tagbar_map_openfold="zo"
+    let g:tagbar_map_closefold="zc"
+    let g:tagbar_map_togglefold="za"
+    let g:tagbar_map_openallfolds="zR"
+    let g:tagbar_map_closeallfolds="zM"
+    let g:tagbar_map_hidenonpublic="I"
+    let g:tagbar_map_zoomwin="A"
+    let g:tagbar_map_previewwin="<nop>"
+    let g:tagbar_map_showproto="<nop>"
+    let g:tagbar_map_incrementfolds="<nop>"
+    let g:tagbar_map_decrementfolds="<nop>"
+    let g:tagbar_map_toggleautoclose="<nop>"
+    let g:tagbar_width=40
+    let g:tagbar_sort=0
+    let g:tagbar_autofocus=1
+    let g:Tb_MaxSize=5
+
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
+  let g:fzf_action = {
+    \ 'ctrl-t': 'tab split',
+    \ 'ctrl-s': 'split',
+    \ 'ctrl-v': 'vsplit' }
+  let $FZF_DEFAULT_OPTS = '--bind ctrl-s:select-all,ctrl-d:deselect-all'
+  let g:fzf_preview_window = ''
+
+  nnoremap <c-p> :GitFiles<CR>
+  nnoremap <leader>ff :Files<CR>
+  nnoremap <leader>fg :Rg
+  nnoremap <leader>fb :Buffers<CR>
+  nnoremap <leader>fH :Helptags<CR>
+  nnoremap <leader>f/ :History/<CR>
+  nnoremap <leader>f: :History:<CR>
+
+  nnoremap <leader>ft :Tags<CR>
+  nnoremap <leader>fbt :BTags<CR>
+  nnoremap <leader>fc :Commits<CR>
+  nnoremap <leader>fB :BCommits<CR>
+  nnoremap <leader>fm :Marks<CR>
+  nnoremap <leader>fC :Commands<CR>
+  nmap <leader>fmn :call fzf#vim#maps('n', 0)<cr>
+  nmap <leader>fmi :call fzf#vim#maps('i', 0)<cr>
+  nmap <leader>fmx :call fzf#vim#maps('x', 0)<cr>
+  nmap <leader>fmv :call fzf#vim#maps('v', 0)<cr>
+  nmap <leader>fmo :call fzf#vim#maps('o', 0)<cr>
+  " nnoremap <leader>ag :Ag<CR>
+  " nnoremap <leader>agt :Agt<CR>
+  nnoremap <silent> <leader>at :let @"=&filetype \| Agt --<C-R>" <C-R><C-W><CR>
+
+  " imap <c-x><c-k> <plug>(fzf-complete-word)
+  " imap <c-x><c-f> <plug>(fzf-complete-file-ag)
+  " imap <c-x><c-f> <plug>(fzf-complete-path)
+  " imap <c-x><c-l> <plug>(fzf-complete-line)
+Plug 'zackhsi/fzf-tags'
+  nmap g<c-]> <Plug>(fzf_tags)
+" }}}
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 let g:coc_global_extensions =["coc-json", "coc-tsserver", "coc-html", "coc-css", "coc-vetur", "coc-highlight", "coc-prettier", "coc-snippets", "coc-eslint", "coc-python", "coc-rust-analyzer"]

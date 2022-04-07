@@ -1,23 +1,41 @@
-local nvim_lsp = require('lspconfig')
+local installer = require('lsp.installer')
 
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities.textDocument.completion.completionItem.snippetSupport = true
+-- Add additional capabilities supported by nvim-cmp
+local protocol = vim.lsp.protocol
+local capabilities = require('cmp_nvim_lsp').update_capabilities(
+  protocol.make_client_capabilities()
+)
+local completionItem = capabilities.textDocument.completion.completionItem
+completionItem.documentationFormat = { 'markdown', 'plaintext' }
+completionItem.snippetSupport = true
+completionItem.preselectSupport = true
+completionItem.insertReplaceSupport = true
+completionItem.labelDetailsSupport = true
+completionItem.deprecatedSupport = true
+completionItem.commitCharactersSupport = true
+completionItem.tagSupport = { valueSet = { 1 } }
+completionItem.resolveSupport = {
+  properties = { 'documentation', 'detail', 'additionalTextEdits' },
+}
 
-local on_attach = function(client, bufnr)
-  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+local attacher = function(client, bufnr)
+  require("aerial").on_attach(client, bufnr)
 
-  buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+  -- Keymaps
+  local function buf_set_keymap(...)
+    vim.api.nvim_buf_set_keymap(bufnr, ...)
+  end
+  local opts = {noremap = true, silent = true}
 
-  -- Mappings.
-  local opts = { noremap=true, silent=true }
-  buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-  buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
-  buf_set_keymap('n', 'gt', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-  buf_set_keymap('n', 'ga', '<Cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  buf_set_keymap("n", "gD", "<Cmd>lua vim.lsp.buf.declaration()<CR>", opts)
+  buf_set_keymap("n", "gd", "<Cmd>lua vim.lsp.buf.definition()<CR>", opts)
+  buf_set_keymap("n", "gt", "<Cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
+  buf_set_keymap("n", "ga", "<cmd>lua vim.lsp.buf.code_action()<CR>", opts)
   buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-  buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
+  buf_set_keymap("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", opts)
+  buf_set_keymap("n", "gff", "<cmd>vim.lsp.buf.formatting()<CR>", opts)
+  buf_set_keymap("n", "gR", "<cmd>LspRestart<CR>", opts)
+  buf_set_keymap("n", "K", "<Cmd>lua vim.lsp.buf.hover()<CR>", opts)
   buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
   buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
   buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
@@ -27,14 +45,12 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
   buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
   -- buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-
   -- Set some keybinds conditional on server capabilities
   if client.resolved_capabilities.document_formatting then
     buf_set_keymap("n", "ff", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
   elseif client.resolved_capabilities.document_range_formatting then
     buf_set_keymap("n", "ff", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", opts)
   end
-
   -- Set autocommands conditional on server_capabilities
   if client.resolved_capabilities.document_highlight then
     vim.api.nvim_exec([[
@@ -48,7 +64,12 @@ local on_attach = function(client, bufnr)
       augroup END
     ]], false)
   end
+
+  print('LSP: ' .. client.name)
 end
+
+-- Configure LSPs installed by installer
+installer.setup(attacher, capabilities)
 
 vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
   vim.lsp.diagnostic.on_publish_diagnostics, {
@@ -75,23 +96,6 @@ vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
     update_in_insert = false,
   }
 )
-
-nvim_lsp.gopls.setup{
-	cmd = {'gopls'},
-	-- for postfix snippets and analyzers
-	capabilities = capabilities,
-	    settings = {
-	      gopls = {
-		      experimentalPostfixCompletions = true,
-		      analyses = {
-		        unusedparams = true,
-		        shadow = true,
-		     },
-		     staticcheck = true,
-		    },
-	    },
-  on_attach = on_attach,
-}
 
 function goimports(timeoutms)
   local context = { source = { organizeImports = true } }
@@ -123,34 +127,8 @@ function goimports(timeoutms)
   end
 end
 
---vim.lsp.set_log_level("debug")
-
--- You dont need to set any of these options. These are the default ones. Only
--- the loading is important
-require('telescope').setup {
-  defaults = {
-    mappings = {
-      i = {
-        ["<C-n>"] = require('telescope.actions').cycle_history_next,
-        ["<C-p>"] = require('telescope.actions').cycle_history_prev,
-        ["<C-j>"] = require('telescope.actions').move_selection_next,
-        ["<C-k>"] = require('telescope.actions').move_selection_previous,
-      },
-    },
-    layout_config = {
-      vertical = { width = 0.5 },
-    },
-  },
-  -- extensions = {
-    -- fzf = {
-      -- fuzzy = true,                    -- false will only do exact matching
-      -- override_generic_sorter = true,  -- override the generic sorter
-      -- override_file_sorter = true,     -- override the file sorter
-      -- case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
-                                       -- -- the default case_mode is "smart_case"
-    -- },
-  -- },
-}
--- To get fzf loaded and working with telescope, you need to call
--- load_extension, somewhere after setup function:
--- require('telescope').load_extension('fzf')
+require("aerial").setup({
+  manage_folds = true,
+  link_folds_to_tree = true,
+  link_tree_to_folds = true,
+})

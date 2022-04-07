@@ -1,7 +1,6 @@
 if &compatible
   set nocompatible
 end
-let nvim_lsp = 0
 
 " Shim command and function to allow migration from Vundle to vim-plug. {{{
 function! VundleToPlug(vundle_command, arg, ...)
@@ -104,98 +103,6 @@ Plug 'liangfeng/vimcdoc'
 
 " }}}
 
-" Browse, Jump, motion {{{
-" if has('nvim')
-  " Plug 'Shougo/defx.nvim', { 'do': ':UpdateRemotePlugins' }
-" else
-  " Plug 'Shougo/defx.nvim'
-  " Plug 'roxma/nvim-yarp'
-  " Plug 'roxma/vim-hug-neovim-rpc'
-" endif
- " Plug 'kristijanhusak/defx-git'
-" " nnoremap <Leader>1 :Defx<cr>
-" autocmd FileType defx call s:defx_my_settings()
-" function! s:defx_toggle_tree() abort
-  " if defx#is_directory()
-      " return defx#do_action('open_or_close_tree')
-  " endif
-  " return defx#do_action('multi', ['drop'])
-" endfunction
-" function! s:defx_my_settings() abort
-  " " Define mappings
-  " nnoremap <silent><buffer><expr> o  <SID>defx_toggle_tree()
-  " " nnoremap <silent><buffer><expr> o
-  " " \ defx#do_action('open_or_close_tree')
-  " nnoremap <silent><buffer><expr> <CR> defx#do_action('drop')
-  " nnoremap <silent><buffer><expr> c
-  " \ defx#do_action('copy')
-  " nnoremap <silent><buffer><expr> m
-  " \ defx#do_action('move')
-  " nnoremap <silent><buffer><expr> p
-  " \ defx#do_action('paste')
-  " nnoremap <silent><buffer><expr> l
-  " \ defx#do_action('open')
-  " nnoremap <silent><buffer><expr> E
-  " \ defx#do_action('open', 'vsplit')
-  " nnoremap <silent><buffer><expr> P
-  " \ defx#do_action('open', 'pedit')
-  " nnoremap <silent><buffer><expr> O
-  " \ defx#do_action('open_tree_recursive')
-  " nnoremap <silent><buffer><expr> K
-  " \ defx#do_action('new_directory')
-  " nnoremap <silent><buffer><expr> N
-  " \ defx#do_action('new_file')
-  " nnoremap <silent><buffer><expr> M
-  " \ defx#do_action('new_multiple_files')
-  " nnoremap <silent><buffer><expr> C
-  " \ defx#do_action('toggle_columns',
-  " \                'mark:indent:icon:filename:type:size:time')
-  " nnoremap <silent><buffer><expr> S
-  " \ defx#do_action('toggle_sort', 'time')
-  " nnoremap <silent><buffer><expr> d
-  " \ defx#do_action('remove')
-  " nnoremap <silent><buffer><expr> r
-  " \ defx#do_action('rename')
-  " nnoremap <silent><buffer><expr> !
-  " \ defx#do_action('execute_command')
-  " nnoremap <silent><buffer><expr> x
-  " \ defx#do_action('execute_system')
-  " nnoremap <silent><buffer><expr> yy
-  " \ defx#do_action('yank_path')
-  " nnoremap <silent><buffer><expr> .
-  " \ defx#do_action('toggle_ignored_files')
-  " nnoremap <silent><buffer><expr> ;
-  " \ defx#do_action('repeat')
-  " nnoremap <silent><buffer><expr> h
-  " \ defx#do_action('cd', ['..'])
-  " nnoremap <silent><buffer><expr> ~
-  " \ defx#do_action('cd')
-  " nnoremap <silent><buffer><expr> q
-  " \ defx#do_action('quit')
-  " nnoremap <silent><buffer><expr> <Space>
-  " \ defx#do_action('toggle_select') . 'j'
-  " nnoremap <silent><buffer><expr> *
-  " \ defx#do_action('toggle_select_all')
-  " nnoremap <silent><buffer><expr> j
-  " \ line('.') == line('$') ? 'gg' : 'j'
-  " nnoremap <silent><buffer><expr> k
-  " \ line('.') == 1 ? 'G' : 'k'
-  " nnoremap <silent><buffer><expr> <C-l>
-  " \ defx#do_action('redraw')
-  " nnoremap <silent><buffer><expr> <C-g>
-  " \ defx#do_action('print')
-  " nnoremap <silent><buffer><expr> cd
-  " \ defx#do_action('change_vim_cwd')
-  " nnoremap <silent><buffer><expr> > defx#do_action('resize',
-  " \ defx#get_context().winwidth + 10)
-  " nnoremap <silent><buffer><expr> < defx#do_action('resize',
-  " \ defx#get_context().winwidth - 10)
-" endfunction
-" nnoremap <silent> <leader>1
-" \ :<C-u>Defx -resume -buffer-name=tab`tabpagenr()` -search=`expand('%:p')`<CR>
-" if !has("gui_macvim")
-  " Plug 'kristijanhusak/defx-icons'
-" endif
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
   nnoremap <silent> <leader>1 :NERDTreeToggle<CR>
   nnoremap <silent> <leader>nf :NERDTreeFind<CR>
@@ -287,9 +194,9 @@ Plug 'rust-lang/rust.vim'
 Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
   let g:go_fmt_fail_silently = 1
   let g:go_highlight_trailing_whitespace_error = 0
-  " let g:go_addtags_transform = "camelcase"
+  " " let g:go_addtags_transform = "camelcase"
   let g:go_list_height = 10
-  " let g:go_list_type='locationlist'
+  " " let g:go_list_type='locationlist'
   let g:go_def_mapping_enabled = 0
   let g:go_auto_sameids = 0
   let g:go_code_completion_enabled = 0
@@ -334,14 +241,14 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
   autocmd FileType go nmap <leader>gd  :GoDeclsDir<cr>
   autocmd FileType go nmap <Leader>gh <Plug>(go-info)
   autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
-  " autocmd FileType go nmap <leader>gi  <Plug>(go-implements)
-  " autocmd FileType go nmap <Leader>gs <Plug>(go-sameids-toggle)
-  " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
-  " autocmd FileType go nmap <leader>gf  <Plug>(go-test-func)
+  " " autocmd FileType go nmap <leader>gi  <Plug>(go-implements)
+  " " autocmd FileType go nmap <Leader>gs <Plug>(go-sameids-toggle)
+  " " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
+  " " autocmd FileType go nmap <leader>gf  <Plug>(go-test-func)
   autocmd Filetype go command! -bang A  call go#alternate#Switch(<bang>0, 'edit')
   autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
   autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
-  " autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
+  " " autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
 Plug 'Shougo/vimshell.vim', { 'for': 'go' }
 Plug 'Shougo/vimproc.vim', { 'for': 'go', 'do' : 'make'}
 Plug 'sebdah/vim-delve', { 'for': 'go' }
@@ -465,85 +372,9 @@ Plug 'github/copilot.vim'
   let g:copilot_no_tab_map = v:true
   let b:copilot_enabled = 1
 
-if filereadable(expand("~/.nvim.lsp")) && has('nvim') && nvim_lsp == 1
-  source ~/.nvim.lsp
-endif
-
-if filereadable(expand("~/.vimrc.coc")) && !has("gui_macvim") && nvim_lsp != 1
-" Tagbar and FZF {{{
-Plug 'majutsushi/tagbar'
-    nnoremap <silent> <leader>4 :TagbarToggle<CR>
-    let g:tagbar_type_php = {
-        \'ctagstype' : 'php',
-        \'kinds'         : [
-            \'i:interfaces',
-            \'c:classes',
-            \'d:constant definitions',
-            \'f:functions',
-            \'j:javascript functions:1'
-        \]
-    \}"
-    let g:tagbar_map_jump=["o", "<cr>"]
-    let g:tagbar_map_openfold="zo"
-    let g:tagbar_map_closefold="zc"
-    let g:tagbar_map_togglefold="za"
-    let g:tagbar_map_openallfolds="zR"
-    let g:tagbar_map_closeallfolds="zM"
-    let g:tagbar_map_hidenonpublic="I"
-    let g:tagbar_map_zoomwin="A"
-    let g:tagbar_map_previewwin="<nop>"
-    let g:tagbar_map_showproto="<nop>"
-    let g:tagbar_map_incrementfolds="<nop>"
-    let g:tagbar_map_decrementfolds="<nop>"
-    let g:tagbar_map_toggleautoclose="<nop>"
-    let g:tagbar_width=40
-    let g:tagbar_sort=0
-    let g:tagbar_autofocus=1
-    let g:Tb_MaxSize=5
-
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plug 'junegunn/fzf.vim'
-  let g:fzf_action = {
-    \ 'ctrl-t': 'tab split',
-    \ 'ctrl-s': 'split',
-    \ 'ctrl-v': 'vsplit' }
-  let $FZF_DEFAULT_OPTS = '--bind ctrl-s:select-all,ctrl-d:deselect-all'
-  let g:fzf_preview_window = ''
-
-  nnoremap <c-p> :GitFiles<CR>
-  nnoremap <leader>ff :Files<CR>
-  nnoremap <leader>fg :Rg
-  nnoremap <leader>fb :Buffers<CR>
-  nnoremap <leader>fh :History<CR>
-  nnoremap <leader>fH :Helptags<CR>
-  nnoremap <leader>f/ :History/<CR>
-  nnoremap <leader>f: :History:<CR>
-
-  nnoremap <leader>ft :Tags<CR>
-  nnoremap <leader>fbt :BTags<CR>
-  nnoremap <leader>fc :Commits<CR>
-  nnoremap <leader>fbc :BCommits<CR>
-  nnoremap <leader>fm :Marks<CR>
-  nnoremap <leader>fC :Commands<CR>
-  nmap <leader>fmn :call fzf#vim#maps('n', 0)<cr>
-  nmap <leader>fmi :call fzf#vim#maps('i', 0)<cr>
-  nmap <leader>fmx :call fzf#vim#maps('x', 0)<cr>
-  nmap <leader>fmv :call fzf#vim#maps('v', 0)<cr>
-  nmap <leader>fmo :call fzf#vim#maps('o', 0)<cr>
-  " nnoremap <leader>ag :Ag<CR>
-  " nnoremap <leader>agt :Agt<CR>
-  nnoremap <silent> <leader>at :let @"=&filetype \| Agt --<C-R>" <C-R><C-W><CR>
-
-  " imap <c-x><c-k> <plug>(fzf-complete-word)
-  " imap <c-x><c-f> <plug>(fzf-complete-file-ag)
-  " imap <c-x><c-f> <plug>(fzf-complete-path)
-  " imap <c-x><c-l> <plug>(fzf-complete-line)
-Plug 'zackhsi/fzf-tags'
-  nmap g<c-]> <Plug>(fzf_tags)
 " }}}
-  source ~/.vimrc.coc
-endif
-" }}}
+
+source ~/.vimrc.coc
 
 call plug#end()
 
@@ -600,7 +431,3 @@ function! s:Hex2dec(line1, line2, arg) range
     echo (a:arg =~? '^0x') ? a:arg + 0 : ('0x'.a:arg) + 0
   endif
 endfunction
-
-if nvim_lsp == 1
-  lua require("lsp_config")
-endif

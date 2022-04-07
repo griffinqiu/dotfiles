@@ -3,20 +3,18 @@
 Plug 'neovim/nvim-lspconfig'
   autocmd BufWritePre *.go lua vim.lsp.buf.formatting()
   autocmd BufWritePre *.go lua goimports(1000)
-Plug 'nvim-lua/completion-nvim'
-  autocmd BufEnter * lua require'completion'.on_attach()
-  imap <tab> <Plug>(completion_smart_tab)
-  " " Set completeopt to have a better completion experience
-  set completeopt=menuone,noinsert,noselect
-  " " Avoid showing message extra message when using completion
-  set shortmess+=c
-  let g:completion_enable_auto_popup = 0
-  let g:completion_enable_snippet = 'vim-vsnip'
-  " let g:completion_menu_length=1
-  let g:completion_matching_smart_case = 1
-  let g:completion_enable_auto_hover = 0
-  " let g:completion_enable_auto_signature = 0
+Plug 'williamboman/nvim-lsp-installer'
+Plug 'ray-x/lsp_signature.nvim'
+Plug 'stevearc/aerial.nvim'
 
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-path'
+Plug 'hrsh7th/cmp-cmdline'
+Plug 'hrsh7th/nvim-cmp'
+
+" For vsnip users.
+Plug 'hrsh7th/cmp-vsnip'
 Plug 'hrsh7th/vim-vsnip'
 Plug 'hrsh7th/vim-vsnip-integ'
 " Plug 'rafamadriz/friendly-snippets'
@@ -48,26 +46,29 @@ Plug 'hrsh7th/vim-vsnip-integ'
 
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'nvim-lua/plenary.nvim'
+Plug 'onsails/lspkind-nvim'
 Plug 'nvim-telescope/telescope.nvim'
-" Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
+Plug 'crispgm/telescope-heading.nvim'
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
 
-nnoremap <c-p> <cmd>Telescope git_files theme=dropdown<cr>
-nnoremap <leader>ff <cmd>Telescope find_files theme=dropdown<cr>
-nnoremap <leader>fg <cmd>Telescope live_grep theme=dropdown<cr>
-nnoremap <leader>fb <cmd>Telescope buffers theme=dropdown<cr>
-nnoremap <leader>fh <cmd>Telescope oldfiles theme=dropdown<cr>
-nnoremap <leader>fH <cmd>Telescope help_tags theme=dropdown<cr>
-nnoremap <leader>f/ <cmd>Telescope search_history theme=dropdown<cr>
-nnoremap <leader>f: <cmd>Telescope command_history theme=dropdown<cr>
-nnoremap <leader>fm <cmd>Telescope marks theme=dropdown<cr>
-nnoremap <leader>fq <cmd>Telescope quickfix theme=dropdown<cr>
-nnoremap <leader>fl <cmd>Telescope loclist theme=dropdown<cr>
-nnoremap <leader>fM <cmd>Telescope keymaps theme=dropdown<cr>
-nnoremap <leader>fc <cmd>Telescope git_commits theme=dropdown<cr>
-nnoremap <leader>fbc <cmd>Telescope git_bcommits theme=dropdown<cr>
+nnoremap <c-p> <cmd>Telescope git_files theme=get_ivy<cr>
+nnoremap <leader>ff <cmd>Telescope find_files theme=get_ivy<cr>
+nnoremap <leader>fg <cmd>Telescope live_grep theme=get_ivy<cr>
+nnoremap <leader>fb <cmd>Telescope buffers theme=get_ivy<cr>
+nnoremap <leader>fH <cmd>Telescope help_tags theme=get_ivy<cr>
+nnoremap <leader>f/ <cmd>Telescope search_history theme=get_ivy<cr>
+nnoremap <leader>f: <cmd>Telescope command_history theme=get_ivy<cr>
+nnoremap <leader>fm <cmd>Telescope marks theme=get_ivy<cr>
+nnoremap <leader>fq <cmd>Telescope quickfix theme=get_ivy<cr>
+nnoremap <leader>fl <cmd>Telescope loclist theme=get_ivy<cr>
+nnoremap <leader>fM <cmd>Telescope keymaps theme=get_ivy<cr>
+nnoremap <leader>fc <cmd>Telescope git_commits theme=get_ivy<cr>
+nnoremap <leader>fC <cmd>Telescope commands theme=get_ivy<cr>
+nnoremap <leader>fB <cmd>Telescope git_bcommits theme=get_ivy<cr>
+nnoremap <leader>fh <cmd>Telescope heading theme=get_ivy<cr>
 " LSP
-nnoremap <leader>fr <cmd>Telescope lsp_references theme=dropdown<cr>
-nnoremap <leader>fa <cmd>Telescope lsp_code_actions theme=dropdown<cr>
-nnoremap <leader>fi <cmd>Telescope lsp_implementations theme=dropdown<cr>
-nnoremap <leader>fd <cmd>Telescope lsp_definitions theme=dropdown<cr>
-nnoremap <leader>ft <cmd>Telescope lsp_type_definitions theme=dropdown<cr>
+nnoremap <leader>fr <cmd>Telescope lsp_references theme=get_ivy<cr>
+nnoremap <leader>fa <cmd>Telescope lsp_code_actions theme=get_ivy<cr>
+nnoremap <leader>fi <cmd>Telescope lsp_implementations theme=get_ivy<cr>
+nnoremap <leader>fd <cmd>Telescope lsp_definitions theme=get_ivy<cr>
+nnoremap <leader>ft <cmd>Telescope lsp_type_definitions theme=get_ivy<cr>

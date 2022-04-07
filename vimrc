@@ -155,9 +155,7 @@ set spellfile=$HOME/Sync/vim-spell-en.utf-8.add
   " \options,tabpages,winsize,resize,winpos,winsize
 
 set formatoptions+=mM
-if !has('nvim')
-  set ttymouse=xterm2
-end
+set ttymouse=xterm2
 
 set shortmess=atIc
 set nrformats=

@@ -22,7 +22,8 @@ brew "reattach-to-user-namespace"
 brew "yarn"
 brew "rg"
 brew "fd"
-cask "vagrant"
+brew "universal-ctags"
+brew "gawk"
 tap "homebrew/cask-fonts"
 cask "font-hack-nerd-font"
 EOF
@@ -55,7 +56,8 @@ if [ ! -e "$HOME"/tmp/tags ]; then
 fi
 
 if [ -e "$HOME"/.vim/autoload/plug.vim ]; then
-  nvim -E -s +PlugUpgrade +qa
+  vim -E -s +PlugUpgrade +qa
+  nvim -E -s +PackerSync  +qa
 else
   echo 'Initing plug.vim'
   curl -fLo "$HOME"/.vim/autoload/plug.vim --create-dirs \
