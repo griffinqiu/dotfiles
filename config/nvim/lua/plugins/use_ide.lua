@@ -75,4 +75,15 @@ return function(use)
   -- Nvim Tree
   use 'kyazdani42/nvim-web-devicons'
   use {'kyazdani42/nvim-tree.lua', config = "require('tree-config')"}
+  use {
+    'airblade/vim-rooter',
+    setup = function()
+      vim.g.rooter_patterns = {'.git'}
+      vim.g.rooter_manual_only = 1
+    end
+  }
+  -- automatically close the tab/vim when nvim-tree is the last window in the tab
+  vim.cmd([[autocmd BufEnter * ++nested if winnr('$') == 1 && bufname() == 'NvimTree_' . tabpagenr() | quit | endif]])
+  use 'scrooloose/nerdtree'
+  vim.cmd([[let NERDTreeWinPos = "right"]])
 end

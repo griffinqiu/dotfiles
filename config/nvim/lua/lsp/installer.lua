@@ -13,7 +13,7 @@ M.servers = {
   'solargraph',
   -- 'sumneko_lua',
   -- 'tailwindcss',
-  -- 'tsserver',
+  'tsserver',
   -- 'vuels',
 }
 
@@ -74,7 +74,11 @@ M.setup = function(attacher, capabilities)
     server:setup(vim.tbl_extend('keep', config, lspconfig[server.name]))
   end)
 
-  require("lsp_signature").setup()
+  require("lsp_signature").setup({
+    always_trigger = false,
+    hint_enable = false,
+    toggle_key = '<c-j>',
+  })
 end
 
 M.install = function()

@@ -9,6 +9,8 @@ return function(use)
   imap("<C-d>", "<Plug>Isurround", "silent", "buffer")
   imap("<C-e>", "<Plug>ISurround", "silent", "buffer")
 
+  use "folke/which-key.nvim"
+
   -- MixedCase (crm)
   -- camelCase (crc)
   -- snake_case (crs) or (cr_)

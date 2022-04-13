@@ -44,7 +44,7 @@ require'nvim-tree'.setup {
   -- opens the tree when changing/opening a new tab if the tree wasn't previously opened
   open_on_tab         = false,
   -- hijack the cursor in the tree to put it at the start of the filename
-  hijack_cursor       = false,
+  hijack_cursor       = true,
   -- updates the root directory of the tree on `DirChanged` (when your run `:cd` usually)
   update_cwd          = true,
   -- opens in place of the unnamed buffer if it's empty
@@ -65,15 +65,19 @@ require'nvim-tree'.setup {
       window_picker = {
         enable = false,
       },
+      exclude = {
+        filetype = { "notify", "packer", "qf", "diff", "fugitive", "fugitiveblame", },
+        buftype  = { "nofile", "terminal", "help", },
+      }
     },
   },
   -- update the focused file on `BufEnter`, un-collapses the folders recursively until it finds the file
   update_focused_file = {
     -- enables the feature
-    enable      = true,
+    enable      = false,
     -- update the root directory of the tree to the one of the folder containing the file if the file is not under the current root directory
     -- only relevant when `update_focused_file.enable` is true
-    update_cwd  = true,
+    update_cwd  = false,
     -- list of buffer names / filetypes that will not update the cwd if the file isn't found under the current root directory
     -- only relevant when `update_focused_file.update_cwd` is true and `update_focused_file.enable` is true
     ignore_list = {}
@@ -101,7 +105,7 @@ require'nvim-tree'.setup {
     -- side of the tree, can be one of 'left' | 'right' | 'top' | 'bottom'
     side = 'left',
     -- if true the tree will resize itself after opening a file
-    auto_resize = false,
+    auto_resize = true,
     mappings = {
       -- custom only false will merge the list with the default mappings
       -- if true, it will only use your list to set the mappings
@@ -110,7 +114,9 @@ require'nvim-tree'.setup {
       list = keymappings
     },
     number = false,
-    relativenumber = false
-  }
+    relativenumber = false,
+    signcolumn = true,
+  },
 }
 nnoremap("<leader>1", "<cmd>lua require'nvim-tree'.toggle()<CR>", "silent")
+nnoremap("<leader>nf", "<cmd>lua require'nvim-tree'.find_file()<CR>10<c-w>h", "silent")
