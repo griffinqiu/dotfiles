@@ -12,6 +12,7 @@ brew "tig"
 brew "ncdu"
 brew "diff-so-fancy"
 brew "stress"
+brew "wget"
 brew "watch"
 brew "sysbench"
 brew "neovim", args: ["HEAD"]
@@ -29,10 +30,12 @@ cask "font-hack-nerd-font"
 EOF
 
 if [ ! -e "$HOME"/.config/nvim/coc-settings.json ]; then
+  echo 'ln -s "$HOME/.vim/coc-settings.json" "$HOME/.config/nvim/coc-settings.json"'
   ln -s "$HOME/.vim/coc-settings.json" "$HOME/.config/nvim/coc-settings.json"
 fi
 
 if [ ! -e "$HOME"/.config/tmuxinator ]; then
+  echo 'ln -s "$HOME/Documents/Sync/tmuxinator" "$HOME/.config/tmuxinator"'
   ln -s "$HOME/Documents/Sync/tmuxinator" "$HOME/.config/tmuxinator"
 fi
 
@@ -48,21 +51,26 @@ if [ ! -e "$HOME"/.tmux ]; then
 fi
 
 if [ ! -e "$HOME"/tmp ]; then
+  echo 'mkdir -p "$HOME"/tmp'
   mkdir -p "$HOME"/tmp
 fi
 
 if [ ! -e "$HOME"/tmp/tags ]; then
+  echo 'mkdir -p "$HOME"/tmp/tags'
   mkdir -p "$HOME"/tmp/tags
 fi
 
 if [ -e "$HOME"/.vim/autoload/plug.vim ]; then
+  echo 'vim -E -s +PlugUpgrade +qa'
   vim -E -s +PlugUpgrade +qa
-  nvim -E -s +PackerSync  +qa
 else
   echo 'Initing plug.vim'
   curl -fLo "$HOME"/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 fi
 
-nvim +PlugUpdate +PlugClean! +qa
+echo 'PlugUpdate +PlugClean! +qa'
+vim +PlugUpdate +PlugClean! +qa
+echo "nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'"
+nvim -c 'autocmd User PackerComplete quitall' -c 'TSUpdate' -c 'PackerSync'
 reset -Q

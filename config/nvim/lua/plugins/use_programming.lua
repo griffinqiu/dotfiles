@@ -63,7 +63,7 @@ return function(use)
   ]])
 
   -- Treesitter
-  use {'nvim-treesitter/nvim-treesitter', config = "require('treesitter-config')"}
+  use {'nvim-treesitter/nvim-treesitter', config = "require('treesitter-config')", run = ":TSUpdate"}
   use {'nvim-treesitter/nvim-treesitter-textobjects', after = {'nvim-treesitter'}}
   use {'RRethy/nvim-treesitter-textsubjects', after = {'nvim-treesitter'}}
 

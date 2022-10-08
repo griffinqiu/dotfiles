@@ -80,3 +80,4 @@ vim.cmd[[set nospell spelllang=en_us,cjk]]
 vim.o.encoding='utf-8'
 vim.o.fileencodings='utf-8,chinese,latin-1'
 vim.o.fileformats='unix,dos,mac'
+vim.o.ttymouse='xterm2'
