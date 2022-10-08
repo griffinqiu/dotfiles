@@ -14,7 +14,7 @@ M.servers = {
   -- 'sumneko_lua',
   -- 'tailwindcss',
   'tsserver',
-  -- 'vuels',
+  'pyright',
 }
 
 local check_installed = function()
