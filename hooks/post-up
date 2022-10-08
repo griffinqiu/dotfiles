@@ -72,5 +72,5 @@ fi
 echo 'PlugUpdate +PlugClean! +qa'
 vim +PlugUpdate +PlugClean! +qa
 echo "nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'"
-nvim -c 'autocmd User PackerComplete quitall' -c 'TSUpdate' -c 'PackerSync'
+nvim -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
 reset -Q

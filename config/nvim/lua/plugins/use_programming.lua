@@ -31,6 +31,7 @@ return function(use)
   -- use { 'ray-x/go.nvim', config = function()
     -- require('go').setup()
   -- end}
+  -- use 'ray-x/guihua.lua' -- recommanded if need floating window support
   use {
     'fatih/vim-go',
     requires = {{'fatih/gomodifytags'}},
