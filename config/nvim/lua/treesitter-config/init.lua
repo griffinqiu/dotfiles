@@ -85,3 +85,5 @@ require('nvim-treesitter.configs').setup {
       }
     },
 }
+vim.wo.foldmethod = 'marker'
+-- vim.wo.foldexpr = 'nvim_treesitter#foldexpr()'

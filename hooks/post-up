@@ -15,7 +15,7 @@ brew "stress"
 brew "wget"
 brew "watch"
 brew "sysbench"
-brew "neovim", args: ["HEAD"]
+brew "neovim"
 brew "tmuxinator"
 brew "gpg"
 brew "coreutils"

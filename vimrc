@@ -153,7 +153,8 @@ set spellfile=$HOME/Sync/vim-spell-en.utf-8.add
   " \options,tabpages,winsize,resize,winpos,winsize
 
 set formatoptions+=mM
-set ttymouse=xterm2
+set mouse=
+set ttymouse=
 
 set shortmess=atIc
 set nrformats=
