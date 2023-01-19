@@ -14,6 +14,8 @@ require('nvim-treesitter.configs').setup {
     'vim',
     'vue',
     'yaml',
+    'gitcommit',
+    'git_rebase',
   }, -- one of "all", "maintained" (parsers with maintainers), or a list of languages
   sync_install = false,            -- install languages synchronously (only applied to `ensure_installed`)
   auto_install = true,            -- Automatically install missing parsers when entering buffer
