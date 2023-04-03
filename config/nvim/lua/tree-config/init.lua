@@ -118,5 +118,5 @@ require'nvim-tree'.setup {
     signcolumn = "yes",
   },
 }
-nnoremap("<leader>1", "<cmd>lua require'nvim-tree'.toggle()<CR>", "silent")
-nnoremap("<leader>nf", "<cmd>lua require'nvim-tree'.find_file()<CR>10<c-w>h", "silent")
+nnoremap("<leader>1", ":NvimTreeToggle<CR>", "silent")
+nnoremap("<leader>nf", ":NvimTreeFindFile<CR>10<c-w>h", "silent")

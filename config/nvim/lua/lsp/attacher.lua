@@ -1,5 +1,5 @@
 local function attacher (client, bufnr)
-  require("aerial").on_attach(client, bufnr)
+  -- require("aerial").on_attach(client, bufnr)
 
   -- Keymaps
   local function buf_set_keymap(...)
