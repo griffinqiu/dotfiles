@@ -95,9 +95,9 @@ return function(use)
                 yank_last_code = "<C-k>",
                 scroll_up = "<C-u>",
                 scroll_down = "<C-d>",
-                toggle_settings = "<C-o>",
+                toggle_settings = "<space>",
                 new_session = "<C-n>",
-                cycle_windows = "<Tab>",
+                cycle_windows = "<c-o>",
                 -- in the Sessions pane
                 select_session = "<Space>",
                 rename_session = "r",

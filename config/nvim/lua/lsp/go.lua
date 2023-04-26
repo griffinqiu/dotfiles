@@ -22,7 +22,7 @@ _G.goimports = function(wait_ms)
     end
   end
 
-  vim.lsp.buf.formatting_sync()
+  vim.lsp.buf.format({async=false})
 end
 
 vim.cmd(([[
@@ -33,7 +33,7 @@ autocmd FileType go lua require'cmp'.setup.buffer {
 \     { name = 'nvim_lsp' },
 \   },
 \ }
-autocmd BufWritePre *.go lua vim.lsp.buf.formatting()
+autocmd BufWritePre *.go lua vim.lsp.buf.format()
 autocmd BufWritePre *.go lua goimports(2000)
 ]]))
 
