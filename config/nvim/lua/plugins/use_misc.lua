@@ -22,7 +22,7 @@ return function(use)
 
   use({
     "jackMort/ChatGPT.nvim",
-      commit = '8820b99c', -- March 6th 2023, before submit
+      -- commit = '8820b99c', -- March 6th 2023, before submit
       requires = {
           "MunifTanjim/nui.nvim",
           "nvim-lua/plenary.nvim",
@@ -90,7 +90,7 @@ return function(use)
             },
             keymaps = {
                 close = { "<C-c>" },
-                submit = "<C-Enter>",
+                submit = "<C-g>",
                 yank_last = "<C-y>",
                 yank_last_code = "<C-k>",
                 scroll_up = "<C-u>",
