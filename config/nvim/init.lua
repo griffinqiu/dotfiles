@@ -1,4 +1,2 @@
-require("settings")
-require("plugins")
-require("keymaps")
-require("lsp")
+require("setting")
+require("keymap")
