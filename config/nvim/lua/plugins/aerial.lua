@@ -1,5 +1,8 @@
 return {
   "stevearc/aerial.nvim",
+  keys = {
+    { "<leader>4", "<cmd>AerialToggle<cr>", mode="n" },
+  },
   config = function()
     require("aerial").setup({
       -- Priority list of preferred backends for aerial.
