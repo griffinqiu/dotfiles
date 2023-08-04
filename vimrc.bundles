@@ -367,9 +367,9 @@ Plug 'github/copilot.vim'
 
 " }}}
 
-if !has("gui_macvim")
-  source ~/.vimrc.coc
-endif
+" if !has("gui_macvim")
+  " source ~/.vimrc.coc
+" endif
 
 call plug#end()
 
