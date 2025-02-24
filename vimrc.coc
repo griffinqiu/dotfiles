@@ -2,7 +2,7 @@
 
 " Tagbar and FZF {{{
 Plug 'majutsushi/tagbar'
-    nnoremap <silent> <leader>4 :TagbarToggle<CR>
+    nnoremap <silent> <leader>5 :TagbarToggle<CR>
     let g:tagbar_type_php = {
         \'ctagstype' : 'php',
         \'kinds'         : [
@@ -117,7 +117,7 @@ nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gt <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
-nnoremap <silent> <leader>2 :CocListResume<CR>
+nnoremap <silent> <leader>4 :CocListResume<CR>
 " textobj function if af
 
 " Use K to show documentation in preview window

@@ -26,6 +26,8 @@ brew "rg"
 brew "fd"
 brew "universal-ctags"
 brew "gawk"
+brew "gh"
+brew "lazygit"
 tap "homebrew/cask-fonts"
 cask "font-hack-nerd-font"
 EOF
@@ -59,6 +61,11 @@ fi
 if [ ! -e "$HOME"/tmp/tags ]; then
   echo 'mkdir -p "$HOME"/tmp/tags'
   mkdir -p "$HOME"/tmp/tags
+fi
+
+if [ ! -e "$HOME"/.cache/nvim/tags ]; then
+  echo 'mkdir -p "$HOME"/.cache/nvim/tags'
+  mkdir -p "$HOME"/.cache/nvim/tags
 fi
 
 if [ -e "$HOME"/.vim/autoload/plug.vim ]; then

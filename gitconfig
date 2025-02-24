@@ -21,6 +21,9 @@
     template = ~/.gitmessage
 [merge]
   ff = only
+[mergetool "vimdiff"]
+  cmd = nvim -d $LOCAL $BASE $REMOTE $MERGED \
+        -c '$wincmd w' -c 'wincmd J'
 [fetch]
     prune = true
 [rebase]

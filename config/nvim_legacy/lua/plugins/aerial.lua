@@ -1,7 +1,7 @@
 return {
   "stevearc/aerial.nvim",
   keys = {
-    { "<leader>4", "<cmd>AerialToggle<cr>", mode="n" },
+    { "<leader>5", "<cmd>AerialToggle<cr>", mode="n" },
   },
   config = function()
     require("aerial").setup({

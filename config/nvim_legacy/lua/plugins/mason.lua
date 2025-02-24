@@ -12,7 +12,7 @@ return {
         "pyright",
         "solargraph",
         "lua_ls",
-        "tsserver",
+        "ts_ls",
       },
       automatic_installation = true,
       handlers = {
@@ -44,7 +44,7 @@ return {
     lspconfig.pyright.setup {}
     lspconfig.solargraph.setup {}
     lspconfig.lua_ls.setup {}
-    lspconfig.tsserver.setup {}
+    lspconfig.ts_ls.setup {}
 
     -- Use LspAttach autocommand to only map the following keys
     -- after the language server attaches to the current buffer

@@ -1,0 +1,28 @@
+-- Keymaps are automatically loaded on the VeryLazy event
+-- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
+local map = vim.keymap.set
+
+map("n", ",", "<Nop>", { silent = true })
+map("c", "<c-a>", "<home>", { desc = "Move to start of the line" })
+map("c", "<c-e>", "<end>", { desc = "Move to end of the line" })
+map("c", "<c-b>", "<left>", { desc = "Move cursor left" })
+map("c", "<c-f>", "<right>", { desc = "Move cursor right" })
+map("n", ",cn", ":let @*=expand('%'). ':' . line('.')<CR>", { desc = "Copy relative file path with line number" })
+map("n", ",cs", ':let @*=expand("%")<CR>', { desc = "Copy relative file path" })
+map("n", ",cf", ':let @*=expand("%:t")<CR>', { desc = "Copy filename" })
+map("n", ",cl", ':let @*=expand("%:p")<CR>', { desc = "Copy full file path" })
+map("n", "<C-s>", ":update!<CR>", { silent = true, desc = "Save file" })
+map("v", "<C-s>", "<C-c>:update!<CR>", { silent = true, desc = "Save file" })
+map("i", "<C-s>", "<C-o>:update!<CR>", { silent = true, desc = "Save file" })
+map("n", "n", "nzzzv", { desc = "Next search result, center and unfold" })
+map("n", "N", "Nzzzv", { desc = "Previous search result, center and unfold" })
+map("n", "<leader><cr>", ":nohlsearch<CR>", { silent = true, desc = "Clear search highlight" })
+map("n", "#", "#g``", { desc = "Previous search result, center and keep cursor position" })
+map("n", "*", "*g``", { desc = "Next search result, center and keep cursor position" })
+
+if vim.fn.executable("lazygit") == 1 then
+  map("n", "<leader>gg", "<Nop>")
+  map("n", "<leader>gG", function()
+    Snacks.lazygit({ cwd = LazyVim.root.git() })
+  end, { desc = "Lazygit (Root Dir)" })
+end

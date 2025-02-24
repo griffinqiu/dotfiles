@@ -18,9 +18,48 @@ local installed_mapx = vim.fn.stdpath('data')..'/site/pack/packer/start/mapx.nvi
 if vim.fn.empty(vim.fn.glob(installed_mapx)) > 0 then
   vim.fn.system({'git', 'clone', 'https://github.com/b0o/mapx.nvim', installed_mapx})
 end
-
 require('mapx').setup{ global = true }
-require('lazy').setup('plugins')
+
+
+local enable_extra_plugins = vim.g.enable_plugins
+  or {
+    -- -- Below are the good extra plugins, but they are disabled by default
+    -- codecompanion = "no",
+    -- avante = "no",
+    -- ["no-neck-pain"] = "no",
+    -- harpoon = "no",
+    -- blink = "no",
+    -- magazine = "yes",
+    -- snacks = "yes",
+    -- lspsaga = "yes",
+    -- ["fold-preview"] = "yes",
+    -- wakatime = "yes",
+  }
+
+local spec = {
+  { import = "core.colorscheme" },
+  { import = "core.editor" },
+  { import = "core.nvim-tree" },
+  { import = "core.nvim-treesitter" },
+  { import = "plugins" },
+}
+
+require("lazy").setup({
+  spec = spec,
+  checker = { enabled = true }, -- automatically check for plugin updates
+  performance = {
+    rtp = {
+      -- disable some rtp plugins
+      disabled_plugins = {
+        "gzip",
+        "tarPlugin",
+        "tohtml",
+        "tutor",
+        "zipPlugin",
+      },
+    },
+  },
+})
 
 vim.o.background='dark'
 
@@ -61,7 +100,7 @@ vim.o.undofile=true
 vim.o.undodir= vim.fn.stdpath('cache') .. '/undoes'
 vim.o.tagcase='match'
 vim.o.backupdir= vim.fn.stdpath('cache') .. '/backups'
-vim.o.colorcolumn=81
+vim.o.colorcolumn='81'
 vim.o.numberwidth=4
 vim.o.sidescroll=1
 vim.o.sidescrolloff=10
@@ -86,5 +125,4 @@ vim.o.encoding='utf-8'
 vim.o.fileencodings='utf-8,chinese,latin-1'
 vim.o.fileformats='unix,dos,mac'
 vim.o.mouse=''
-vim.o.ttymouse=''
 vim.wo.foldmethod='marker'
