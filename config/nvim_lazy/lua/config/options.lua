@@ -5,7 +5,7 @@ vim.api.nvim_set_keymap("n", "<space>", "<nop>", {})
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 vim.g.ai_cmp = false
-vim.g.snacks_animate = false
+vim.g.snacks_animate = true
 vim.g.minipairs_disable = true
 
 local opt = vim.opt
@@ -45,7 +45,7 @@ opt.undofile = true
 opt.tagcase = "match"
 -- opt.undodir = vim.fn.stdpath("cache") .. "/undoes"
 -- opt.backupdir = vim.fn.stdpath("cache") .. "/backups"
-opt.colorcolumn = "81"
+opt.colorcolumn = "121"
 opt.numberwidth = 4
 opt.sidescroll = 1
 opt.sidescrolloff = 10

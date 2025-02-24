@@ -16,7 +16,6 @@ map("v", "<C-s>", "<C-c>:update!<CR>", { silent = true, desc = "Save file" })
 map("i", "<C-s>", "<C-o>:update!<CR>", { silent = true, desc = "Save file" })
 map("n", "n", "nzzzv", { desc = "Next search result, center and unfold" })
 map("n", "N", "Nzzzv", { desc = "Previous search result, center and unfold" })
-map("n", "<leader><cr>", ":nohlsearch<CR>", { silent = true, desc = "Clear search highlight" })
 map("n", "#", "#g``", { desc = "Previous search result, center and keep cursor position" })
 map("n", "*", "*g``", { desc = "Next search result, center and keep cursor position" })
 
