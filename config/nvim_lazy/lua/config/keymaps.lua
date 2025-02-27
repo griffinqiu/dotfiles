@@ -14,10 +14,12 @@ map("n", ",cl", ':let @*=expand("%:p")<CR>', { desc = "Copy full file path" })
 map("n", "<C-s>", ":update!<CR>", { silent = true, desc = "Save file" })
 map("v", "<C-s>", "<C-c>:update!<CR>", { silent = true, desc = "Save file" })
 map("i", "<C-s>", "<C-o>:update!<CR>", { silent = true, desc = "Save file" })
-map("n", "n", "nzzzv", { desc = "Next search result, center and unfold" })
-map("n", "N", "Nzzzv", { desc = "Previous search result, center and unfold" })
 map("n", "#", "#g``", { desc = "Previous search result, center and keep cursor position" })
 map("n", "*", "*g``", { desc = "Next search result, center and keep cursor position" })
+
+-- Disable LazyVim terminal keymaps
+map("n", "<leader>fT", "<nop>", { desc = "which_key_ignore" })
+map("n", "<leader>ft", "<nop>", { desc = "which_key_ignore" })
 
 if vim.fn.executable("lazygit") == 1 then
   map("n", "<leader>gg", "<Nop>")
