@@ -10,9 +10,9 @@ return {
       },
     },
   },
-  { "CopilotC-Nvim/CopilotChat.nvim", enabled = false },
   {
     "olimorris/codecompanion.nvim",
+    enabled = vim.g.use_codecompanion,
     dependencies = {
       { "echasnovski/mini.diff" },
       { "nvim-lua/plenary.nvim" },
@@ -136,7 +136,7 @@ return {
           },
           chat = {
             adapter = "lb_openai",
-            roles = { llm = "🤖 Robot", user = "Griffin" },
+            roles = { llm = "🤖 Robot", user = vim.env.USER or "User" },
             keymaps = {
               toggle_chat = {
                 modes = { n = "q" },
@@ -144,14 +144,6 @@ return {
                 callback = function()
                   vim.cmd("CodeCompanionChat Toggle")
                 end,
-              },
-              close = {
-                modes = {
-                  n = "gq",
-                },
-                index = 4,
-                callback = "keymaps.close",
-                description = "Close Chat",
               },
               stop = {
                 modes = {
@@ -188,9 +180,9 @@ return {
       { "<leader>2", ":CodeCompanionChat Toggle<cr>", mode = "n", desc = "CodeCompanionChat Toggle" },
       -- Recommend setup
       {
-        mapping_key_prefix .. "c",
+        mapping_key_prefix .. "p",
         "<cmd>CodeCompanionActions<cr>",
-        desc = "Code Companion - Code Actions",
+        desc = "Code Companion - Prompt Actions",
       },
       {
         mapping_key_prefix .. "a",
