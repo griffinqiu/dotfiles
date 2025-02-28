@@ -23,7 +23,4 @@ map("n", "<leader>ft", "<nop>", { desc = "which_key_ignore" })
 
 if vim.fn.executable("lazygit") == 1 then
   map("n", "<leader>gg", "<Nop>")
-  map("n", "<leader>gG", function()
-    Snacks.lazygit({ cwd = LazyVim.root.git() })
-  end, { desc = "Lazygit (Root Dir)" })
 end
