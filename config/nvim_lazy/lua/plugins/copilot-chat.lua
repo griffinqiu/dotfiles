@@ -9,14 +9,6 @@ return {
     end,
     keys = {
       {
-        "<leader>2",
-        function()
-          return require("CopilotChat").toggle()
-        end,
-        desc = "Toggle (CopilotChat)",
-        mode = { "n", "v" },
-      },
-      {
         "q",
         function()
           return require("CopilotChat").toggle()

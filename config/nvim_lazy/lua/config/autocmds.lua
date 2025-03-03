@@ -18,10 +18,3 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.api.nvim_buf_set_keymap(0, "i", "<c-h>", "<bs>", { noremap = true, silent = true })
   end,
 })
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "TelescopePrompt" },
-  callback = function()
-    vim.api.nvim_buf_set_keymap(0, "i", "<c-j>", "<c-n>", { noremap = true, silent = true })
-    vim.api.nvim_buf_set_keymap(0, "i", "<c-k>", "<c-p>", { noremap = true, silent = true })
-  end,
-})

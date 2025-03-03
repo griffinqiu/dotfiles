@@ -177,7 +177,6 @@ return {
       })
     end,
     keys = {
-      { "<leader>2", ":CodeCompanionChat Toggle<cr>", mode = "n", desc = "CodeCompanionChat Toggle" },
       -- Recommend setup
       {
         mapping_key_prefix .. "p",

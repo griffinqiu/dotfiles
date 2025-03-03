@@ -12,15 +12,11 @@ return {
       prev = "<c-p>",
     }
   end,
-
   keys = {
     { "\\", "<Plug>CtrlSFPrompt", mode = "n", desc = "CtrlSF Prompt" },
-    { "<leader>3", ":CtrlSFToggle<CR>", mode = "n", desc = "CtrlSF Toggle" },
-    { "<c-g><c-g>", "<Plug>CtrlSFCwordExec", mode = "n", desc = "CtrlSF Current Word Exec" },
-    { "<c-g><c-g>", "<Plug>CtrlSFVwordExec", mode = "v", desc = "CtrlSF Selected Exec" },
-    { "<c-g>g", "<Plug>CtrlSFPrompt", mode = "n", desc = "CtrlSF Prompt" },
-    { "<c-g>g", "<Plug>CtrlSFVwordPath", mode = "v", desc = "CtrlSF Selected and waiting" },
-    { "<c-g>v", ":CtrlSFToggle<CR>", mode = "n", desc = "CtrlSF Toggle" },
-    { "<c-g>l", "<Plug>CtrlSFQuickfixPrompt", mode = "n", desc = "CtrlSF QuickfixPrompt" },
+    { "\\", "<Plug>CtrlSFVwordPath", mode = "v", desc = "CtrlSF Selected and waiting" },
+    { "<leader>sf", ":CtrlSFToggle<CR>", mode = "n", desc = "CtrlSF Toggle" },
+    { "<leader>sF", "<Plug>CtrlSFCwordExec", mode = "n", desc = "CtrlSF Current Word Exec" },
+    { "<leader>sF", "<Plug>CtrlSFVwordExec", mode = "v", desc = "CtrlSF Selected Exec" },
   },
 }

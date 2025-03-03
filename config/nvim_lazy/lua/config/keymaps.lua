@@ -1,6 +1,7 @@
 -- Keymaps are automatically loaded on the VeryLazy event
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 local map = vim.keymap.set
+local del = vim.keymap.del
 
 map("n", ",", "<Nop>", { silent = true })
 map("c", "<c-a>", "<home>", { desc = "Move to start of the line" })
@@ -24,5 +25,5 @@ map("n", "<leader>fT", "<nop>", { desc = "which_key_ignore" })
 map("n", "<leader>ft", "<nop>", { desc = "which_key_ignore" })
 
 if vim.fn.executable("lazygit") == 1 then
-  vim.keymap.del("n", "<leader>gg")
+  del("n", "<leader>gg")
 end
