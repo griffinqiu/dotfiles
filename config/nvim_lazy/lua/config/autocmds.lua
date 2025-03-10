@@ -8,7 +8,7 @@
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "TelescopePrompt", "snacks_input", "snacks_picker_input" },
+  pattern = { "TelescopePrompt", "snacks_input", "snacks_picker_input", "neo-tree-popup" },
   callback = function()
     vim.api.nvim_buf_set_keymap(0, "i", "<c-a>", "<home>", { noremap = true, silent = true })
     vim.api.nvim_buf_set_keymap(0, "i", "<c-e>", "<end>", { noremap = true, silent = true })
