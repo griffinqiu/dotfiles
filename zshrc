@@ -44,3 +44,8 @@ eval "$(gh copilot alias -- zsh)"
 [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
 [[ -f ~/Documents/Sync/zshrc.sync ]] && source ~/Documents/Sync/zshrc.sync
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+
+. "$HOME/.local/bin/env"
+
+# Created by `pipx` on 2025-03-14 06:26:33
+export PATH="$PATH:/Users/griffin/.local/bin"
