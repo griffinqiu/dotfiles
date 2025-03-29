@@ -11,6 +11,7 @@ return {
       opts.lsp.signature = {
         auto_open = { enabled = false },
       }
+      return opts
     end,
   },
 }

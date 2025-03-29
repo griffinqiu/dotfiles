@@ -3,6 +3,7 @@ return {
   dependencies = {
     "fatih/gomodifytags",
   },
+  branch = "master",
   VeryLazy = true,
   ft = { "go" },
   build = ":GoUpdateBinaries",
