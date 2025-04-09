@@ -66,3 +66,5 @@ opt.fileencodings = "utf-8,chinese,latin-1"
 opt.fileformats = "unix,dos,mac"
 opt.mouse = ""
 vim.wo.foldmethod = "marker"
+opt.complete = ".,w,b,t,i,u"
+opt.completeopt = { "menuone", "noselect", "noinsert" }
