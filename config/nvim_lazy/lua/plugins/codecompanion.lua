@@ -36,6 +36,9 @@ return {
     config = function()
       require("codecompanion").setup({
         adapters = {
+          config = {
+            default_model = "ollama",
+          },
           lb_openai = function()
             return require("codecompanion.adapters").extend("openai_compatible", {
               env = {
@@ -45,7 +48,7 @@ return {
               },
               schema = {
                 model = {
-                  default = "gpt-4o", -- define llm model to be used
+                  default = "gpt-4o",
                 },
                 temperature = {
                   order = 2,
@@ -101,21 +104,50 @@ return {
             })
           end,
 
-          localhost_deepseek = function()
-            return require("codecompanion.adapters").extend("ollama", {
-              name = "my_deepseek",
-              schema = {
-                model = {
-                  default = "deepseek-r1:14b",
+          my_deepseek_r1 = function()
+            return require("codecompanion.adapters")
+              .extend("ollama", {
+                name = "ollama",
+                schema = {
+                  model = {
+                    default = "deepseek-r1:32b",
+                  },
+                  num_ctx = {
+                    default = 16384,
+                  },
+                  num_predict = {
+                    default = -1,
+                  },
                 },
-                num_ctx = {
-                  default = 16384,
+              })
+              .extend("ollama", {
+                name = "ollama",
+                schema = {
+                  model = {
+                    default = "deepseek-r1:70b",
+                  },
+                  num_ctx = {
+                    default = 16384,
+                  },
+                  num_predict = {
+                    default = -1,
+                  },
                 },
-                num_predict = {
-                  default = -1,
+              })
+              .extend("ollama", {
+                name = "ollama",
+                schema = {
+                  model = {
+                    default = "qwen2.5-coder:32b",
+                  },
+                  num_ctx = {
+                    default = 16384,
+                  },
+                  num_predict = {
+                    default = -1,
+                  },
                 },
-              },
-            })
+              })
           end,
         },
         opts = {

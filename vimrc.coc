@@ -1,36 +1,6 @@
 " vim: set ft=vim:
 
 " Tagbar and FZF {{{
-Plug 'majutsushi/tagbar'
-    nnoremap <silent> <leader>5 :TagbarToggle<CR>
-    let g:tagbar_type_php = {
-        \'ctagstype' : 'php',
-        \'kinds'         : [
-            \'i:interfaces',
-            \'c:classes',
-            \'d:constant definitions',
-            \'f:functions',
-            \'j:javascript functions:1'
-        \]
-    \}"
-    let g:tagbar_map_jump=["o", "<cr>"]
-    let g:tagbar_map_openfold="zo"
-    let g:tagbar_map_closefold="zc"
-    let g:tagbar_map_togglefold="za"
-    let g:tagbar_map_openallfolds="zR"
-    let g:tagbar_map_closeallfolds="zM"
-    let g:tagbar_map_hidenonpublic="I"
-    let g:tagbar_map_zoomwin="A"
-    let g:tagbar_map_previewwin="<nop>"
-    let g:tagbar_map_showproto="<nop>"
-    let g:tagbar_map_incrementfolds="<nop>"
-    let g:tagbar_map_decrementfolds="<nop>"
-    let g:tagbar_map_toggleautoclose="<nop>"
-    let g:tagbar_width=40
-    let g:tagbar_sort=0
-    let g:tagbar_autofocus=1
-    let g:Tb_MaxSize=5
-
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
   let g:fzf_action = {
@@ -117,7 +87,7 @@ nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gt <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
-nnoremap <silent> <leader>4 :CocListResume<CR>
+nnoremap <silent> <leader>cs :CocListResume<CR>
 " textobj function if af
 
 " Use K to show documentation in preview window

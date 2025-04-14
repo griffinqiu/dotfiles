@@ -8,6 +8,7 @@ echo "  \__,_|\___/ \__| |_| |_|_|\___||___/"
 echo ""
 
 brew bundle --file=- <<EOF
+brew "fzf"
 brew "tig"
 brew "ncdu"
 brew "diff-so-fancy"
@@ -19,6 +20,7 @@ brew "neovim"
 brew "jupytext"
 brew "tmuxinator"
 brew "gpg"
+brew "pipx"
 brew "coreutils"
 brew "reattach-to-user-namespace"
 brew "yarn"
@@ -27,7 +29,12 @@ brew "fd"
 brew "universal-ctags"
 brew "gawk"
 brew "gh"
+brew "bash" # ensure bash is >= 4.0
+brew "macvim"
 brew "lazygit"
+brew "lazydocker"
+brew "asdf"
+cask "kitty"
 tap "homebrew/cask-fonts"
 cask "font-hack-nerd-font"
 EOF
@@ -51,16 +58,6 @@ if [ ! -e "$HOME"/.tmux ]; then
   echo 'Installing tpm'
   git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
   "$HOME/.tmux/plugins/tpm/bin/install_plugins"
-fi
-
-if [ ! -e "$HOME"/tmp ]; then
-  echo 'mkdir -p "$HOME"/tmp'
-  mkdir -p "$HOME"/tmp
-fi
-
-if [ ! -e "$HOME"/tmp/tags ]; then
-  echo 'mkdir -p "$HOME"/tmp/tags'
-  mkdir -p "$HOME"/tmp/tags
 fi
 
 if [ ! -e "$HOME"/.cache/nvim/tags ]; then

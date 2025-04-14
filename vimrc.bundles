@@ -104,7 +104,7 @@ Plug 'liangfeng/vimcdoc'
 " }}}
 
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
-  nnoremap <silent> <leader>1 :NERDTreeToggle<CR>
+  nnoremap <silent> <leader>e :NERDTreeToggle<CR>
   nnoremap <silent> <leader>nf :NERDTreeFind<CR>
   let g:NERDTreeMapPreview = "p"
   let g:NERDTreeMapOpenSplit = "s"
@@ -150,7 +150,7 @@ Plug 'dyng/ctrlsf.vim'
   vmap <C-G>l <Plug>CtrlSFQuilkfixVwordPath
   vmap <C-G>L <Plug>CtrSFQuickfixVwordPath
   vmap <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
-  nmap <silent><leader>3 :CtrlSFToggle<CR>
+  nmap <silent><leader>sf :CtrlSFToggle<CR>
   nnoremap \ :CtrlSF <SPACE>
   let g:ctrlsf_mapping = {
     \ "next": "<c-n>",

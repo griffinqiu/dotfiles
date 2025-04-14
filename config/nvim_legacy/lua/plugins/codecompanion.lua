@@ -470,15 +470,15 @@ return {
       })
     end,
     keys = {
-      { "<leader>2", ":CodeCompanionChat Toggle<cr>", mode="n" },
-      { "<leader>cr", ":CodeCompanion /buffer Refactor it", mode="v" },
-      { "<leader>ce", ":CodeCompanion Explain<cr>", mode="v" },
-      { "<leader>ct", ":CodeCompanion Unit Tests<cr>", mode="v" },
-      { "<leader>cf", ":CodeCompanion Fix code<cr>", mode="v" },
-      { "<leader>cbs", ":CodeCompanion Buffer selection<cr>", mode="v" },
-      { "<leader>clsp", ":CodeCompanion Explain LSP Diagnostics<cr>", mode="v" },
-      { "<leader>cm1", ":CodeCompanion Generate a Commit Message<cr>", mode="n" },
-      { "<leader>cm2", ":CodeCompanion Commit Message<cr>", mode="n" },
+      { "<leader>aa", ":CodeCompanionChat Toggle<cr>", mode = "n" },
+      { "<leader>cr", ":CodeCompanion /buffer Refactor it", mode = "v" },
+      { "<leader>ce", ":CodeCompanion Explain<cr>", mode = "v" },
+      { "<leader>ct", ":CodeCompanion Unit Tests<cr>", mode = "v" },
+      { "<leader>cf", ":CodeCompanion Fix code<cr>", mode = "v" },
+      { "<leader>cbs", ":CodeCompanion Buffer selection<cr>", mode = "v" },
+      { "<leader>clsp", ":CodeCompanion Explain LSP Diagnostics<cr>", mode = "v" },
+      { "<leader>cm1", ":CodeCompanion Generate a Commit Message<cr>", mode = "n" },
+      { "<leader>cm2", ":CodeCompanion Commit Message<cr>", mode = "n" },
 
       -- Recommend setup
       {
@@ -564,7 +564,6 @@ return {
         end,
         desc = "Code Companion - Quick chat",
       },
-
     },
     cmd = {
       "CodeCompanion",
