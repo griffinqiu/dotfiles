@@ -28,8 +28,18 @@ return {
     enabled = vim.g.use_codecompanion,
     dependencies = {
       { "echasnovski/mini.diff" },
-      { "nvim-lua/plenary.nvim" },
+      { "nvim-lua/plenary.nvim", branch = "master" },
       { "nvim-telescope/telescope.nvim" },
+      {
+        "OXY2DEV/markview.nvim",
+        lazy = false,
+        opts = {
+          preview = {
+            filetypes = { "markdown", "codecompanion" },
+            ignore_buftypes = {},
+          },
+        },
+      },
       { "j-hui/fidget.nvim" },
       { "hrsh7th/nvim-cmp" },
     },
@@ -152,7 +162,7 @@ return {
         },
         opts = {
           language = "Chinese",
-          log_level = "DEBUG",
+          -- log_level = "DEBUG",
         },
         display = {
           inline = {
