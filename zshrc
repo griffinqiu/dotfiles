@@ -36,7 +36,6 @@ _load_settings "$HOME/.zsh/configs"
 
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
-# export NVIM_APPNAME=nvim_lazy
 eval "$(gh copilot alias -- zsh)"
 
 [[ -f ~/.zshrc.oh-my-zsh ]] && source ~/.zshrc.oh-my-zsh
