@@ -35,6 +35,7 @@ brew "lazygit"
 brew "lazydocker"
 brew "asdf"
 cask "kitty"
+cask "ghostty"
 tap "homebrew/cask-fonts"
 cask "font-hack-nerd-font"
 EOF

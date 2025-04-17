@@ -30,16 +30,6 @@ return {
       { "echasnovski/mini.diff" },
       { "nvim-lua/plenary.nvim", branch = "master" },
       { "nvim-telescope/telescope.nvim" },
-      {
-        "OXY2DEV/markview.nvim",
-        lazy = false,
-        opts = {
-          preview = {
-            filetypes = { "markdown", "codecompanion" },
-            ignore_buftypes = {},
-          },
-        },
-      },
       { "j-hui/fidget.nvim" },
       { "hrsh7th/nvim-cmp" },
     },

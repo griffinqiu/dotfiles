@@ -34,3 +34,8 @@
     path = ~/Documents/Sync/gitconfig.sync
 [init]
 	defaultBranch = main
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
