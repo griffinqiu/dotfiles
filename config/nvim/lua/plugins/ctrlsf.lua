@@ -3,10 +3,9 @@ return {
   init = function()
     vim.g.ctrlsf_auto_close = 0
     vim.g.ctrlsf_open_left = 0
-    vim.g.ctrlsf_position = "right"
+    vim.g.ctrlsf_position = "left"
     vim.g.ctrlsf_winsize = "30%"
     vim.g.ctrlsf_ignore_dir = { "node_modules", "build", "tmp", "proto" }
-    vim.g.ctrlsf_position = "right"
     vim.g.ctrlsf_mapping = {
       next = "<c-n>",
       prev = "<c-p>",

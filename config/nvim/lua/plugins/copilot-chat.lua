@@ -2,7 +2,7 @@ return {
   {
     "CopilotC-Nvim/CopilotChat.nvim",
     event = "VeryLazy",
-    enabled = not vim.g.use_codecompanion,
+    enabled = vim.g.ai_partner == "copilot-chat",
     opts = function(_, opts)
       opts.auto_insert_mode = false
       return opts

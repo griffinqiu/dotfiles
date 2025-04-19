@@ -11,21 +11,8 @@ return {
     },
   },
   {
-    "augmentcode/augment.vim",
-    keys = {
-      { "<leader>ac", ":Augment chat<CR>", mode = "n" },
-      { "<leader>ac", ":Augment chat<CR>", mode = "v" },
-      { "<leader>an", ":Augment chat-new<CR>", mode = "n" },
-      { "<leader>at", ":Augment chat-toggle<CR>", mode = "n" },
-      -- { "<c-y>", "<cmd>call augment#Accept()<cr>", mode = "i" },
-      -- { "<cr>", '<cmd>call augment#Accept("\\n")<cr>', mode = "i" },
-      -- inoremap <c-y> <cmd>call augment#Accept()<cr>
-      -- inoremap <cr> <cmd>call augment#Accept("\n")<cr>
-    },
-  },
-  {
     "olimorris/codecompanion.nvim",
-    enabled = vim.g.use_codecompanion,
+    enabled = vim.g.ai_cmp == "codecompanion",
     dependencies = {
       { "echasnovski/mini.diff" },
       { "nvim-lua/plenary.nvim", branch = "master" },
