@@ -1,0 +1,35 @@
+{
+  "mcpServers": {
+    "github.com/modelcontextprotocol/servers/tree/main/src/time": {
+      "args": [
+        "mcp-server-time"
+      ],
+      "command": "uvx"
+    },
+    "remote-server": {
+      "headers": {
+        "Authorization": "Bearer your-token"
+      },
+      "url": "https://api.example.com/mcp"
+    },
+    "fetch": {
+      "args": [
+        "mcp-server-fetch"
+      ],
+      "env": {
+        "API_KEY": "",
+        "SERVER_URL": null,
+        "DEBUG": "true"
+      },
+      "command": "uvx",
+      "disabled": false
+    }
+  },
+  "nativeMCPServers": {
+    "neovim": {
+      "disabled_prompts": [
+        
+      ]
+    }
+  }
+}
