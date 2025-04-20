@@ -10,7 +10,9 @@
 vim.api.nvim_create_autocmd("FileType", {
   pattern = {
     "TelescopePrompt",
-    "neo-tree-popup", 
+    "snacks_input",
+    "snacks_picker_input",
+    "neo-tree-popup",
     "AvantePromptInput",
     "AvanteInput",
   },
