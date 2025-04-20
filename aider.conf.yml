@@ -1,0 +1,19 @@
+# 输出设置
+dark-mode: true # 适配深色终端背景
+pretty: true # 启用彩色输出
+
+# 颜色配置（使用 Tokyo Night 配色参数）
+user-input-color: "#9ece6a" # 绿色 (color2)
+tool-output-color: "#a9b1d6" # 灰色 (color7)
+tool-error-color: "#f7768e" # 红色 (color1)
+tool-warning-color: "#e0af68" # 橙色 (color3)
+assistant-output-color: "#7aa2f7" # 蓝色 (color4)
+
+# 补全菜单颜色
+completion-menu-color: "#c0caf5" # 前景色 (foreground)
+completion-menu-bg-color: "#1a1b26" # 背景色 (background)
+completion-menu-current-color: "#1a1b26" # 当前项文字颜色 (background)
+completion-menu-current-bg-color: "#7aa2f7" # 当前项背景色 (color4)
+
+# 代码高亮主题（可选）
+code-theme: "monokai"
