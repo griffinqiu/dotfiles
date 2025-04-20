@@ -8,7 +8,14 @@
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "TelescopePrompt", "snacks_input", "snacks_picker_input", "neo-tree-popup" },
+  pattern = {
+    "TelescopePrompt",
+    "snacks_input",
+    "snacks_picker_input",
+    "neo-tree-popup",
+    "AvantePromptInput",
+    "AvanteInput",
+  },
   callback = function()
     vim.api.nvim_buf_set_keymap(0, "i", "<c-a>", "<home>", { noremap = true, silent = true })
     vim.api.nvim_buf_set_keymap(0, "i", "<c-e>", "<end>", { noremap = true, silent = true })
@@ -16,5 +23,13 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.api.nvim_buf_set_keymap(0, "i", "<c-f>", "<right>", { noremap = true, silent = true })
     vim.api.nvim_buf_set_keymap(0, "i", "<c-d>", "<delete>", { noremap = true, silent = true })
     vim.api.nvim_buf_set_keymap(0, "i", "<c-h>", "<bs>", { noremap = true, silent = true })
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "AvanteInput", "AvanteSelectedFiles", "Avante", "AvantePromptInput" },
+  callback = function()
+    vim.api.nvim_buf_set_keymap(0, "n", "<c-j>", "<nop>", { noremap = true, silent = true })
+    vim.api.nvim_buf_set_keymap(0, "n", "<c-k>", "<nop>", { noremap = true, silent = true })
   end,
 })
