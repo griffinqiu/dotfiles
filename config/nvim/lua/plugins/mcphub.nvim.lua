@@ -15,7 +15,7 @@ return {
         config = vim.fn.expand("~/.config/mcphub/servers.json"), -- Absolute path to config file location (will create if not exists)
         native_servers = {}, -- add your native servers here
 
-        auto_approve = false, -- Auto approve mcp tool calls
+        auto_approve = true, -- Auto approve mcp tool calls
         auto_toggle_mcp_servers = true, -- Let LLMs start and stop MCP servers automatically
         -- Extensions configuration
         extensions = {

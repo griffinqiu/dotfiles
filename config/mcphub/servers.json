@@ -1,35 +1,85 @@
 {
   "mcpServers": {
-    "github.com/modelcontextprotocol/servers/tree/main/src/time": {
+    "twitter-mcp": {
+      "disabled": false,
+      "env": {
+        "API_KEY": "W2mXWGgQLtibldERRwcbGbfj3",
+        "API_SECRET_KEY": "wZSDT6HUTiID4PLRkQniKtpbYu4hPOfW00uwzmQkylKMaiXcRI",
+        "ACCESS_TOKEN": "125911623-AszWaOOan9aHMTBluxg48GsmkrZljZ3aJX9WWEMr",
+        "ACCESS_TOKEN_SECRET": "Ynvbv4T9Ll5S9nRHMpmpBYpSm0ZB6rbl5sodGZZyrna0r"
+      },
+      "command": "npx",
       "args": [
-        "mcp-server-time"
-      ],
-      "command": "uvx"
+        "-y",
+        "@enescinar/twitter-mcp"
+      ]
     },
     "remote-server": {
+      "disabled": true,
+      "url": "https://api.example.com/mcp",
       "headers": {
         "Authorization": "Bearer your-token"
-      },
-      "url": "https://api.example.com/mcp"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
     },
     "fetch": {
-      "args": [
-        "mcp-server-fetch"
-      ],
+      "disabled": false,
       "env": {
-        "API_KEY": "",
         "SERVER_URL": null,
+        "API_KEY": "",
         "DEBUG": "true"
       },
       "command": "uvx",
-      "disabled": false
+      "args": [
+        "mcp-server-fetch"
+      ]
+    },
+    "postgres": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "mcp/postgres",
+        "postgresql://host.docker.internal:5432/mydb"
+      ]
+    },
+    "github.com/AgentDeskAI/browser-tools-mcp": {
+      "disabled": false,
+      "env": {
+        "DEBUG": "true"
+      },
+      "command": "npx",
+      "args": [
+        "@agentdeskai/browser-tools-mcp@latest"
+      ]
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "github.com/anaisbetts/mcp-youtube": {
+      "disabled": false,
+      "env": {
+        "DEBUG": "true"
+      },
+      "command": "npx",
+      "args": [
+        "@anaisbetts/mcp-youtube"
+      ]
     }
   },
   "nativeMCPServers": {
     "neovim": {
-      "disabled_prompts": [
-        
-      ]
+      "disabled_prompts": []
     }
   }
 }

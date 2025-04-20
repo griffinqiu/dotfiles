@@ -18,3 +18,5 @@ tags
 tmp/**/*
 .Trash
 Thumbs.db
+.aider*
+config/mcphub/servers.json

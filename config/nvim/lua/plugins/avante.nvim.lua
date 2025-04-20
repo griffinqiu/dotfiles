@@ -3,6 +3,10 @@ return {
     "yetone/avante.nvim",
     event = "VeryLazy",
     version = false, -- Never set this value to "*"! Never!
+    keys = {
+      { "<leader>an", ":AvanteChatNew<CR>", mode = "n" },
+      -- { "<leader>ac", ":AvanteClear<CR>", mode = "n" },
+    },
     opts = {
       ---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
       provider = "claude", -- The provider used in Aider mode or in the planning phase of Cursor Planning Mode
@@ -164,7 +168,7 @@ return {
           default = "<leader>aa",
           debug = "<leader>ad",
           hint = "<leader>ah",
-          suggestion = "<leader>as",
+          -- suggestion = "<leader>as",
           repomap = "<leader>aR",
         },
       },
@@ -185,11 +189,11 @@ return {
         },
         edit = {
           border = "rounded",
-          start_insert = true, -- Start insert mode when opening the edit window
+          start_insert = false, -- Start insert mode when opening the edit window
         },
         ask = {
           floating = false, -- Open the 'AvanteAsk' prompt in a floating window
-          start_insert = true, -- Start insert mode when opening the ask window
+          start_insert = false, -- Start insert mode when opening the ask window
           border = "rounded",
           ---@type "ours" | "theirs"
           focus_on_apply = "ours", -- which diff to focus after applying
@@ -224,41 +228,64 @@ return {
         embed_model = "nomic-embed-text", -- The embedding model to use for RAG service
         endpoint = "http://localhost:11434", -- The API endpoint for RAG service
       },
-      custom_tools = {
-        {
-          name = "run_go_tests", -- Unique name for the tool
-          description = "Run Go unit tests and return results", -- Description shown to AI
-          command = "go test -v ./...", -- Shell command to execute
-          param = { -- Input parameters (optional)
-            type = "table",
-            fields = {
-              {
-                name = "target",
-                description = "Package or directory to test (e.g. './pkg/...' or './internal/pkg')",
-                type = "string",
-                optional = true,
-              },
-            },
-          },
-          returns = { -- Expected return values
-            {
-              name = "result",
-              description = "Result of the fetch",
-              type = "string",
-            },
-            {
-              name = "error",
-              description = "Error message if the fetch was not successful",
-              type = "string",
-              optional = true,
-            },
-          },
-          func = function(params, on_log, on_complete) -- Custom function to execute
-            local target = params.target or "./..."
-            return vim.fn.system(string.format("go test -v %s", target))
-          end,
-        },
+      -- other config
+      -- The system_prompt type supports both a string and a function that returns a string. Using a function here allows dynamically updating the prompt with mcphub
+      system_prompt = function()
+        local hub = require("mcphub").get_hub_instance()
+        return hub:get_active_servers_prompt()
+      end,
+      custom_tools = function()
+        return {
+          require("mcphub.extensions.avante").mcp_tool(),
+        }
+      end,
+      disabled_tools = {
+        "list_files",
+        "search_files",
+        "read_file",
+        "create_file",
+        "rename_file",
+        "delete_file",
+        "create_dir",
+        "rename_dir",
+        "delete_dir",
+        "bash",
       },
+      -- custom_tools = {
+      --   {
+      --     name = "run_go_tests", -- Unique name for the tool
+      --     description = "Run Go unit tests and return results", -- Description shown to AI
+      --     command = "go test -v ./...", -- Shell command to execute
+      --     param = { -- Input parameters (optional)
+      --       type = "table",
+      --       fields = {
+      --         {
+      --           name = "target",
+      --           description = "Package or directory to test (e.g. './pkg/...' or './internal/pkg')",
+      --           type = "string",
+      --           optional = true,
+      --         },
+      --       },
+      --     },
+      --     returns = { -- Expected return values
+      --       {
+      --         name = "result",
+      --         description = "Result of the fetch",
+      --         type = "string",
+      --       },
+      --       {
+      --         name = "error",
+      --         description = "Error message if the fetch was not successful",
+      --         type = "string",
+      --         optional = true,
+      --       },
+      --     },
+      --     func = function(params, on_log, on_complete) -- Custom function to execute
+      --       local target = params.target or "./..."
+      --       return vim.fn.system(string.format("go test -v %s", target))
+      --     end,
+      --   },
+      -- },
     },
     -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
     build = "make",
