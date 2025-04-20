@@ -3,6 +3,7 @@ return {
     "yetone/avante.nvim",
     event = "VeryLazy",
     version = false, -- Never set this value to "*"! Never!
+    enabled = vim.g.ai_partner == "avante",
     keys = {
       { "<leader>an", ":AvanteChatNew<CR>", mode = "n" },
       -- { "<leader>ac", ":AvanteClear<CR>", mode = "n" },
