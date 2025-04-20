@@ -4,7 +4,6 @@
 vim.api.nvim_set_keymap("n", "<space>", "<nop>", {})
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
-vim.g.ai_cmp = false
 vim.g.ai_partner = "avante"
 vim.g.snacks_animate = true
 vim.g.minipairs_disable = true

@@ -12,7 +12,7 @@ return {
   },
   {
     "olimorris/codecompanion.nvim",
-    enabled = vim.g.ai_cmp == "codecompanion",
+    enabled = vim.g.ai_partner == "codecompanion",
     dependencies = {
       { "echasnovski/mini.diff" },
       { "nvim-lua/plenary.nvim", branch = "master" },
