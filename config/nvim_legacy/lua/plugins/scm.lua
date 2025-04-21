@@ -23,7 +23,8 @@ return {
   {
     'tpope/vim-fugitive',
     keys = {
-      { "<leader>gb", '<cmd>Git blame<cr>', mode="n" }
+      { "<leader>gb", '<cmd>Git blame<cr>', mode="n" },
+      { "<leader>gc", '<cmd>Git commit<cr>', mode="n", desc = "Commit changes" },
     },
   },
   { 'tpope/vim-rhubarb' }, -- :Gbrowse
