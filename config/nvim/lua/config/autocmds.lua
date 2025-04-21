@@ -25,11 +25,3 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.api.nvim_buf_set_keymap(0, "i", "<c-h>", "<bs>", { noremap = true, silent = true })
   end,
 })
-
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "AvanteInput", "AvanteSelectedFiles", "Avante", "AvantePromptInput" },
-  callback = function()
-    vim.api.nvim_buf_set_keymap(0, "n", "<c-j>", "<nop>", { noremap = true, silent = true })
-    vim.api.nvim_buf_set_keymap(0, "n", "<c-k>", "<nop>", { noremap = true, silent = true })
-  end,
-})

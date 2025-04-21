@@ -6,16 +6,16 @@ return {
     enabled = vim.g.ai_partner == "avante",
     keys = {
       { "<leader>an", ":AvanteChatNew<CR>", mode = "n" },
-      -- { "<leader>ac", ":AvanteClear<CR>", mode = "n" },
+      { "<leader>ac", ":AvanteClear<CR>", mode = "n" },
     },
     opts = {
       ---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
-      provider = "claude", -- The provider used in Aider mode or in the planning phase of Cursor Planning Mode
+      provider = "aihubmix/claude", -- The provider used in Aider mode or in the planning phase of Cursor Planning Mode
       -- WARNING: Since auto-suggestions are a high-frequency operation and therefore expensive,
       -- currently designating it as `copilot` provider is dangerous because: https://github.com/yetone/avante.nvim/issues/1048
       -- Of course, you can reduce the request frequency by increasing `suggestion.debounce`.
-      auto_suggestions_provider = "claude",
-      cursor_applying_provider = nil, -- The provider used in the applying phase of Cursor Planning Mode, defaults to nil, when nil uses Config.provider as the provider for the applying phase
+      auto_suggestions_provider = "aihubmix/Llama",
+      cursor_applying_provider = "aihubmix/Llama", -- The provider used in the applying phase of Cursor Planning Mode, defaults to nil, when nil uses Config.provider as the provider for the applying phase
       claude = {
         endpoint = "https://api.anthropic.com",
         model = "claude-3-7-sonnet-20250219",
@@ -59,6 +59,15 @@ return {
           __inherited_from = "openai",
           endpoint = "http://localhost:11434/v1",
           model = "deepseek-r1:32b",
+          disable_tools = true,
+          timeout = 30000,
+          temperature = 0,
+          max_completion_tokens = 40000,
+        },
+        ["ollama/qwen2.5"] = {
+          __inherited_from = "openai",
+          endpoint = "http://localhost:11434/v1",
+          model = "qwen2.5-coder:32b",
           disable_tools = true,
           timeout = 30000,
           temperature = 0,
