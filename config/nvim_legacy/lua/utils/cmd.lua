@@ -9,7 +9,4 @@ end
 
 return {
   create_cmd = create_cmd,
-  GitCommit = create_cmd("GitCommit", function()
-    vim.cmd("Git commit")
-  end, { nargs = 0 }),
 }
