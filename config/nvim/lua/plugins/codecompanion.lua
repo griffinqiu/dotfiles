@@ -22,12 +22,28 @@ return {
     },
     config = function()
       require("codecompanion").setup({
+        behaviour = {
+          enable_cursor_planning_mode = true,
+        },
         adapters = {
           config = {
             default_model = "ollama",
           },
-          lb_openai = function()
+          groq = function()
             return require("codecompanion.adapters").extend("openai_compatible", {
+              name = "groq",
+              env = {
+                url = "https://api.groq.com/openai/v1",
+                api_key = "GROQ_API_KEY",
+              },
+              schema = {
+                model = {
+                  default = "llama-3-3-70b-versatile",
+                },
+                max_completion_tokens = {
+                  default = 32768,
+                },
+              },
               env = {
                 url = "https://lboneapi.longbridge-inc.com",
                 api_key = "LBOPENAI_API_KEY",
@@ -154,7 +170,7 @@ return {
         },
         strategies = {
           inline = {
-            adapter = "lb_openai",
+            adapter = "groq",
             keymaps = {
               accept_change = {
                 modes = { n = "ga" },
