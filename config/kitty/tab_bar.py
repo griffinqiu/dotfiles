@@ -3,7 +3,7 @@ from kitty.utils import color_as_int
 from kitty.fast_data_types import Screen
 from kitty.tab_bar import as_rgb, draw_title, DrawData, ExtraData, Formatter, TabBarData
 
-ICON = "    "
+ICON = "  KITTY "
 ICON_FG = as_rgb(color_as_int(Color(78, 81, 82)))
 ICON_BG = as_rgb(color_as_int(Color(157, 205, 105)))
 

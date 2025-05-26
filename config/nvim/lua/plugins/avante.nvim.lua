@@ -73,6 +73,15 @@ return {
           temperature = 0,
           max_completion_tokens = 40000,
         },
+        ["xai/grok"] = {
+          __inherited_from = "openai",
+          endpoint = "https://api.x.ai/v1",
+          model = "grok-3-beta",
+          api_key_name = "XAI_API_KEY",
+          timeout = 30000,
+          temperature = 0.7,
+          max_tokens = 16384,
+        },
       },
       selector = {
         provider = "telescope",
@@ -232,7 +241,7 @@ return {
       },
       rag_service = {
         enabled = false, -- Enables the RAG service
-        host_mount = "~/RAG-Data", -- Host mount path for the rag service
+        host_mount = os.getenv("HOME"), -- Host mount path for the rag service
         provider = "ollama", -- The provider to use for RAG service (e.g. openai or ollama)
         llm_model = "llama3:8b", -- The LLM model to use for RAG service
         embed_model = "nomic-embed-text", -- The embedding model to use for RAG service
@@ -311,7 +320,7 @@ return {
       "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
       "ibhagwan/fzf-lua", -- for file_selector provider fzf
       "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
-      "zbirenbaum/copilot.lua", -- for providers='copilot'
+      -- "zbirenbaum/copilot.lua", -- for providers='copilot'
       {
         -- support for image pasting
         "HakonHarnes/img-clip.nvim",

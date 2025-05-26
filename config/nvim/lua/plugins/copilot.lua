@@ -1,15 +1,19 @@
 return {
   {
-    "zbirenbaum/copilot.lua",
-    event = "VeryLazy",
-    enabled = true,
-    opts = function(_, opts)
-      opts.suggestion = opts.suggestion or {}
-      opts.suggestion.keymap = {
-        accept = "<c-j>",
-        next = "<m-n>",
-        prev = "<m-p>",
+    "copilot-cmp",
+    enabled = false,
+  },
+  {
+    "github/copilot.vim",
+    init = function()
+      vim.g.copilot_no_tab_map = true
+      vim.g.copilot_filetypes = {
+        ["TelescopePrompt"] = false,
+        ["DressingInput"] = false,
       }
+    end,
+    config = function()
+      vim.cmd([[imap <silent><script><expr> <C-j> copilot#Accept("\<CR>")]])
     end,
   },
 }
