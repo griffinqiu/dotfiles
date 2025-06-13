@@ -5,9 +5,10 @@ vim.api.nvim_set_keymap("n", "<space>", "<nop>", {})
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 vim.g.ai_partner = "avante"
-vim.g.snacks_animate = true
+vim.g.snacks_animate = false
 vim.g.minipairs_disable = true
 vim.env.USER = "Griffin"
+vim.g.root_spec = { ".git", "lsp", "cwd" }
 
 local opt = vim.opt
 opt.background = "dark"

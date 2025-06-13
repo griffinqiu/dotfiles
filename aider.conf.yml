@@ -1,6 +1,6 @@
-# 输出设置
-dark-mode: true # 适配深色终端背景
-pretty: true # 启用彩色输出
+pretty: true
+dark-mode: false
+code-theme: "nord"
 
 # 颜色配置（使用 Tokyo Night 配色参数）
 user-input-color: "#9ece6a" # 绿色 - 用户输入 (color2)

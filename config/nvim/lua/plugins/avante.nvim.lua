@@ -10,7 +10,7 @@ return {
     },
     opts = {
       ---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
-      provider = "aihubmix/claude", -- The provider used in Aider mode or in the planning phase of Cursor Planning Mode
+      provider = "claude", -- The provider used in Aider mode or in the planning phase of Cursor Planning Mode
       -- WARNING: Since auto-suggestions are a high-frequency operation and therefore expensive,
       -- currently designating it as `copilot` provider is dangerous because: https://github.com/yetone/avante.nvim/issues/1048
       -- Of course, you can reduce the request frequency by increasing `suggestion.debounce`.
@@ -18,7 +18,7 @@ return {
       cursor_applying_provider = "aihubmix/Llama", -- The provider used in the applying phase of Cursor Planning Mode, defaults to nil, when nil uses Config.provider as the provider for the applying phase
       claude = {
         endpoint = "https://api.anthropic.com",
-        model = "claude-3-7-sonnet-20250219",
+        model = "claude-sonnet-4-20250514",
         temperature = 0,
         max_tokens = 20480,
       },
@@ -50,7 +50,7 @@ return {
         ["aihubmix/claude"] = {
           __inherited_from = "claude",
           endpoint = "https://aihubmix.com",
-          model = "claude-3-7-sonnet-20250219",
+          model = "claude-sonnet-4-20250514",
           api_key_name = "AIHUBMIX_API_KEY",
           timeout = 30000,
           max_tokens = 20480,
