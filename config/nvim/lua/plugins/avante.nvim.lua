@@ -7,7 +7,152 @@ return {
     keys = {
       { "<leader>an", ":AvanteChatNew<CR>", mode = "n" },
       { "<leader>ac", ":AvanteClear<CR>", mode = "n" },
+      {
+        "<leader>ar",
+        function()
+          -- 重置avante窗口高度的函数
+          local function reset_avante_windows()
+            -- 获取所有窗口
+            local wins = vim.api.nvim_list_wins()
+            local ask_win = nil
+            local sidebar_win = nil
+
+            -- 查找avante相关窗口
+            for _, win in ipairs(wins) do
+              local buf = vim.api.nvim_win_get_buf(win)
+              local buf_name = vim.api.nvim_buf_get_name(buf)
+              local filetype = vim.bo[buf].filetype
+
+              -- 检查是否是ask窗口 (通常是输入窗口)
+              if filetype == "AvanteInput" or buf_name:match("Avante.*Input") then
+                ask_win = win
+              -- 检查是否是sidebar窗口 (回复窗口)
+              elseif filetype == "Avante" or buf_name:match("Avante") then
+                sidebar_win = win
+              end
+            end
+
+            -- 获取编辑器总高度
+            local total_height = vim.o.lines - vim.o.cmdheight - 1 -- 减去命令行和状态栏
+
+            -- 设置ask窗口高度为固定值 (8行)
+            if ask_win then
+              vim.api.nvim_win_set_height(ask_win, 8)
+              print("Ask window height reset to 8 lines")
+            end
+
+            -- 设置sidebar窗口高度为尽可能大
+            if sidebar_win then
+              -- 计算可用高度 (总高度减去ask窗口高度和一些边距)
+              local available_height = total_height - 10 -- 为ask窗口和边距预留空间
+              if available_height > 20 then -- 确保有最小高度
+                vim.api.nvim_win_set_height(sidebar_win, available_height)
+
+                -- 移动光标到回复窗口底部
+                vim.api.nvim_set_current_win(sidebar_win)
+                local buf = vim.api.nvim_win_get_buf(sidebar_win)
+                local line_count = vim.api.nvim_buf_line_count(buf)
+                vim.api.nvim_win_set_cursor(sidebar_win, { line_count, 0 })
+
+                print("Sidebar window height reset and cursor moved to bottom")
+              end
+            end
+
+            if not ask_win and not sidebar_win then
+              print("No Avante windows found")
+            end
+          end
+
+          reset_avante_windows()
+        end,
+        mode = "n",
+        desc = "Reset Avante windows height",
+      },
     },
+    config = function(_, opts)
+      -- 创建用户命令
+      vim.api.nvim_create_user_command("AvanteResetWindows", function()
+        -- 重置avante窗口高度的函数
+        local wins = vim.api.nvim_list_wins()
+        local ask_win = nil
+        local sidebar_win = nil
+
+        -- 查找avante相关窗口
+        for _, win in ipairs(wins) do
+          local buf = vim.api.nvim_win_get_buf(win)
+          local buf_name = vim.api.nvim_buf_get_name(buf)
+          local filetype = vim.bo[buf].filetype
+
+          -- 检查是否是ask窗口 (通常是输入窗口)
+          if filetype == "AvanteInput" or buf_name:match("Avante.*Input") then
+            ask_win = win
+          -- 检查是否是sidebar窗口 (回复窗口)
+          elseif filetype == "Avante" or buf_name:match("Avante") then
+            sidebar_win = win
+          end
+        end
+
+        -- 获取编辑器总高度
+        local total_height = vim.o.lines - vim.o.cmdheight - 1 -- 减去命令行和状态栏
+
+        -- 设置ask窗口高度为固定值 (8行)
+        if ask_win then
+          vim.api.nvim_win_set_height(ask_win, 8)
+          print("Ask window height reset to 8 lines")
+        end
+
+        -- 设置sidebar窗口高度为尽可能大
+        if sidebar_win then
+          -- 计算可用高度 (总高度减去ask窗口高度和一些边距)
+          local available_height = total_height - 10 -- 为ask窗口和边距预留空间
+          if available_height > 20 then -- 确保有最小高度
+            vim.api.nvim_win_set_height(sidebar_win, available_height)
+
+            -- 移动光标到回复窗口底部
+            vim.api.nvim_set_current_win(sidebar_win)
+            local buf = vim.api.nvim_win_get_buf(sidebar_win)
+            local line_count = vim.api.nvim_buf_line_count(buf)
+            vim.api.nvim_win_set_cursor(sidebar_win, { line_count, 0 })
+
+            print("Sidebar window height reset and cursor moved to bottom")
+          end
+        end
+
+        if not ask_win and not sidebar_win then
+          print("No Avante windows found")
+        end
+      end, {
+        desc = "Reset Avante window heights and move cursor to bottom",
+      })
+
+      -- 可选：自动在窗口大小改变时重置avante窗口（如tmux调整大小）
+      vim.api.nvim_create_autocmd("VimResized", {
+        group = vim.api.nvim_create_augroup("AvanteWindowResize", { clear = true }),
+        callback = function()
+          -- 延迟执行，确保窗口大小调整完成
+          vim.defer_fn(function()
+            -- 检查是否有avante窗口打开
+            local wins = vim.api.nvim_list_wins()
+            local has_avante = false
+            for _, win in ipairs(wins) do
+              local buf = vim.api.nvim_win_get_buf(win)
+              local filetype = vim.bo[buf].filetype
+              if filetype == "Avante" or filetype == "AvanteInput" then
+                has_avante = true
+                break
+              end
+            end
+
+            if has_avante then
+              vim.cmd("AvanteResetWindows")
+            end
+          end, 100) -- 延迟100ms
+        end,
+      })
+
+      -- 设置avante插件
+      require("avante").setup(opts)
+    end,
     opts = {
       ---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
       provider = "claude",
