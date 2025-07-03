@@ -8,6 +8,57 @@ return {
       { "<leader>an", ":AvanteChatNew<CR>", mode = "n" },
       { "<leader>ac", ":AvanteClear<CR>", mode = "n" },
     },
+    config = function(_, opts)
+      -- Setup avante normally first
+      require("avante").setup(opts)
+      -- tmux-specific window management
+      if vim.env.TMUX then
+        vim.api.nvim_create_autocmd("User", {
+          pattern = "VeryLazy",
+          callback = function()
+            -- Simple, aggressive duplicate window cleanup
+            local function kill_duplicates()
+              local avante_wins = {}
+              for _, win in ipairs(vim.api.nvim_list_wins()) do
+                local buf = vim.api.nvim_win_get_buf(win)
+                local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+                if ft:match("^Avante") then
+                  table.insert(avante_wins, win)
+                end
+              end
+
+              -- Keep only the first window, close all others
+              for i = 2, #avante_wins do
+                pcall(vim.api.nvim_win_close, avante_wins[i], true)
+              end
+            end
+
+            -- Create high-priority autocmd that runs on every possible event
+            vim.api.nvim_create_augroup("avante_tmux_kill_duplicates", { clear = true })
+            vim.api.nvim_create_autocmd({
+              "VimResized",
+              "WinNew",
+              "WinEnter",
+              "WinLeave",
+              "BufEnter",
+              "BufWinEnter",
+              "BufNewFile",
+              "BufReadPost",
+            }, {
+              group = "avante_tmux_kill_duplicates",
+              callback = function()
+                vim.schedule(kill_duplicates)
+              end,
+            })
+
+            -- Also run cleanup every 500ms to catch anything we missed
+            vim.fn.timer_start(500, function()
+              vim.schedule(kill_duplicates)
+            end, { ["repeat"] = -1 })
+          end,
+        })
+      end
+    end,
     opts = {
       ---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
       provider = "claude", -- The provider used in Aider mode or in the planning phase of Cursor Planning Mode
@@ -136,7 +187,7 @@ return {
         auto_apply_diff_after_generation = false,
         support_paste_from_clipboard = true,
         minimize_diff = true, -- Whether to remove unchanged lines when applying a code block
-        enable_token_counting = true, -- Whether to enable token counting. Default to true.
+        enable_token_counting = false, -- Disable token counting to fix tmux issues
         enable_cursor_planning_mode = false, -- Whether to enable Cursor Planning Mode. Default to false.
         enable_claude_text_editor_tool_mode = false, -- Whether to enable Claude Text Editor Tool Mode.
       },
