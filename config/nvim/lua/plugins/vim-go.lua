@@ -24,6 +24,7 @@ return {
        endif
       endfunction
       autocmd FileType go nmap <leader>gg :<C-u>call <SID>build_go_files()<CR>
+      autocmd FileType go nmap <leader>gC  <Plug>(go-coverage-toggle)
     ]])
   end,
 }

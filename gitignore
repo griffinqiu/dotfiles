@@ -20,3 +20,4 @@ tmp/**/*
 Thumbs.db
 .aider*
 config/mcphub/servers.json
+.tool-versions
