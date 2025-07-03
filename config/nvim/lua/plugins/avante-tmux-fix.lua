@@ -11,7 +11,7 @@ return {
       -- Track avante's internal state
       local in_resize = false
       local original_cursor_win = nil
-      local avante_filetypes = { "Avante", "AvanteInput", "AvantePromptInput", "AvanteAsk", "AvanteSelectedFiles" }
+      local avante_filetypes = { "Avante", "AvanteInput", "AvanteAsk", "AvanteSelectedFiles" }
 
       -- Check if current window is avante
       local function is_in_avante_window()
@@ -153,11 +153,11 @@ return {
       local function cleanup_duplicate_avante_windows()
         local seen_filetypes = {}
         local windows_to_close = {}
-        
+
         for _, win in ipairs(vim.api.nvim_list_wins()) do
           local buf = vim.api.nvim_win_get_buf(win)
           local ft = vim.api.nvim_buf_get_option(buf, "filetype")
-          
+
           -- Special handling for Select Files panel
           if ft == "AvanteSelectedFiles" then
             if seen_filetypes[ft] then
@@ -168,7 +168,7 @@ return {
             end
           end
         end
-        
+
         -- Close duplicate windows
         for _, win in ipairs(windows_to_close) do
           if vim.api.nvim_win_is_valid(win) then
@@ -188,7 +188,7 @@ return {
           vim.defer_fn(cleanup_duplicate_avante_windows, 100)
         end,
       })
-      
+
       -- Additional cleanup after resize
       vim.api.nvim_create_autocmd("VimResized", {
         group = "AvanteTmuxFix",
@@ -229,4 +229,3 @@ return {
     end,
   },
 }
-

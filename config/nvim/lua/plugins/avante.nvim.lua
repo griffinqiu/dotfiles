@@ -35,10 +35,10 @@ return {
             -- 获取编辑器总高度
             local total_height = vim.o.lines - vim.o.cmdheight - 1 -- 减去命令行和状态栏
 
-            -- 设置ask窗口高度为固定值 (8行)
+            -- 设置ask窗口高度为固定值 (12行)
             if ask_win then
-              vim.api.nvim_win_set_height(ask_win, 8)
-              print("Ask window height reset to 8 lines")
+              vim.api.nvim_win_set_height(ask_win, 12)
+              print("Ask window height reset to 12 lines")
             end
 
             -- 设置sidebar窗口高度为尽可能大
@@ -95,10 +95,10 @@ return {
         -- 获取编辑器总高度
         local total_height = vim.o.lines - vim.o.cmdheight - 1 -- 减去命令行和状态栏
 
-        -- 设置ask窗口高度为固定值 (8行)
+        -- 设置ask窗口高度为固定值 (12行)
         if ask_win then
-          vim.api.nvim_win_set_height(ask_win, 8)
-          print("Ask window height reset to 8 lines")
+          vim.api.nvim_win_set_height(ask_win, 12)
+          print("Ask window height reset to 12 lines")
         end
 
         -- 设置sidebar窗口高度为尽可能大
@@ -259,7 +259,7 @@ return {
         },
         input = {
           provider = "snacks",
-          height = 8,
+          height = 12,
           provider_opts = {
             title = "Avante Input",
             icon = " ",
