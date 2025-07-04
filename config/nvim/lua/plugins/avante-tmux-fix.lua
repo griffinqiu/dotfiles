@@ -67,6 +67,70 @@ return {
         end
       end
 
+      local function reset_avante_windows()
+        local wins = vim.api.nvim_list_wins()
+        local ask_win = nil
+        local sidebar_win = nil
+        local selected_files_win = nil
+        local original_win = vim.api.nvim_get_current_win()
+
+        for _, win in ipairs(wins) do
+          local buf = vim.api.nvim_win_get_buf(win)
+          local buf_name = vim.api.nvim_buf_get_name(buf)
+          local filetype = vim.bo[buf].filetype
+
+          if filetype == "AvanteInput" or buf_name:match("Avante.*Input") then
+            ask_win = win
+          elseif filetype == "Avante" or buf_name:match("Avante") then
+            sidebar_win = win
+          elseif filetype == "AvanteSelectedFiles" or buf_name:match("Avante.*SelectedFiles") then
+            selected_files_win = win
+          end
+        end
+
+        local total_height = vim.o.lines - vim.o.cmdheight - 1
+
+        if ask_win then
+          vim.api.nvim_win_set_height(ask_win, 10)
+
+          -- Ensure the height sticks by setting it again after a short delay
+          vim.defer_fn(function()
+            if vim.api.nvim_win_is_valid(ask_win) then
+              vim.api.nvim_win_set_height(ask_win, 10)
+            end
+          end, 50)
+        end
+
+        if sidebar_win then
+          local available_height = total_height - 16 -- Reserve space for Ask panel (11) + some padding
+          if available_height > 20 then
+            vim.api.nvim_win_set_height(sidebar_win, available_height)
+
+            -- Move cursor to bottom without switching windows
+            local buf = vim.api.nvim_win_get_buf(sidebar_win)
+            local line_count = vim.api.nvim_buf_line_count(buf)
+            vim.api.nvim_win_set_cursor(sidebar_win, { line_count, 0 })
+          end
+        end
+
+        if selected_files_win then
+          local buf = vim.api.nvim_win_get_buf(selected_files_win)
+          local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+          local file_count = 0
+
+          -- Count non-empty lines as file count
+          for _, line in ipairs(lines) do
+            if line:match("%S") then -- Line contains non-whitespace characters
+              file_count = file_count + 1
+            end
+          end
+
+          -- Set height based on file count: minimum 2, maximum 10
+          local height = math.max(2, math.min(10, file_count))
+          vim.api.nvim_win_set_height(selected_files_win, height)
+        end
+      end
+
       local avante_setup_done = false
       local function patch_avante_resize()
         if avante_setup_done then
@@ -92,6 +156,17 @@ return {
       end
 
       vim.api.nvim_create_augroup("AvanteTmuxFix", { clear = true })
+
+      vim.api.nvim_create_user_command("AvanteResetWindows", function()
+        vim.g.avante_manual_reset = true
+        reset_avante_windows()
+      end, {
+        desc = "Reset Avante window heights and move cursor to bottom",
+      })
+
+      vim.keymap.set("n", "<leader>aw", function()
+        vim.cmd("AvanteResetWindows")
+      end, { desc = "Reset Avante windows height" })
 
       vim.api.nvim_create_autocmd({ "VimResized" }, {
         group = "AvanteTmuxFix",
@@ -165,7 +240,29 @@ return {
       vim.api.nvim_create_autocmd("VimResized", {
         group = "AvanteTmuxFix",
         callback = function()
-          vim.defer_fn(cleanup_duplicate_avante_windows, 200)
+          -- Only auto-reset if not manually triggered
+          if vim.g.avante_manual_reset then
+            vim.g.avante_manual_reset = false
+            return
+          end
+
+          vim.defer_fn(function()
+            local wins = vim.api.nvim_list_wins()
+            local has_avante = false
+            for _, win in ipairs(wins) do
+              local buf = vim.api.nvim_win_get_buf(win)
+              local filetype = vim.bo[buf].filetype
+              if filetype == "Avante" or filetype == "AvanteInput" then
+                has_avante = true
+                break
+              end
+            end
+
+            if has_avante then
+              reset_avante_windows()
+            end
+            cleanup_duplicate_avante_windows()
+          end, 200)
         end,
       })
 
