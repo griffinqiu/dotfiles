@@ -1,5 +1,8 @@
 {
     "diagnostics.disable": [
-        "deprecated"
+        "deprecated",
+        "unused-local",
+        "undefined-field",
+        "need-check-nil"
     ]
 }

@@ -139,7 +139,7 @@ return {
     opts = {
       ---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
       provider = "claude",
-      auto_suggestions_provider = "openai",
+      auto_suggestions_provider = "claude",
       cursor_applying_provider = "openai",
       selector = {
         provider = "telescope",

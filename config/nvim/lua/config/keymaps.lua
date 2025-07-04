@@ -32,3 +32,40 @@ map("n", "<leader>ft", "<nop>", { desc = "which_key_ignore" })
 if vim.fn.executable("lazygit") == 1 then
   del("n", "<leader>gg")
 end
+
+-- Diagnostic configuration with LazyVim icons
+local function setup_diagnostics(enabled)
+  vim.diagnostic.config({
+    virtual_text = false,
+    virtual_lines = enabled or false,
+    signs = {
+      text = {
+        [vim.diagnostic.severity.ERROR] = LazyVim.config.icons.diagnostics.Error,
+        [vim.diagnostic.severity.WARN] = LazyVim.config.icons.diagnostics.Warn,
+        [vim.diagnostic.severity.HINT] = LazyVim.config.icons.diagnostics.Hint,
+        [vim.diagnostic.severity.INFO] = LazyVim.config.icons.diagnostics.Info,
+      },
+    },
+    underline = enabled or false,
+    update_in_insert = false,
+    severity_sort = true,
+  })
+end
+
+local diagnostics_active = false
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function()
+    vim.defer_fn(function()
+      setup_diagnostics(diagnostics_active)
+    end, 100)
+  end,
+})
+map("n", "<leader>ud", function()
+  diagnostics_active = not diagnostics_active
+  setup_diagnostics(diagnostics_active)
+  vim.notify(
+    diagnostics_active and "Diagnostics enabled" or "Diagnostics disabled (signs only)",
+    vim.log.levels.INFO,
+    { title = "Diagnostics" }
+  )
+end, { desc = "Toggle diagnostics", noremap = true })
