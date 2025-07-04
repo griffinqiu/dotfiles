@@ -10,8 +10,13 @@ map("c", "<c-b>", "<left>", { desc = "Move cursor left" })
 map("c", "<c-f>", "<right>", { desc = "Move cursor right" })
 map("c", "<c-d>", "<delete>", { desc = "Delete character under the cursor" })
 map("c", "<c-h>", "<bs>", { desc = "Delete character before the cursor" })
-map("n", ",cn", ":let @*=expand('%'). ':' . line('.')<CR>", { desc = "Copy relative file path with line number" })
-map("n", ",cs", ':let @*=expand("%")<CR>', { desc = "Copy relative file path" })
+map(
+  "n",
+  ",cn",
+  ":let @*=expand('%:.'). ':' . line('.')<CR>",
+  { desc = "Copy relative file path with line number (cwd)" }
+)
+map("n", ",cs", ':let @*=expand("%:.")<CR>', { desc = "Copy relative file path (cwd)" })
 map("n", ",cf", ':let @*=expand("%:t")<CR>', { desc = "Copy filename" })
 map("n", ",cl", ':let @*=expand("%:p")<CR>', { desc = "Copy full file path" })
 map("n", "<C-s>", ":update!<CR>", { silent = true, desc = "Save file" })

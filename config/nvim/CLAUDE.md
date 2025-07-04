@@ -31,6 +31,10 @@ This is a **LazyVim-based Neovim configuration** that extends the LazyVim starte
 - Uses StyLua for Lua code formatting (configured in `stylua.toml`)
 - Settings: 2-space indentation, 120 character column width
 
+**Language-specific commands:**
+- Go: `<leader>gg` - Build Go files or run tests (auto-detects test files)
+- Go: `<leader>gC` - Toggle test coverage
+
 ### Custom Configuration Highlights
 
 **Options** (`lua/config/options.lua`):
@@ -49,7 +53,15 @@ This is a **LazyVim-based Neovim configuration** that extends the LazyVim starte
 
 **Plugin Loading**: All plugins in `lua/plugins/` are automatically loaded by LazyVim's spec system. Each file returns a Lua table with plugin specifications.
 
-**Notable Plugins**:
+**LazyVim Extras Enabled** (configured in `lazyvim.json`):
+- **AI**: copilot, copilot-chat
+- **Coding**: luasnip, mini-comment, mini-surround, nvim-cmp, yanky
+- **Editor**: dial, inc-rename, mini-diff, mini-move, neo-tree, refactoring, telescope
+- **Languages**: cmake, docker, git, go, json, markdown, python, ruby, sql, toml, typescript, yaml
+- **Testing**: core test framework
+- **Utilities**: dot, mini-hipatterns, project
+
+**Custom Plugins**:
 - File management: neo-tree, telescope, ctrlsf
 - AI assistance: avante.nvim, claude-code.nvim, copilot, codecompanion
 - Language support: vim-go, vim-rails, LSP configurations

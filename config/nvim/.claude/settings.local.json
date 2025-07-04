@@ -4,7 +4,10 @@
       "Bash(find:*)",
       "Bash(rg:*)",
       "Bash(nvim:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": []
   }

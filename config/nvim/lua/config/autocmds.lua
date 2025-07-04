@@ -30,3 +30,15 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.api.nvim_buf_set_keymap(0, "i", "<c-h>", "<bs>", { noremap = true, silent = true })
   end,
 })
+
+-- Disable spelling and diagnostics for markdown files
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "markdown",
+  callback = function()
+    vim.opt_local.spell = false
+    -- Force disable diagnostics after LSP attaches
+    vim.defer_fn(function()
+      vim.diagnostic.disable(0)
+    end, 100)
+  end,
+})

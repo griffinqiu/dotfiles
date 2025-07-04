@@ -14,6 +14,18 @@ return {
 
       opts.servers = opts.servers or {}
       opts.servers.gopls = {}
+      opts.servers.marksman = {
+        on_attach = function(_, bufnr)
+          vim.diagnostic.disable(bufnr)
+        end,
+        settings = {
+          marksman = {
+            diagnostics = {
+              enabled = false,
+            },
+          },
+        },
+      }
     end,
   },
 }

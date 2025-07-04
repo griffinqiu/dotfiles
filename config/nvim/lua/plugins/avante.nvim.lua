@@ -2,7 +2,7 @@ return {
   {
     "yetone/avante.nvim",
     event = "VeryLazy",
-    version = false, -- Never set this value to "*"! Never!
+    version = false,
     enabled = vim.g.ai_partner == "avante",
     keys = {
       { "<leader>an", ":AvanteChatNew<CR>", mode = "n" },
@@ -10,45 +10,35 @@ return {
       {
         "<leader>ar",
         function()
-          -- 重置avante窗口高度的函数
           local function reset_avante_windows()
-            -- 获取所有窗口
             local wins = vim.api.nvim_list_wins()
             local ask_win = nil
             local sidebar_win = nil
 
-            -- 查找avante相关窗口
             for _, win in ipairs(wins) do
               local buf = vim.api.nvim_win_get_buf(win)
               local buf_name = vim.api.nvim_buf_get_name(buf)
               local filetype = vim.bo[buf].filetype
 
-              -- 检查是否是ask窗口 (通常是输入窗口)
               if filetype == "AvanteInput" or buf_name:match("Avante.*Input") then
                 ask_win = win
-              -- 检查是否是sidebar窗口 (回复窗口)
               elseif filetype == "Avante" or buf_name:match("Avante") then
                 sidebar_win = win
               end
             end
 
-            -- 获取编辑器总高度
-            local total_height = vim.o.lines - vim.o.cmdheight - 1 -- 减去命令行和状态栏
+            local total_height = vim.o.lines - vim.o.cmdheight - 1
 
-            -- 设置ask窗口高度为固定值 (12行)
             if ask_win then
               vim.api.nvim_win_set_height(ask_win, 12)
               print("Ask window height reset to 12 lines")
             end
 
-            -- 设置sidebar窗口高度为尽可能大
             if sidebar_win then
-              -- 计算可用高度 (总高度减去ask窗口高度和一些边距)
-              local available_height = total_height - 10 -- 为ask窗口和边距预留空间
-              if available_height > 20 then -- 确保有最小高度
+              local available_height = total_height - 10
+              if available_height > 20 then
                 vim.api.nvim_win_set_height(sidebar_win, available_height)
 
-                -- 移动光标到回复窗口底部
                 vim.api.nvim_set_current_win(sidebar_win)
                 local buf = vim.api.nvim_win_get_buf(sidebar_win)
                 local line_count = vim.api.nvim_buf_line_count(buf)
@@ -70,45 +60,35 @@ return {
       },
     },
     config = function(_, opts)
-      -- 创建用户命令
       vim.api.nvim_create_user_command("AvanteResetWindows", function()
-        -- 重置avante窗口高度的函数
         local wins = vim.api.nvim_list_wins()
         local ask_win = nil
         local sidebar_win = nil
 
-        -- 查找avante相关窗口
         for _, win in ipairs(wins) do
           local buf = vim.api.nvim_win_get_buf(win)
           local buf_name = vim.api.nvim_buf_get_name(buf)
           local filetype = vim.bo[buf].filetype
 
-          -- 检查是否是ask窗口 (通常是输入窗口)
           if filetype == "AvanteInput" or buf_name:match("Avante.*Input") then
             ask_win = win
-          -- 检查是否是sidebar窗口 (回复窗口)
           elseif filetype == "Avante" or buf_name:match("Avante") then
             sidebar_win = win
           end
         end
 
-        -- 获取编辑器总高度
-        local total_height = vim.o.lines - vim.o.cmdheight - 1 -- 减去命令行和状态栏
+        local total_height = vim.o.lines - vim.o.cmdheight - 1
 
-        -- 设置ask窗口高度为固定值 (12行)
         if ask_win then
           vim.api.nvim_win_set_height(ask_win, 12)
           print("Ask window height reset to 12 lines")
         end
 
-        -- 设置sidebar窗口高度为尽可能大
         if sidebar_win then
-          -- 计算可用高度 (总高度减去ask窗口高度和一些边距)
-          local available_height = total_height - 10 -- 为ask窗口和边距预留空间
-          if available_height > 20 then -- 确保有最小高度
+          local available_height = total_height - 10
+          if available_height > 20 then
             vim.api.nvim_win_set_height(sidebar_win, available_height)
 
-            -- 移动光标到回复窗口底部
             vim.api.nvim_set_current_win(sidebar_win)
             local buf = vim.api.nvim_win_get_buf(sidebar_win)
             local line_count = vim.api.nvim_buf_line_count(buf)
@@ -125,13 +105,10 @@ return {
         desc = "Reset Avante window heights and move cursor to bottom",
       })
 
-      -- 可选：自动在窗口大小改变时重置avante窗口（如tmux调整大小）
       vim.api.nvim_create_autocmd("VimResized", {
         group = vim.api.nvim_create_augroup("AvanteWindowResize", { clear = true }),
         callback = function()
-          -- 延迟执行，确保窗口大小调整完成
           vim.defer_fn(function()
-            -- 检查是否有avante窗口打开
             local wins = vim.api.nvim_list_wins()
             local has_avante = false
             for _, win in ipairs(wins) do
@@ -146,12 +123,18 @@ return {
             if has_avante then
               vim.cmd("AvanteResetWindows")
             end
-          end, 100) -- 延迟100ms
+          end, 100)
         end,
       })
 
-      -- 设置avante插件
       require("avante").setup(opts)
+
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "AvanteInput",
+        callback = function()
+          vim.keymap.set("i", "<M-CR>", "<CR>", { buffer = true, desc = "Insert newline in Avante input" })
+        end,
+      })
     end,
     opts = {
       ---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
@@ -163,14 +146,14 @@ return {
         provider_opts = {},
       },
       web_search_engine = {
-        provider = "tavily", -- tavily, serpapi, searchapi, google or kagi
+        provider = "tavily",
       },
       dual_boost = {
         enabled = true,
         first_provider = "claude",
         second_provider = "openai",
         prompt = "Based on the two reference outputs below, generate a response that incorporates elements from both but reflects your own judgment and unique perspective. Do not provide any explanation, just give the response directly. Reference Output 1: [{{provider1_output}}], Reference Output 2: [{{provider2_output}}]",
-        timeout = 60000, -- Timeout in milliseconds
+        timeout = 60000,
       },
       behaviour = {
         auto_suggestions = false,
@@ -218,8 +201,8 @@ return {
           prev = "[[",
         },
         submit = {
-          normal = "<C-s>",
-          insert = "<C-s>",
+          normal = "<CR>",
+          insert = "<CR>",
         },
         cancel = {
           normal = { "<C-c>", "q" },
@@ -235,26 +218,24 @@ return {
           remove_file = "d",
           add_file = "@",
           close = { "q" },
-          close_from_input = nil, -- e.g., { normal = "<Esc>", insert = "<C-d>" }
+          close_from_input = nil,
         },
         ask = nil,
         toggle = {
           default = "<leader>aa",
           debug = "<leader>ad",
           hint = "<leader>ah",
-          -- suggestion = "<leader>as",
           repomap = "<leader>aR",
         },
       },
       hints = { enabled = true },
       windows = {
-        ---@type "right" | "left" | "top" | "bottom"
-        position = "right", -- the position of the sidebar
-        wrap = true, -- similar to vim.o.wrap
-        width = 50, -- default % based on available width
+        position = "right",
+        wrap = true,
+        width = 50,
         sidebar_header = {
-          enabled = true, -- true, false to enable/disable the header
-          align = "left", -- left, center, right for title
+          enabled = true,
+          align = "left",
           rounded = false,
         },
         input = {
@@ -268,14 +249,14 @@ return {
 
         edit = {
           border = "rounded",
-          start_insert = false, -- Start insert mode when opening the edit window
+          start_insert = false,
         },
         ask = {
-          floating = false, -- Open the 'AvanteAsk' prompt in a floating window
-          start_insert = false, -- Start insert mode when opening the ask window
+          floating = false,
+          start_insert = false,
           border = "rounded",
-          ---@type "ours" | "theirs"
-          focus_on_apply = "ours", -- which diff to focus after applying
+
+          focus_on_apply = "ours",
         },
       },
       highlights = {
@@ -294,15 +275,13 @@ return {
         throttle = 600,
       },
       rag_service = {
-        enabled = false, -- Enables the RAG service
-        host_mount = os.getenv("HOME"), -- Host mount path for the rag service
-        provider = "ollama", -- The provider to use for RAG service (e.g. openai or ollama)
-        llm_model = "llama3:8b", -- The LLM model to use for RAG service
-        embed_model = "nomic-embed-text", -- The embedding model to use for RAG service
-        endpoint = "http://localhost:11434", -- The API endpoint for RAG service
+        enabled = false,
+        host_mount = os.getenv("HOME"),
+        provider = "ollama",
+        llm_model = "llama3:8b",
+        embed_model = "nomic-embed-text",
+        endpoint = "http://localhost:11434",
       },
-      -- other config
-      -- The system_prompt type supports both a string and a function that returns a string. Using a function here allows dynamically updating the prompt with mcphub
       system_prompt = function()
         local hub = require("mcphub").get_hub_instance()
         return hub:get_active_servers_prompt()
@@ -314,37 +293,31 @@ return {
       end,
       disabled_tools = {},
     },
-    -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
     build = "make",
-    -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
     dependencies = {
       "nvim-treesitter/nvim-treesitter",
       "nvim-lua/plenary.nvim",
       "MunifTanjim/nui.nvim",
-      "echasnovski/mini.pick", -- for file_selector provider mini.pick
-      "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
-      "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
-      "ibhagwan/fzf-lua", -- for file_selector provider fzf
-      "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
+      "echasnovski/mini.pick",
+      "nvim-telescope/telescope.nvim",
+      "hrsh7th/nvim-cmp",
+      "ibhagwan/fzf-lua",
+      "nvim-tree/nvim-web-devicons",
       {
-        -- support for image pasting
         "HakonHarnes/img-clip.nvim",
         event = "VeryLazy",
         opts = {
-          -- recommended settings
           default = {
             embed_image_as_base64 = false,
             prompt_for_file_name = false,
             drag_and_drop = {
               insert_mode = true,
             },
-            -- required for Windows users
             use_absolute_path = true,
           },
         },
       },
       {
-        -- Make sure to set this up properly if you have lazy=true
         "MeanderingProgrammer/render-markdown.nvim",
         opts = {
           file_types = { "markdown", "Avante" },
