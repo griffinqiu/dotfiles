@@ -82,7 +82,6 @@ return {
         },
       })
 
-      -- 完全禁用 diff 功能
       local function disable_diff()
         package.loaded["claudecode.diff"] = {
           setup = function() end,
@@ -95,7 +94,6 @@ return {
       disable_diff()
     end,
     keys = {
-      { "<leader>a", nil, desc = "AI/Claude Code" },
       { "<leader>aa", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
       { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude" },
       { "<leader>ac", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
@@ -107,7 +105,7 @@ return {
           vim.cmd("ClaudeCodeSend")
         end,
         mode = "n",
-        desc = "Send current line to Claude",
+        desc = "Send current line",
       },
       { "<leader>af", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add current buffer" },
       {
