@@ -5,24 +5,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Code Style and Quality Standards
 
 ### Core Principles
+
 - Write clean, comprehensive, and rigorous code logic
 - Use reasonable and descriptive variable naming
 - Apply appropriate function decomposition without over-engineering
 - Avoid unnecessary comments for self-evident code
 
 ### Function Decomposition Guidelines
+
 - Extract functions when logic is complex, reusable, or conceptually distinct
 - **Avoid over-decomposition**: Do not create single-use functions for simple 2-3 line logic blocks
 - Functions should have clear, single responsibilities
 - Consider reusability and maintainability when deciding to extract functions
 
 ### Variable Naming
+
 - Use descriptive names that clearly indicate purpose and content
 - Prefer explicit names over abbreviated ones (`userAccount` vs `usrAcc`)
 - Use consistent naming conventions throughout the codebase
 - Boolean variables should be clearly identifiable (`isActive`, `hasPermission`, `canDelete`)
 
 ### Code Comments
+
 - **Do not add comments for obvious code** - let the code speak for itself
 - Only add comments for:
   - Complex business logic that requires context
@@ -30,8 +34,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - External API integrations or unusual patterns
   - TODO items or known limitations
 - Prefer self-documenting code over explanatory comments
+- Please use English for comments to ensure clarity and consistency across the codebase
 
 ### Code Organization
+
 - Maintain logical code structure and flow
 - Group related functionality together
 - Use consistent indentation and formatting
@@ -39,7 +45,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Ensure proper error handling without over-engineering
 
 ### Quality Checklist
+
 Before completing any code changes, ensure:
+
 - [ ] Variable names clearly express their purpose
 - [ ] Functions have single, clear responsibilities
 - [ ] No unnecessary function extractions for simple logic
