@@ -22,3 +22,93 @@ Thumbs.db
 config/mcphub/servers.json
 .tool-versions
 .claude
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+.coverage.*
+*.cover
+.hypothesis/
+
+# Temporary files
+tmp/
+temp/
+/tmp/
+*.tmp
+*.temp
+
+# OSS temporary downloads
+oss_*
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# Documentation
+docs/_build/
+site/
+
+# Package management
+pip-log.txt
+pip-delete-this-directory.txt
+
+# UV lock file (keep pyproject.toml but ignore lock)
+uv.lock
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Flask
+instance/
+.webassets-cache
+
+# Secrets
+*.pem
+*.key
+*.crt
+*.p12

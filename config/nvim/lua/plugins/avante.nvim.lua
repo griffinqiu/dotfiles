@@ -22,7 +22,7 @@ return {
       ---@alias Provider "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot" | string
       provider = "claude",
       auto_suggestions_provider = "claude",
-      cursor_applying_provider = "openai",
+      cursor_applying_provider = "aihubmix",
       selector = {
         provider = "telescope",
         provider_opts = {},
@@ -37,15 +37,21 @@ return {
         prompt = "Based on the two reference outputs below, generate a response that incorporates elements from both but reflects your own judgment and unique perspective. Do not provide any explanation, just give the response directly. Reference Output 1: [{{provider1_output}}], Reference Output 2: [{{provider2_output}}]",
         timeout = 60000,
       },
+      providers = {
+        aihubmix = {
+          model = "aihubmix-Llama-3-3-70B-Instruct",
+        },
+      },
       behaviour = {
         auto_suggestions = false,
         auto_set_highlight_group = true,
         auto_set_keymaps = true,
-        auto_apply_diff_after_generation = false,
+        auto_apply_diff_after_generation = true,
         support_paste_from_clipboard = true,
         minimize_diff = true,
         enable_token_counting = true,
-        enable_cursor_planning_mode = false,
+        enable_cursor_planning_mode = true,
+        enable_cursor_applying_mode = true,
         enable_claude_text_editor_tool_mode = false,
       },
       prompt_logger = {

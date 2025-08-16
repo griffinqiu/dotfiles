@@ -1,0 +1,59 @@
+#!/bin/bash
+
+set -e
+
+if [ $# -eq 0 ]; then
+  echo "Usage: $0 <tag>"
+  echo "Example: $0 feature-branch"
+  exit 1
+fi
+
+TAG="$1"
+
+# Get the git root directory
+GIT_ROOT=$(git rev-parse --show-toplevel)
+
+# Get the current project name (basename of git root)
+PROJECT_NAME=$(basename "$GIT_ROOT")
+
+# Get the parent directory of git root
+PARENT_DIR=$(dirname "$GIT_ROOT")
+
+# Create the new worktree path: parent_dir/project_name-tag
+WORKTREE_PATH="$PARENT_DIR/$PROJECT_NAME-$TAG"
+
+# Window name is tag
+WINDOW_NAME="$TAG"
+
+# Check if tmux window already exists
+if tmux has-session 2>/dev/null && tmux list-windows -F "#{window_name}" | grep -q "^$WINDOW_NAME$"; then
+  echo "Tmux window '$WINDOW_NAME' already exists. Switching to it..."
+  tmux select-window -t "$WINDOW_NAME"
+  echo "Switched to existing window '$WINDOW_NAME'"
+  exit 0
+fi
+
+# Check if worktree directory already exists
+if [ -d "$WORKTREE_PATH" ]; then
+  echo "Directory $WORKTREE_PATH already exists. Skipping git worktree creation..."
+else
+  # Create git worktree
+  echo "Creating git worktree at $WORKTREE_PATH..."
+  git worktree add "$WORKTREE_PATH"
+fi
+
+# Create new tmux window with the specified name and root directory
+echo "Creating tmux window '$WINDOW_NAME' with root directory '$WORKTREE_PATH'..."
+tmux new-window -n "$WINDOW_NAME" -c "$WORKTREE_PATH"
+
+# Split the window vertically and set up nvim in left pane
+tmux send-keys -t "$WINDOW_NAME" "nvim" Enter
+
+# Split horizontally to create claudelb pane
+tmux split-window -h -t "$WINDOW_NAME" -c "$WORKTREE_PATH"
+tmux send-keys -t "$WINDOW_NAME" "claudelb" Enter
+
+# Switch to the newly created window
+tmux select-window -t "$WINDOW_NAME"
+
+echo "Successfully created/configured tmux window '$WINDOW_NAME'"
