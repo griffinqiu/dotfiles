@@ -20,6 +20,14 @@ This is a **LazyVim-based Neovim configuration** that extends the LazyVim starte
 - Multiple AI providers supported: Avante.nvim, Claude Code, Copilot, CodeCompanion
 - Avante uses Claude Sonnet 4 by default with custom endpoint configurations
 
+**MCPHub Integration**:
+- MCPHub provides Model Context Protocol (MCP) server integration for Avante
+- Extends AI capabilities with custom tools and server resources
+- Auto-approves MCP tool calls and allows LLMs to start/stop servers automatically
+- Configuration in `~/.config/mcphub/servers.json`
+- Command: `:MCPHub` to access interface
+- Port: 37373 (default), configurable in plugin settings
+
 ### Development Commands
 
 **Makefile targets:**
@@ -30,10 +38,20 @@ This is a **LazyVim-based Neovim configuration** that extends the LazyVim starte
 **Code formatting:**
 - Uses StyLua for Lua code formatting (configured in `stylua.toml`)
 - Settings: 2-space indentation, 120 character column width
+- Format command: `stylua .` (run from repository root)
 
 **Language-specific commands:**
 - Go: `<leader>gg` - Build Go files or run tests (auto-detects test files)
 - Go: `<leader>gC` - Toggle test coverage
+
+**AI/Avante commands:**
+- `<leader>an` - Start new Avante chat session
+- `<leader>ac` - Clear Avante chat
+- `<leader>aa` - Toggle Avante sidebar
+- `<leader>ad` - Toggle Avante debug mode
+- `<leader>ah` - Toggle Avante hints
+- `<leader>aR` - Toggle Avante repomap
+- In Avante input: `<M-CR>` - Insert newline (insert mode)
 
 ### Custom Configuration Highlights
 
@@ -67,7 +85,11 @@ This is a **LazyVim-based Neovim configuration** that extends the LazyVim starte
 - Language support: vim-go, vim-rails, LSP configurations
 - UI enhancements: bufferline, noice, colorscheme customizations
 
-**Plugin States**: Many plugins can be enabled/disabled based on global variables (e.g., `vim.g.ai_partner`)
+**Plugin States**: Many plugins can be enabled/disabled based on global variables:
+- `vim.g.ai_partner` - Controls which AI provider is active (default: "avante")
+- `vim.g.snacks_animate` - Disables snacks animations (set to false)
+- `vim.g.minipairs_disable` - Disables mini.pairs plugin (set to true)
+- `vim.env.USER` - Sets user name to "Griffin" for personalization
 
 ### Directory Structure
 ```
@@ -91,3 +113,12 @@ When working with this configuration:
 3. **Core Changes**: Modify files in `lua/config/` for fundamental Neovim behavior
 4. **Code Style**: Run StyLua for formatting consistency
 5. **AI Partner Switching**: Set `vim.g.ai_partner` to switch between AI providers
+
+### Advanced AI Configuration
+
+**Avante System Prompts**: The Avante configuration uses dynamic system prompts via MCPHub integration:
+- System prompt function calls `require("mcphub").get_hub_instance():get_active_servers_prompt()`
+- Custom tools are provided through `require("mcphub.extensions.avante").mcp_tool()`
+- This allows context-aware AI assistance based on active MCP servers
+
+**Multi-Provider Setup**: Avante supports "dual boost" mode combining Claude and OpenAI responses for enhanced output quality.
