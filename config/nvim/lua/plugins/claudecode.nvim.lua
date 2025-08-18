@@ -24,9 +24,9 @@ return {
             setup = function(config) end,
 
             open = function(cmd, env, config)
-              -- Check if there's already a pane to the right (same logic as simple_toggle)
-              local pane_count = vim.fn.system("tmux list-panes | wc -l"):gsub("%s+", "")
-              if tonumber(pane_count) <= 1 then
+              -- Check if there's already a pane running claude command
+              local claude_pane = vim.fn.system("tmux list-panes -F '#{pane_start_command}' | grep 'claude'"):gsub("%s+", "")
+              if claude_pane == "" then
                 local tmux_cmd = string.format(
                   "tmux split-window -h -p %d -c '%s' '%s'",
                   math.floor(config.split_width_percentage * 100),
@@ -38,15 +38,18 @@ return {
             end,
 
             close = function()
-              -- Close the rightmost tmux pane
-              vim.fn.system("tmux kill-pane -t '{right-of}'")
+              -- Close the pane running claude command
+              local claude_pane_id = vim.fn.system("tmux list-panes -F '#{pane_id}:#{pane_start_command}' | grep 'claude' | cut -d: -f1"):gsub("%s+", "")
+              if claude_pane_id ~= "" then
+                vim.fn.system("tmux kill-pane -t '" .. claude_pane_id .. "'")
+              end
             end,
 
             simple_toggle = function(cmd, env, config)
-              -- Check if there's already a pane to the right
-              local pane_count = vim.fn.system("tmux list-panes | wc -l"):gsub("%s+", "")
-              if tonumber(pane_count) > 1 then
-                vim.fn.system("tmux kill-pane -t '{right-of}'")
+              -- Check if there's already a pane running claude command
+              local claude_pane_id = vim.fn.system("tmux list-panes -F '#{pane_id}:#{pane_start_command}' | grep 'claude' | cut -d: -f1"):gsub("%s+", "")
+              if claude_pane_id ~= "" then
+                vim.fn.system("tmux kill-pane -t '" .. claude_pane_id .. "'")
               else
                 local tmux_cmd = string.format(
                   "tmux split-window -h -p %d -c '%s' '%s'",
@@ -59,8 +62,13 @@ return {
             end,
 
             focus_toggle = function()
-              -- Focus the rightmost pane or return to the left one
-              vim.fn.system("tmux select-pane -t '{right-of}' || tmux select-pane -t '{left-of}'")
+              -- Focus the pane running claude command or return to the previous pane
+              local claude_pane_id = vim.fn.system("tmux list-panes -F '#{pane_id}:#{pane_start_command}' | grep 'claude' | cut -d: -f1"):gsub("%s+", "")
+              if claude_pane_id ~= "" then
+                vim.fn.system("tmux select-pane -t '" .. claude_pane_id .. "'")
+              else
+                vim.fn.system("tmux select-pane -t '{last}'")
+              end
             end,
 
             get_active_bufnr = function()
