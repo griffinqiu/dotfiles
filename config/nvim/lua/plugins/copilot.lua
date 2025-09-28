@@ -1,19 +1,18 @@
 return {
   {
-    "copilot-cmp",
-    enabled = false,
-  },
-  {
-    "github/copilot.vim",
-    init = function()
-      vim.g.copilot_no_tab_map = true
-      vim.g.copilot_filetypes = {
-        ["TelescopePrompt"] = false,
-        ["DressingInput"] = false,
-      }
+    "folke/sidekick.nvim",
+    opts = function()
+      -- Accept inline suggestions or next edits
+      LazyVim.cmp.actions.ai_nes = function()
+        local Nes = require("sidekick.nes")
+        if Nes.have() and (Nes.jump() or Nes.apply()) then
+          return true
+        end
+      end
     end,
-    config = function()
-      vim.cmd([[imap <silent><script><expr> <C-j> copilot#Accept("\<CR>")]])
-    end,
+    keys = {
+      -- nes is also useful in normal mode
+      { "<c-j>", LazyVim.cmp.map({ "ai_nes" }, "<c-j>"), mode = { "n" }, expr = true },
+    },
   },
 }

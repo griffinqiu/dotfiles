@@ -36,6 +36,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Prefer self-documenting code over explanatory comments
 - Please use English for comments to ensure clarity and consistency across the codebase
 
+### Self-Documenting Code Principle
+
+**Clean code should be self-documenting through meaningful names and clear intent.** Magic strings and numbers should be extracted as constants with semantic names. Functions should have single responsibilities with names that clearly express their purpose. When code is written this way, the code itself becomes the documentation - no additional comments are needed to understand the logic and intent. This makes code more maintainable, testable, and readable.
+
+Key aspects:
+- Extract magic strings/numbers to named constants
+- Use function names that read like natural language
+- Structure code to express intent clearly
+- Eliminate the need for explanatory comments through clarity
+
 ### Code Organization
 
 - Maintain logical code structure and flow

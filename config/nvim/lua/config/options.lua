@@ -9,6 +9,7 @@ vim.g.snacks_animate = false
 vim.g.minipairs_disable = true
 vim.env.USER = "Griffin"
 vim.g.root_spec = { ".git", "lsp", "cwd" }
+vim.g.copilot_nes = true
 
 local opt = vim.opt
 opt.background = "dark"

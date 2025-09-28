@@ -9,6 +9,11 @@ return {
 
       opts.servers = opts.servers or {}
       opts.servers.gopls = {}
+
+      opts.setup = opts.setup or {}
+      opts.setup.clangd = function(_, opts)
+        opts.capabilities.offsetEncoding = { "utf-16" }
+      end
     end,
   },
 }

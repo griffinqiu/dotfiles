@@ -1,8 +1,11 @@
 {
-    "diagnostics.disable": [
-        "deprecated",
-        "unused-local",
-        "undefined-field",
-        "need-check-nil"
-    ]
+  "diagnostics.disable": [
+    "deprecated",
+    "unused-local",
+    "undefined-field",
+    "need-check-nil",
+    "missing-fields",
+    "undefined-global",
+        "redefined-local"
+  ]
 }

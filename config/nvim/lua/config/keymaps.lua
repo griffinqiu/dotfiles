@@ -69,3 +69,9 @@ map("n", "<leader>ud", function()
     { title = "Diagnostics" }
   )
 end, { desc = "Toggle diagnostics", noremap = true })
+
+map("i", "<c-j>", function()
+  if not vim.lsp.inline_completion.get() then
+    return "<c-j>"
+  end
+end, { expr = true, desc = "Accept the current inline completion" })
