@@ -8,4 +8,18 @@ return {
   -- space case (cr<space>)
   -- Title Case (crt)
   { "tpope/vim-abolish" },
+  {
+    "Mr-LLLLL/interestingwords.nvim",
+    opts = {
+      colors = { "#ff899d", "#9fe044", "#faba4a", "#8db0ff", "#c7a9ff", "#a4daff", "#c0caf5" },
+      search_count = true,
+      navigation = true,
+      scroll_center = true,
+      search_key = "#",
+      cancel_search_key = "<leader>M",
+      color_key = "<leader>#",
+      cancel_color_key = "<leader><esc>",
+      select_mode = "random",
+    },
+  },
 }

@@ -81,9 +81,6 @@ temp/
 *.tmp
 *.temp
 
-# OSS temporary downloads
-oss_*
-
 # Jupyter Notebooks
 .ipynb_checkpoints
 
