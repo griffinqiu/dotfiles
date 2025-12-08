@@ -27,7 +27,7 @@ gui:
       - "#c0caf5"
 customCommands:
   - key: <c-a>
-    description: Pick AI commit
+    description: Pick AI commits
     command: |
       aichat "Please suggest 10 commit messages, given the following diff:
 
