@@ -13,7 +13,7 @@ return {
 
       return {
         nes = {
-          enabled = true,
+          enabled = false,
         },
         cli = {
           prompts = {
@@ -57,6 +57,20 @@ return {
         "<cmd>Sidekick nes update<cr>",
         mode = { "n" },
         desc = "Sidekick: Trigger NES suggestions",
+      },
+      {
+        "<leader>ue",
+        function()
+          vim.cmd("Sidekick nes toggle")
+          vim.defer_fn(function()
+            local nes_enabled = require("sidekick.nes").enabled
+            local message = nes_enabled and "Enabled Sidekick NES" or "Disabled Sidekick NES"
+            local level = nes_enabled and vim.log.levels.INFO or vim.log.levels.WARN
+            vim.notify(message, level, { title = "Sidekick NES" })
+          end, 100)
+        end,
+        mode = { "n" },
+        desc = "Toggle NES",
       },
     },
   },
