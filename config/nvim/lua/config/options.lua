@@ -4,7 +4,7 @@
 vim.api.nvim_set_keymap("n", "<space>", "<nop>", {})
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
-vim.g.ai_partner = "claudecode"
+vim.g.ai_partner = "sidekick"
 vim.g.snacks_animate = false
 vim.g.minipairs_disable = true
 vim.env.USER = "Griffin"

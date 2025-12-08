@@ -1,0 +1,63 @@
+return {
+  {
+    "folke/sidekick.nvim",
+    enabled = vim.g.ai_partner == "sidekick",
+    opts = function()
+      -- Accept inline suggestions or next edits
+      LazyVim.cmp.actions.sidekick_nes = function()
+        local Nes = require("sidekick.nes")
+        if Nes.have() and (Nes.jump() or Nes.apply()) then
+          return true
+        end
+      end
+
+      return {
+        nes = {
+          enabled = true,
+        },
+        cli = {
+          prompts = {
+            -- 代码审查相关
+            changes = "你能帮我审查一下我的代码变更吗？",
+            review = "请审查 {file} 中可能存在的问题或改进建议。",
+
+            -- 诊断和修复
+            diagnostics = "请帮我修复 {file} 中的诊断问题：\n{diagnostics}",
+            diagnostics_all = "请帮我修复所有诊断问题：\n{diagnostics_all}",
+            fix = "请帮我修复{this}。",
+
+            -- 文档和解释
+            document = "为{function|line}添加详细的文档注释。",
+            explain = "请解释{this}的作用和实现原理。",
+
+            -- 优化和测试
+            optimize = "{this}有哪些可以优化的地方？请给出具体建议。",
+            tests = "请为{this}编写完整的单元测试。",
+
+            -- 代码重构
+            refactor = "请重构{this}，使代码更加清晰和可维护。",
+            modernize = "将{this}重写为现代化的代码风格。",
+
+            -- 代码生成
+            implement = "请根据以下需求实现功能：{this}",
+            complete = "请完成这段代码的实现：{this}",
+
+            -- 代码分析
+            complexity = "分析{this}的时间和空间复杂度。",
+            security = "检查{this}中是否存在安全漏洞。",
+          },
+        },
+      }
+    end,
+    keys = {
+      -- nes is also useful in normal mode
+      { "<c-j>", LazyVim.cmp.map({ "sidekick_nes" }, "<c-j>"), mode = { "n" }, expr = true },
+      {
+        "<leader>ae",
+        "<cmd>Sidekick nes update<cr>",
+        mode = { "n" },
+        desc = "Sidekick: Trigger NES suggestions",
+      },
+    },
+  },
+}

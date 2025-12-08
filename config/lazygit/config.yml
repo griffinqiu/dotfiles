@@ -1,4 +1,6 @@
 gui:
+  scrollHeight: 10
+  scrollOffBehavior: jump
   nerdFontsVersion: "3"
   theme:
     activeBorderColor:
