@@ -188,8 +188,8 @@ nnoremap E $
 nnoremap gV `[v`]
 
 " Copy filename to clipboard
-nmap ,cn :let @*=expand("%"). ':' . line(".")<CR>
-nmap ,cs :let @*=expand("%")<CR>
+nmap ,cn :let @*=expand("%:."). ':' . line(".")<CR>
+nmap ,cs :let @*=expand("%:.")<CR>
 nmap ,cf :let @*=expand("%:t")<CR>
 nmap ,cl :let @*=expand("%:p")<CR>
 
@@ -198,8 +198,8 @@ nnoremap [l :lprevious<CR>
 nnoremap ]l :lnext<CR>
 nnoremap [t :tabprevious<CR>
 nnoremap ]t :tabnext<CR>
-nnoremap [c :cprevious<CR>
-nnoremap ]c :cnext<CR>
+nnoremap [q :cprevious<CR>
+nnoremap ]q :cnext<CR>
 
 noremap <silent> <C-s> :update!<CR>
 vnoremap <silent> <C-s> <C-c>:update!<CR>
@@ -216,8 +216,6 @@ nmap <leader><c-l> <c-l>
 
 nnoremap t<C-]> :tabnew %<CR>g<C-]>
 nnoremap <leader>ct :silent ! ctags -R --languages=ruby --exclude=.git --exclude=log -f tags<cr>
-
-" inoremap <C-e> <C-k>
 " map <C-j> <C-w>j
 " map <C-k> <C-w>k
 " map <C-h> <C-w>h
@@ -229,8 +227,6 @@ noremap <up> :lprevious<CR>
 noremap <down>  :lnext<CR>
 
 imap <C-]> <C-x><C-]>
-" inoremap <C-g> <C-x><C-o>
-" imap <C-l> <C-x><c-l>
 
 " Convert all tabs to spaces
 " map <leader>ct :retab<cr>
@@ -250,5 +246,13 @@ map <leader>s? z=
 
 " Remove the Windows ^M - when the encodings gets messed up
 noremap <leader><leader>m mmHmt:%s/<C-V><cr>//ge<cr>'tzt'm
+
+" Command-mode navigation (Emacs-style, aligned with nvim)
+cnoremap <C-a> <Home>
+cnoremap <C-e> <End>
+cnoremap <C-b> <Left>
+cnoremap <C-f> <Right>
+cnoremap <C-d> <Delete>
+cnoremap <C-h> <BS>
 
 " }}}

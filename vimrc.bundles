@@ -34,7 +34,7 @@ Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-surround'
   let g:surround_no_insert_mappings = 1
   imap <C-d> <Plug>Isurround
-  imap <C-e> <Plug>ISurround
+  imap <C-y> <Plug>ISurround
 Plug 'tpope/vim-abolish'
   " MixedCase (crm)
   " camelCase (crc)
@@ -55,10 +55,10 @@ Plug 'mhinz/vim-signify'
   xmap ac <plug>(signify-motion-outer-visual)
   " nnoremap <leader>gt :SignifyToggle<CR>
   " nnoremap <leader>gh :SignifyToggleHighlight<CR>
-  nmap ]g <plug>(signify-next-hunk)
-  nmap [g <plug>(signify-prev-hunk)
-  nmap ]G 9999]g
-  nmap [G 9999[g
+  nmap ]h <plug>(signify-next-hunk)
+  nmap [h <plug>(signify-prev-hunk)
+  nmap ]H 9999]h
+  nmap [H 9999[h
   " nnoremap <leader>gr :SignifyRefresh<CR>
 Plug 'tpope/vim-fugitive'
   nnoremap <Leader>gb :Git blame<CR>
@@ -184,8 +184,8 @@ Plug 'ludovicchabant/vim-gutentags'
   let g:gutentags_ctags_exclude_wildignore = 1
 
 Plug 'Valloric/ListToggle'
-  let g:lt_location_list_toggle_map = '<leader>l'
-  let g:lt_quickfix_list_toggle_map = '<leader>q'
+  let g:lt_location_list_toggle_map = '<leader>tl'
+  let g:lt_quickfix_list_toggle_map = '<leader>tq'
 " }}}
 
 " Rust, Golang {{{
@@ -240,7 +240,7 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
   autocmd FileType go nmap <leader>gO :GoImport<SPACE>
   autocmd FileType go nmap <leader>gd  :GoDeclsDir<cr>
   autocmd FileType go nmap <Leader>gh <Plug>(go-info)
-  autocmd FileType go nmap <leader>gc  <Plug>(go-coverage-toggle)
+  autocmd FileType go nmap <leader>gC  <Plug>(go-coverage-toggle)
   " " autocmd FileType go nmap <leader>gi  <Plug>(go-implements)
   " " autocmd FileType go nmap <Leader>gs <Plug>(go-sameids-toggle)
   " " autocmd FileType go nmap <leader>gb  <Plug>(go-build)
@@ -320,12 +320,12 @@ Plug 'mattn/emmet-vim'
   " let g:user_emmet_mode='i'
   let g:user_emmet_mode='i'
   autocmd FileType html,css,less,sass,eruby,erb,javascript,jsx,vue EmmetInstall
-  let g:user_emmet_leader_key='<c-e>'
-  let g:user_emmet_expandabbr_key='<c-e><c-e>'
-  let g:user_emmet_expandword_key = '<C-e>v'
-  let g:user_emmet_update_tag = '<C-e>u'
-  let g:user_emmet_next_key='<C-e>n'
-  let g:user_emmet_prev_key='<C-e>p'
+  let g:user_emmet_leader_key='<c-y>'
+  let g:user_emmet_expandabbr_key='<c-y><c-y>'
+  let g:user_emmet_expandword_key = '<C-y>v'
+  let g:user_emmet_update_tag = '<C-y>u'
+  let g:user_emmet_next_key='<C-y>n'
+  let g:user_emmet_prev_key='<C-y>p'
 
   let g:user_emmet_settings = {
   \  'html' : {
