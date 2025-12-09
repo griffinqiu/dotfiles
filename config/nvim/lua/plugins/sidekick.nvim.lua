@@ -8,6 +8,16 @@ return {
           enabled = false,
         },
         cli = {
+          mux = {
+            enabled = true,
+          },
+          win = {
+            keys = {
+              buffers = { "<m-b>", "buffers", mode = "nt", desc = "open buffer picker" },
+              files = { "<m-f>", "files", mode = "nt", desc = "open file picker" },
+              prompt = { "<m-p>", "prompt", mode = "t", desc = "insert prompt or context" },
+            },
+          },
           prompts = {
             -- 代码审查相关
             changes = "你能帮我审查一下我的代码变更吗？",
@@ -43,7 +53,7 @@ return {
     end,
     keys = {
       {
-        "<c-j>",
+        "<tab>",
         function()
           if not require("sidekick").nes_jump_or_apply() then
             local nes = require("sidekick.nes")
@@ -69,7 +79,7 @@ return {
           end, 100)
         end,
         mode = { "n" },
-        desc = "Toggle NES",
+        desc = "Toggle Sidekick NES",
       },
     },
   },
