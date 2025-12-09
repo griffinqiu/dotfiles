@@ -8,9 +8,9 @@ return {
           enabled = false,
         },
         cli = {
-          mux = {
-            enabled = true,
-          },
+          -- mux = {
+          --   enabled = true,
+          -- },
           win = {
             keys = {
               buffers = { "<m-b>", "buffers", mode = "nt", desc = "open buffer picker" },
