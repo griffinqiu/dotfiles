@@ -3,14 +3,6 @@ return {
     "folke/sidekick.nvim",
     enabled = vim.g.ai_partner == "sidekick",
     opts = function()
-      -- Accept inline suggestions or next edits
-      LazyVim.cmp.actions.sidekick_nes = function()
-        local Nes = require("sidekick.nes")
-        if Nes.have() and (Nes.jump() or Nes.apply()) then
-          return true
-        end
-      end
-
       return {
         nes = {
           enabled = false,
@@ -50,13 +42,20 @@ return {
       }
     end,
     keys = {
-      -- nes is also useful in normal mode
-      { "<c-j>", LazyVim.cmp.map({ "sidekick_nes" }, "<c-j>"), mode = { "n" }, expr = true },
       {
-        "<leader>ae",
-        "<cmd>Sidekick nes update<cr>",
-        mode = { "n" },
-        desc = "Sidekick: Trigger NES suggestions",
+        "<c-j>",
+        function()
+          if not require("sidekick").nes_jump_or_apply() then
+            local nes = require("sidekick.nes")
+            local message = nes.enabled and "Updating suggestions" or "Enabling NES and updating suggestions"
+            vim.notify(message, vim.log.levels.INFO, { title = "Sidekick NES" })
+            if not nes.enabled then
+              vim.cmd("Sidekick nes enable")
+            end
+            vim.cmd("Sidekick nes update")
+          end
+        end,
+        desc = "Goto/Apply Next Edit Suggestion or Update",
       },
       {
         "<leader>ue",
