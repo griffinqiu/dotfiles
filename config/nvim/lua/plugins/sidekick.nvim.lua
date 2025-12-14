@@ -9,13 +9,18 @@ return {
         },
         cli = {
           -- mux = {
+          --   backend = "tmux",
           --   enabled = true,
+          --   create = "terminal",
           -- },
           win = {
             keys = {
               buffers = { "<m-b>", "buffers", mode = "nt", desc = "open buffer picker" },
               files = { "<m-f>", "files", mode = "nt", desc = "open file picker" },
               prompt = { "<m-p>", "prompt", mode = "t", desc = "insert prompt or context" },
+              stopinsert = { "<c-s>", "stopinsert", mode = "t", desc = "enter normal mode" },
+              back_to_insert = { "<c-s>", "startinsert", mode = "n", desc = "enter insert mode" },
+              hide_n = false,
             },
           },
           prompts = {
