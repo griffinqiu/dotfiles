@@ -58,7 +58,7 @@ return {
     end,
     keys = {
       {
-        "<tab>",
+        "<c-j>",
         function()
           if not require("sidekick").nes_jump_or_apply() then
             local nes = require("sidekick.nes")
