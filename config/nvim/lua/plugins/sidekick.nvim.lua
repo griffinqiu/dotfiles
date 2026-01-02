@@ -60,17 +60,19 @@ return {
       {
         "<c-j>",
         function()
-          if not require("sidekick").nes_jump_or_apply() then
-            local nes = require("sidekick.nes")
-            local message = nes.enabled and "Updating suggestions" or "Enabling NES and updating suggestions"
-            vim.notify(message, vim.log.levels.INFO, { title = "Sidekick NES" })
-            if not nes.enabled then
-              vim.cmd("Sidekick nes enable")
+          local nes = require("sidekick.nes")
+          if nes.enabled then
+            if not require("sidekick").nes_jump_or_apply() then
+              vim.notify("Updating suggestions", vim.log.levels.INFO, { title = "Sidekick NES" })
+              vim.cmd("Sidekick nes update")
             end
-            vim.cmd("Sidekick nes update")
+          else
+            -- NES 未开启，执行默认的 <C-j> 行为
+            local key = vim.api.nvim_replace_termcodes("<C-j>", true, false, true)
+            vim.api.nvim_feedkeys(key, "n", false)
           end
         end,
-        desc = "Goto/Apply Next Edit Suggestion or Update",
+        desc = "Goto/Apply Next Edit Suggestion or Update (when NES enabled)",
       },
       {
         "<leader>ue",
