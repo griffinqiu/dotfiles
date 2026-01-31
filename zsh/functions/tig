@@ -1,4 +1,4 @@
-tig () {
+gitlog () {
 	if [ -n "$1" ]
 	then
 		lazygit log -f "$1"
