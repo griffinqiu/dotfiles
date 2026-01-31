@@ -36,7 +36,6 @@ _load_settings "$HOME/.zsh/configs"
 
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
-eval "$(gh copilot alias -- zsh)"
 
 
 # fzf tokyonight_storm
