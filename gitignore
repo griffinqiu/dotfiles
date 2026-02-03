@@ -109,3 +109,4 @@ instance/
 *.key
 *.crt
 *.p12
+claude/settings.json
