@@ -1,7 +1,8 @@
-# ensure homebrew and dotfiles bin directory is loaded first
-PATH="$HOME/.bin:/opt/homebrew/bin:/usr/local/sbin:$PATH"
-
-# mkdir .git/safe in the root of repositories you trust
+PATH="/usr/local/sbin:$PATH"
+PATH="$HOME/.bun/bin:$PATH"
+PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
+PATH="/opt/homebrew/bin:$PATH"
+PATH="$HOME/.bin:$PATH"
+PATH="$HOME/.local/bin:$PATH"
 PATH=".git/safe/../../bin:$PATH"
-
 export -U PATH

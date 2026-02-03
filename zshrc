@@ -71,14 +71,3 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
 
 [[ -f ~/.local/bin/env ]] && source ~/.local/bin/env
 export XDG_CONFIG_HOME="$HOME/.config"
-
-export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
-# Created by `pipx` on 2025-03-14 06:26:33
-export PATH="$PATH:/Users/griffin/.local/bin"
-
-# bun completions
-[ -s "/Users/griffin/.bun/_bun" ] && source "/Users/griffin/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
