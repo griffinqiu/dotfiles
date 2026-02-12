@@ -12,9 +12,9 @@ return {
       table.insert(opts.options.disabled_filetypes.statusline, "Avante")
       table.insert(opts.options.disabled_filetypes.statusline, "AvanteSelectedFiles")
 
-      -- opts.sections = opts.sections or {}
-      -- opts.sections.lualine_x = opts.sections.lualine_x or {}
-      -- table.insert(opts.sections.lualine_x, { require("mcphub.extensions.lualine") })
+      opts.sections = opts.sections or {}
+      opts.sections.lualine_a = {}
+
       return opts
     end,
   },
