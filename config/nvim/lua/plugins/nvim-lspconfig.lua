@@ -9,6 +9,15 @@ return {
 
       opts.servers = opts.servers or {}
       opts.servers.gopls = {}
+      opts.servers.lua_ls = {
+        settings = {
+          Lua = {
+            diagnostics = {
+              globals = { "vim" },
+            },
+          },
+        },
+      }
 
       opts.setup = opts.setup or {}
       opts.setup.clangd = function(_, opts)

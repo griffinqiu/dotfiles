@@ -33,7 +33,7 @@ return {
           local target_win = nil
           for _, win in ipairs(vim.api.nvim_list_wins()) do
             local buf = vim.api.nvim_win_get_buf(win)
-            local ft = vim.api.nvim_buf_get_option(buf, "filetype")
+            local ft = vim.bo[buf].filetype
 
             local is_avante_ft = false
             for _, aft in ipairs(avante_filetypes) do
@@ -168,7 +168,7 @@ return {
         vim.cmd("AvanteResetWindows")
       end, { desc = "Reset Avante windows height" })
 
-      vim.api.nvim_create_autocmd({ "VimResized" }, {
+      vim.api.nvim_create_autocmd("VimResized", {
         group = "AvanteTmuxFix",
         callback = function()
           patch_avante_resize()
@@ -190,7 +190,7 @@ return {
         callback = function(args)
           local buf = args.buf
           if buf and vim.api.nvim_buf_is_valid(buf) then
-            local ft = vim.api.nvim_buf_get_option(buf, "filetype")
+            local ft = vim.bo[buf].filetype
 
             for _, avante_ft in ipairs(avante_filetypes) do
               if ft == avante_ft then
@@ -210,7 +210,7 @@ return {
 
         for _, win in ipairs(vim.api.nvim_list_wins()) do
           local buf = vim.api.nvim_win_get_buf(win)
-          local ft = vim.api.nvim_buf_get_option(buf, "filetype")
+          local ft = vim.bo[buf].filetype
 
           if ft == "AvanteSelectedFiles" then
             if seen_filetypes[ft] then

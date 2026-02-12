@@ -41,12 +41,12 @@ cask "font-hack-nerd-font"
 EOF
 
 if [ ! -e "$HOME"/.config/nvim/coc-settings.json ]; then
-  echo 'ln -s "$HOME/.vim/coc-settings.json" "$HOME/.config/nvim/coc-settings.json"'
+  echo "ln -s \"$HOME/.vim/coc-settings.json\" \"$HOME/.config/nvim/coc-settings.json\""
   ln -s "$HOME/.vim/coc-settings.json" "$HOME/.config/nvim/coc-settings.json"
 fi
 
 if [ ! -e "$HOME"/.config/tmuxinator ]; then
-  echo 'ln -s "$HOME/Documents/Sync/tmuxinator" "$HOME/.config/tmuxinator"'
+  echo "ln -s \"$HOME/Documents/Sync/tmuxinator\" \"$HOME/.config/tmuxinator\""
   ln -s "$HOME/Documents/Sync/tmuxinator" "$HOME/.config/tmuxinator"
 fi
 
@@ -62,7 +62,7 @@ if [ ! -e "$HOME"/.tmux ]; then
 fi
 
 if [ ! -e "$HOME"/.cache/nvim/tags ]; then
-  echo 'mkdir -p "$HOME"/.cache/nvim/tags'
+  echo "mkdir -p \"$HOME\"/.cache/nvim/tags"
   mkdir -p "$HOME"/.cache/nvim/tags
 fi
 
