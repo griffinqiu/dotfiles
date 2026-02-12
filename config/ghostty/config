@@ -7,10 +7,8 @@ font-family = 思源黑体
 font-size = 18
 
 # Theme
-theme = tokyonight-storm
+theme = /Users/griffin/.config/ghostty/tokyonight_storm
 
 # macOS
 macos-option-as-alt = true
-
-# Key Bindings
 keybind = shift+enter=text:\x1b\r

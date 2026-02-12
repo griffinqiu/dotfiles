@@ -19,7 +19,12 @@ return {
     end,
   },
   { "ellisonleao/gruvbox.nvim" },
-  { "folke/tokyonight.nvim" }, -- super good
+  {
+    "folke/tokyonight.nvim",
+    opts = {
+      style = "storm",
+    },
+  },
   { "maxmx03/solarized.nvim" },
   { "rebelot/kanagawa.nvim" },
   { "joshdick/onedark.vim" },
