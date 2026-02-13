@@ -1,11 +1,27 @@
 local INSTANCE_NAME = "far"
 
+local function get_file_filter()
+  local ext = vim.fn.expand("%:e")
+  if ext == "" then
+    return nil
+  end
+  return "*." .. ext
+end
+
 local function toggle_grug_far(opts)
   vim.cmd("Neotree close")
-  require("grug-far").toggle_instance(vim.tbl_extend("force", {
+  local prefills = {}
+  if not opts or not opts.prefills or not opts.prefills.filesFilter then
+    prefills.filesFilter = get_file_filter()
+  end
+
+  local merged_opts = vim.tbl_deep_extend("force", {
     instanceName = INSTANCE_NAME,
     staticTitle = "Find and Replace",
-  }, opts or {}))
+    prefills = prefills,
+  }, opts or {})
+
+  require("grug-far").toggle_instance(merged_opts)
 end
 
 return {
@@ -36,6 +52,9 @@ return {
           grug_far.with_visual_selection({
             instanceName = INSTANCE_NAME,
             staticTitle = "Find and Replace",
+            prefills = {
+              filesFilter = get_file_filter(),
+            },
           })
         end
       end,
