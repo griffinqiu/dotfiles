@@ -103,8 +103,10 @@ Plug 'scrooloose/nerdcommenter'
   let g:NERDSpaceDelims=1
 
 " Search and replace
-Plug 'griffinqiu/star-search'
-Plug 'griffinqiu/powerful-vim'
+Plug 'lfv89/vim-interestingwords'
+  let g:interestingWordsDefaultMappings = 0
+  let g:interestingWordsGUIColors = ['#ff899d', '#9fe044', '#faba4a', '#8db0ff', '#c7a9ff', '#a4daff', '#c0caf5']
+  let g:interestingWordsTermColors = ['1', '2', '3', '4', '5', '6', '7']
 Plug 'dyng/ctrlsf.vim'
   nmap <C-G>g <Plug>CtrlSFPrompt
   nmap <C-G>G <Plug>CtrlSFCwordPath
@@ -291,6 +293,13 @@ Plug 'github/copilot.vim'
   let b:copilot_enabled = 1
 
 call plug#end()
+
+" vim-interestingwords keymaps (aligned with nvim)
+" Note: Plugin has compatibility issues with Vim 9, waiting for fix
+" See: https://github.com/lfv89/vim-interestingwords/issues/41
+nnoremap <silent> <leader># <Plug>InterestingWords
+vnoremap <silent> <leader># <Plug>InterestingWords
+nnoremap <silent> <leader><esc> <Plug>InterestingWordsClear
 
 " Utility functions
 nnoremap \h :let Value=<C-R><C-W><CR>

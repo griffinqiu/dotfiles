@@ -257,12 +257,39 @@ map <leader>s? z=
 " Remove the Windows ^M - when the encodings gets messed up
 noremap <leader><leader>m mmHmt:%s/<C-V><cr>//ge<cr>'tzt'm
 
+" Visual mode search with proper escaping (aligned with nvim)
+function! s:VSetSearch(cmdtype)
+  let temp = @s
+  norm! gv"sy
+  let @/ = '\V' . substitute(escape(@s, a:cmdtype.'\'), '\n', '\\n', 'g')
+  let @s = temp
+endfunction
+
+xnoremap * :<C-u>call <SID>VSetSearch('/')<CR>/<C-R>=@/<CR><CR>
+xnoremap # :<C-u>call <SID>VSetSearch('?')<CR>?<C-R>=@/<CR><CR>
+
 " Command-mode navigation (Emacs-style, aligned with nvim)
+" start of line
 cnoremap <C-a> <Home>
+" end of line
 cnoremap <C-e> <End>
+
+" back one character
 cnoremap <C-b> <Left>
+" forward one character
 cnoremap <C-f> <Right>
+
+" delete character
 cnoremap <C-d> <Delete>
+" backspace
 cnoremap <C-h> <BS>
+
+" command-line window
+cnoremap <C-g> <C-f>
+
+" back one word
+cnoremap <Esc><C-b> <S-Left>
+" forward one word
+cnoremap <Esc><C-f> <S-Right>
 
 " }}}
