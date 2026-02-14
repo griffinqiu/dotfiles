@@ -139,18 +139,32 @@ Plug 'dyng/ctrlsf.vim'
   vmap <C-G>L <Plug>CtrSFQuickfixVwordPath
   vmap <C-G><C-L> <Plug>CtrlSFQuickfixVwordExec
   nmap <silent><leader>sf :CtrlSFToggle<CR>
+  " Align with Neovim grug-far keybinding
+  nnoremap <leader>sr :CtrlSF <SPACE>
+  vnoremap <leader>sr y:CtrlSF <C-r>"<CR>
   nnoremap \ :CtrlSF <SPACE>
   let g:ctrlsf_mapping = {
     \ "next": "<c-n>",
     \ "prev": "<c-p>",
+    \ "split": "s",
+    \ "vsplit": "v",
+    \ "tab": "t",
+    \ "quit": "q",
     \ }
   let g:ctrlsf_auto_close = 0
-  let g:ctrlsf_open_left = 0
+  let g:ctrlsf_auto_focus = {
+    \ "at": "start"
+    \ }
+  let g:ctrlsf_auto_preview = 0
+  let g:ctrlsf_case_sensitive = 'smart'
+  let g:ctrlsf_default_root = 'project'
+  let g:ctrlsf_default_view_mode = 'compact'
+  let g:ctrlsf_populate_qflist = 1
   let g:ctrlsf_position = 'right'
-  let g:ctrlsf_winsize = '30%'
-  "let g:ctrlsf_context = '-B 5 -A 3'
-  " let g:ctrlsf_debug_mode = 1
-  let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp', 'proto']
+  let g:ctrlsf_winsize = '40%'
+  let g:ctrlsf_context = '-B 2 -A 2'
+  let g:ctrlsf_ignore_dir = ['node_modules', 'build', 'tmp', 'proto', '.git', 'dist']
+  let g:ctrlsf_search_mode = 'async'
 
 Plug 'terryma/vim-multiple-cursors'
   let g:multi_cursor_start_key='<c-n>'
