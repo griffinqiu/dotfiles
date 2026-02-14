@@ -80,25 +80,13 @@ Plug 'griffinqiu/vim-textobj-numeral'        " an | in, ad | id
 " }}}
 
 " Tools, Such as nerdtree, vimwiki {{{
-Plug 'skywind3000/vim-quickui'
-Plug 'xfyuan/vim-mac-dictionary'
-  let g:vim_mac_dictionary_use_format = 1
-  nnoremap <silent><leader>ww :MacDictPopup<CR>
-  nnoremap <silent><leader>wd :MacDictWord<CR>
-  nnoremap <silent><leader>wq :MacDictQuery<CR>
-
 Plug 'editorconfig/editorconfig-vim'
 Plug 'christoomey/vim-sort-motion'
 Plug 'AndrewRadev/splitjoin.vim'
-Plug 'diepm/vim-rest-console'
-  let b:vrc_header_content_type = 'application/json; charset=utf-8'
 
 Plug 'rizzatti/dash.vim'
   nmap <silent> <leader>d <Plug>DashSearch
 
-Plug 'vim-scripts/matchit.zip'
-Plug 'godlygeek/tabular'
-  vmap <leader>tz :Tabularize /=
 Plug 'liangfeng/vimcdoc'
 
 " }}}
@@ -169,11 +157,6 @@ Plug 'terryma/vim-multiple-cursors'
   let g:multi_cursor_start_word_key='g<c-n>'
   let g:multi_cursor_quit_key = '<Esc>'
 
-Plug 'Lokaltog/vim-easymotion'
-  " let g:EasyMotion_leader_key = "'"
-  map ' <Plug>(easymotion-prefix)
-  nmap <Leader>' <Plug>(easymotion-overwin-w)
-
 Plug 'ludovicchabant/vim-gutentags'
   " Config g:gutentags_ctags_extra_args in ~/ctags.d/config.ctags
   let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
@@ -183,9 +166,38 @@ Plug 'ludovicchabant/vim-gutentags'
   let g:gutentags_generate_on_new = 0
   let g:gutentags_ctags_exclude_wildignore = 1
 
-Plug 'Valloric/ListToggle'
-  let g:lt_location_list_toggle_map = '<leader>tl'
-  let g:lt_quickfix_list_toggle_map = '<leader>tq'
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
+  let g:fzf_action = {
+    \ 'ctrl-t': 'tab split',
+    \ 'ctrl-s': 'split',
+    \ 'ctrl-v': 'vsplit' }
+  let $FZF_DEFAULT_OPTS = '--bind ctrl-s:select-all,ctrl-d:deselect-all'
+  let g:fzf_preview_window = ''
+
+  nnoremap <c-p> :GitFiles<CR>
+  nnoremap <leader>ff :Files<CR>
+  nnoremap <leader>fg :Rg
+  nnoremap <leader>fb :Buffers<CR>
+  nnoremap <leader>fH :Helptags<CR>
+  nnoremap <leader>f/ :History/<CR>
+  nnoremap <leader>f: :History:<CR>
+
+  nnoremap <leader>ft :Tags<CR>
+  nnoremap <leader>fbt :BTags<CR>
+  nnoremap <leader>fc :Commits<CR>
+  nnoremap <leader>fB :BCommits<CR>
+  nnoremap <leader>fm :Marks<CR>
+  nnoremap <leader>fC :Commands<CR>
+  nmap <leader>fmn :call fzf#vim#maps('n', 0)<cr>
+  nmap <leader>fmi :call fzf#vim#maps('i', 0)<cr>
+  nmap <leader>fmx :call fzf#vim#maps('x', 0)<cr>
+  nmap <leader>fmv :call fzf#vim#maps('v', 0)<cr>
+  nmap <leader>fmo :call fzf#vim#maps('o', 0)<cr>
+  nnoremap <silent> <leader>at :let @"=&filetype \| Agt --<C-R>" <C-R><C-W><CR>
+
+Plug 'zackhsi/fzf-tags'
+  nmap g<c-]> <Plug>(fzf_tags)
 " }}}
 
 " Rust, Golang {{{
@@ -249,9 +261,6 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
   autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
   autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
   " " autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
-Plug 'Shougo/vimshell.vim', { 'for': 'go' }
-Plug 'Shougo/vimproc.vim', { 'for': 'go', 'do' : 'make'}
-Plug 'sebdah/vim-delve', { 'for': 'go' }
 " }}}
 
 " Syntax {{{
@@ -260,7 +269,6 @@ Plug 'sebdah/vim-delve', { 'for': 'go' }
 " Plug 'kchmck/vim-coffee-script', { 'for': 'coffee' }
 " Plug 'pangloss/vim-javascript', { 'for': 'javascript' }
 Plug 'mxw/vim-jsx', { 'for': 'javascript' }
-Plug 'chrisbra/csv.vim'
 Plug 'posva/vim-vue'
   " autocmd BufRead,BufNewFile *.vue set filetype=vue
   let g:vue_pre_processors = []
@@ -298,11 +306,6 @@ Plug 'tpope/vim-pathogen', { 'for': 'ruby' }
   " vmap <leader>zd :call I18nDisplayTranslation()<CR>
 Plug 'AndrewRadev/switch.vim'
   let g:switch_mapping = "-"
-
-Plug 'plasticboy/vim-markdown'
-Plug 'mzlogin/vim-markdown-toc'
-  let g:vim_markdown_folding_disabled=1
-  let g:vim_markdown_initial_foldlevel=1
 " }}}
 
 " Snips {{{
@@ -315,26 +318,6 @@ Plug 'mzlogin/vim-markdown-toc'
     " nnoremap <silent> <leader>uu :UltiSnipsEdit<cr>
     " nnoremap <silent> <leader>ue :UltiSnipsEdit<space>
 " Plug 'griffinqiu/vim-snippets'
-
-Plug 'mattn/emmet-vim'
-  " let g:user_emmet_mode='i'
-  let g:user_emmet_mode='i'
-  autocmd FileType html,css,less,sass,eruby,erb,javascript,jsx,vue EmmetInstall
-  let g:user_emmet_leader_key='<c-y>'
-  let g:user_emmet_expandabbr_key='<c-y><c-y>'
-  let g:user_emmet_expandword_key = '<C-y>v'
-  let g:user_emmet_update_tag = '<C-y>u'
-  let g:user_emmet_next_key='<C-y>n'
-  let g:user_emmet_prev_key='<C-y>p'
-
-  let g:user_emmet_settings = {
-  \  'html' : {
-  \      'quote_char': "'",
-  \  },
-  \  'javascript' : {
-  \      'extends' : 'jsx',
-  \  }
-  \}
 " }}}
 
 " Theme {{{
@@ -366,10 +349,6 @@ Plug 'github/copilot.vim'
   let b:copilot_enabled = 1
 
 " }}}
-
-" if !has("gui_macvim")
-  " source ~/.vimrc.coc
-" endif
 
 call plug#end()
 
