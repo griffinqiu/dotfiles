@@ -237,6 +237,9 @@ map <leader>co :botright copen<cr>
 map <leader>cd :cd %:p:h<cr>
 map <silent> <leader><cr> :nohlsearch<cr>
 
+" Switch to alternate buffer (align with LazyVim)
+nnoremap <leader><leader> <c-^>
+
 " Spell
 map <leader>ss :setlocal spell!<cr>
 map <leader>sn ]s

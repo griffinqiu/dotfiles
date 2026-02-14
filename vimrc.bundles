@@ -363,14 +363,6 @@ Plug 'vim-airline/vim-airline'
   let g:airline_symbols.maxlinenr = ''
   let g:airline_symbols.colnr = ':'
 
-" " Useage
-" " 1. Chose theme in vim
-" " :Tmuxline airline righteous
-" " 2. Save snapshot to tmux.conf
-" " :TmuxlineSnapshot! ~/dotfiles/tmux-style.conf
-" Plug 'edkolev/tmuxline.vim'
-" }}}
-
 " LSP {{{
 
 Plug 'github/copilot.vim'
