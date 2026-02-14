@@ -237,8 +237,15 @@ map <leader>co :botright copen<cr>
 map <leader>cd :cd %:p:h<cr>
 map <silent> <leader><cr> :nohlsearch<cr>
 
-" Switch to alternate buffer (align with LazyVim)
-nnoremap <leader><leader> <c-^>
+" Smart file search: GitFiles in git repo, Files otherwise
+function! SmartFileSearch()
+  if system('git rev-parse --is-inside-work-tree 2>/dev/null') =~ 'true'
+    execute 'GitFiles'
+  else
+    execute 'Files'
+  endif
+endfunction
+nnoremap <silent> <leader><leader> :call SmartFileSearch()<CR>
 
 " Spell
 map <leader>ss :setlocal spell!<cr>
