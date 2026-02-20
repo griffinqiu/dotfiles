@@ -1,5 +1,5 @@
 #!/bin/bash
-# Claude Code statusLine - lualine flat style, Tokyo Night Storm
+# Claude Code statusLine - lualine flat style, terminal palette colors
 
 read -r -d '' input < /dev/stdin
 
@@ -17,16 +17,15 @@ eval "$(echo "$input" | jq -r '
 
 RESET=$'\033[0m'
 
-BLUE=$'\033[38;2;122;162;247m'
-PURP=$'\033[38;2;187;154;247m'
-TEAL=$'\033[38;2;26;188;156m'
-GRN=$'\033[38;2;158;206;106m'
-RED=$'\033[38;2;247;118;142m'
-ORNG=$'\033[38;2;255;158;100m'
-YLW=$'\033[38;2;224;175;104m'
-AQUA=$'\033[38;2;115;218;202m'
-GRAY=$'\033[38;2;169;177;214m'
-SEP_CLR=$'\033[38;2;86;95;137m'
+BLUE=$'\033[38;5;4m'
+PURP=$'\033[38;5;5m'
+TEAL=$'\033[38;5;6m'
+GRN=$'\033[38;5;2m'
+RED=$'\033[38;5;1m'
+ORNG=$'\033[38;5;11m'
+YLW=$'\033[38;5;3m'
+GRAY=$'\033[38;5;7m'
+SEP_CLR=$'\033[38;5;8m'
 
 SEP=" ${SEP_CLR}|${RESET} "
 
