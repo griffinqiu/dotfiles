@@ -5,8 +5,6 @@
     {
       "context": "Chat",
       "bindings": {
-        "ctrl+f": null,
-        "meta+k": "chat:killAgents",
         "meta+p": null,
         "meta+m": "chat:modelPicker",
         "ctrl+_": null,
