@@ -11,6 +11,7 @@ eval "$(echo "$input" | jq -r '
   "lines_removed=" + ((.cost.total_lines_removed // 0) | tostring),
   "total_input=" + ((.context_window.total_input_tokens // 0) | tostring),
   "total_output=" + ((.context_window.total_output_tokens // 0) | tostring),
+  "cost_usd=" + ((.cost.total_cost_usd // 0) | tostring),
   "version=" + (.version // "" | @sh)
 ')"
 
@@ -23,6 +24,8 @@ GRN=$'\033[38;2;158;206;106m'
 RED=$'\033[38;2;247;118;142m'
 ORNG=$'\033[38;2;255;158;100m'
 YLW=$'\033[38;2;224;175;104m'
+AQUA=$'\033[38;2;115;218;202m'
+GRAY=$'\033[38;2;169;177;214m'
 SEP_CLR=$'\033[38;2;86;95;137m'
 
 SEP=" ${SEP_CLR}|${RESET} "
@@ -64,6 +67,12 @@ if [ "$lines_added" -gt 0 ] || [ "$lines_removed" -gt 0 ]; then
     diff_seg="${SEP}${diff_icon_color}󰦒${RESET} ${diff_parts}"
 fi
 
+token_seg="${pct_color}󰍛 ${token_display}${RESET}"
+if [ "$(awk "BEGIN{print ($cost_usd > 0)}")" = "1" ]; then
+    cost_display=$(awk "BEGIN{printf \"%.3f\", $cost_usd}")
+    token_seg="${token_seg} ${pct_color}\$${cost_display}${RESET}"
+fi
+
 update_seg=""
 if [ -n "$version" ]; then
     CACHE_FILE="/tmp/claude-statusline-latest-version"
@@ -83,13 +92,14 @@ if [ -n "$version" ]; then
     fi
 
     if [ -n "$latest" ] && [ "$latest" != "$version" ]; then
-        update_seg="${SEP}${YLW} ${latest}${RESET}"
+        update_seg="${SEP}${YLW}󰄾 ${latest}${RESET}"
     fi
 fi
 
-printf "%s%s%s%s%s%s%s\n" \
+printf "%s%s%s%s%s%s%s%s%s\n" \
     "$left" \
     "$diff_seg" \
-    "$SEP" "${PURP}󱚥 ${short_model}${RESET}" \
-    "$SEP" "${pct_color}󰍛 ${token_display} · ${used_pct}%${RESET}" \
+    "$SEP" "${PURP}󰚩 ${short_model}${RESET}" \
+    "$SEP" "$token_seg" \
+    "$SEP" "${pct_color}󰓌 ${used_pct}%${RESET}" \
     "$update_seg"
