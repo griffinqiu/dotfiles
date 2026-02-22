@@ -66,11 +66,9 @@ if [ "$lines_added" -gt 0 ] || [ "$lines_removed" -gt 0 ]; then
     diff_seg="${SEP}${diff_icon_color}󰦒${RESET} ${diff_parts}"
 fi
 
+cost_display=$(awk "BEGIN{printf \"%.3f\", $cost_usd}")
 token_seg="${pct_color}󰍛 ${token_display}${RESET}"
-if [ "$(awk "BEGIN{print ($cost_usd > 0)}")" = "1" ]; then
-    cost_display=$(awk "BEGIN{printf \"%.3f\", $cost_usd}")
-    token_seg="${token_seg} ${pct_color}\$${cost_display}${RESET}"
-fi
+token_seg="${token_seg} ${pct_color}\$${cost_display}${RESET}"
 
 update_seg=""
 if [ -n "$version" ]; then
