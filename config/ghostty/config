@@ -7,7 +7,7 @@ font-family = 思源黑体
 font-size = 18
 
 # Theme
-theme = /Users/griffin/.config/ghostty/tokyonight_moon
+theme = /Users/griffin/.config/ghostty/colors
 
 # macOS
 macos-option-as-alt = true

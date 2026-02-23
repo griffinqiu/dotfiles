@@ -1,5 +1,5 @@
 #!/bin/bash
-# Claude Code statusLine - lualine flat style, tokyonight moon
+# Claude Code statusLine - lualine flat style, kanagawa dragon
 
 read -r -d '' input </dev/stdin
 
@@ -17,22 +17,22 @@ eval "$(echo "$input" | jq -r '
 
 RESET=$'\033[0m'
 
-# tokyonight moon - https://github.com/folke/tokyonight.nvim
+# kanagawa dragon - https://github.com/rebelot/kanagawa.nvim
 # switching themes: update hex values below
 _hex() {
   local h="${1#'#'}"
   printf '\033[38;2;%d;%d;%dm' $((16#${h:0:2})) $((16#${h:2:2})) $((16#${h:4:2}))
 }
 
-BLUE=$(_hex "#82aaff")    # blue
-PURP=$(_hex "#c099ff")    # magenta
-TEAL=$(_hex "#86e1fc")    # cyan
-GRN=$(_hex "#c3e88d")     # green
-RED=$(_hex "#ff757f")     # red
-ORNG=$(_hex "#ffd8ab")    # bright-yellow
-YLW=$(_hex "#ffc777")     # yellow
-GRAY=$(_hex "#828bb8")    # fg_dark
-SEP_CLR=$(_hex "#444a73") # terminal_black
+BLUE=$(_hex "#8ba4b0")    # dragonBlue2
+PURP=$(_hex "#a292a3")    # dragonPink
+TEAL=$(_hex "#7fb4ca")    # springBlue
+GRN=$(_hex "#8a9a7b")     # dragonGreen2
+RED=$(_hex "#c4746e")     # dragonRed
+ORNG=$(_hex "#b6927b")    # dragonOrange
+YLW=$(_hex "#c4b28a")     # dragonYellow
+GRAY=$(_hex "#a6a69c")    # dragonGray
+SEP_CLR=$(_hex "#393836") # dragonBlack5
 
 SEP=" ${SEP_CLR}|${RESET} "
 

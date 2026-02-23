@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "mcp__Ref__ref_search_documentation"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

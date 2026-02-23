@@ -71,7 +71,7 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "tokyonight-moon",
+      colorscheme = "kanagawa-dragon",
     },
   },
 }

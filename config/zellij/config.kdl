@@ -314,7 +314,7 @@ default_mode "normal"
 //
 // theme_dir "/tmp"
 
-theme "tokyonight_storm"
+theme "colors"
 
 // Toggle enabling the mouse mode.
 // On certain configurations, or terminals this could

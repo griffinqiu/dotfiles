@@ -70,3 +70,4 @@ vim.wo.foldmethod = "marker"
 opt.complete = ".,w,b,t,i,u"
 opt.completeopt = { "menuone", "noselect", "noinsert" }
 opt.spell = false
+

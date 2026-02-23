@@ -1,1 +1,9 @@
 .aider*
+
+# Override global .gitignore to commit Claude Code skills
+!.claude/
+.claude/*
+!.claude/skills/
+!.claude/skills/**
+
+config/.claude/settings.local.json

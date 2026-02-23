@@ -1,0 +1,20 @@
+// kanagawa-dragon
+// https://github.com/rebelot/kanagawa.nvim
+
+themes {
+    colors {
+        fg "#c5c9c5"
+        bg "#282727"
+        // Black should match the terminal background color
+        // This ensures the top and bottom bars are transparent
+        black "#181616"
+        red "#c4746e"
+        green "#8a9a7b"
+        yellow "#c4b28a"
+        blue "#8ba4b0"
+        magenta "#a292a3"
+        cyan "#8ea4a2"
+        white "#c8c093"
+        orange "#b6927b"
+    }
+}

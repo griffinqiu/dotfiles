@@ -1,15 +1,15 @@
 pretty: true
-dark-mode: false
-code-theme: "nord"
+dark-mode: true
+code-theme: "monokai"
 
-# 颜色配置（tokyonight moon: https://github.com/folke/tokyonight.nvim）
-user-input-color: "#c3e88d" # green
-tool-output-color: "#828bb8" # fg_dark
-tool-error-color: "#ff757f" # red
-tool-warning-color: "#ffc777" # yellow
-assistant-output-color: "#82aaff" # blue
+# 颜色配置（kanagawa dragon: https://github.com/rebelot/kanagawa.nvim）
+user-input-color: "#8a9a7b"
+tool-output-color: "#8ea4a2"
+tool-error-color: "#c4746e"
+tool-warning-color: "#c4b28a"
+assistant-output-color: "#c5c9c5"
 
-completion-menu-color: "#c8d3f5" # fg
-completion-menu-bg-color: "#222436" # bg
-completion-menu-current-color: "#222436" # bg
-completion-menu-current-bg-color: "#82aaff" # blue
+completion-menu-color: "#c5c9c5"
+completion-menu-bg-color: "#282727"
+completion-menu-current-color: "#181616"
+completion-menu-current-bg-color: "#8a9a7b"
