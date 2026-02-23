@@ -1,7 +1,7 @@
 #!/bin/bash
-# Claude Code statusLine - lualine flat style, terminal palette colors
+# Claude Code statusLine - lualine flat style, tokyonight moon
 
-read -r -d '' input < /dev/stdin
+read -r -d '' input </dev/stdin
 
 eval "$(echo "$input" | jq -r '
   "cwd=" + (.workspace.current_dir // .cwd | @sh),
@@ -17,15 +17,22 @@ eval "$(echo "$input" | jq -r '
 
 RESET=$'\033[0m'
 
-BLUE=$'\033[38;5;4m'
-PURP=$'\033[38;5;5m'
-TEAL=$'\033[38;5;6m'
-GRN=$'\033[38;5;2m'
-RED=$'\033[38;5;1m'
-ORNG=$'\033[38;5;11m'
-YLW=$'\033[38;5;3m'
-GRAY=$'\033[38;5;7m'
-SEP_CLR=$'\033[38;5;8m'
+# tokyonight moon - https://github.com/folke/tokyonight.nvim
+# switching themes: update hex values below
+_hex() {
+  local h="${1#'#'}"
+  printf '\033[38;2;%d;%d;%dm' $((16#${h:0:2})) $((16#${h:2:2})) $((16#${h:4:2}))
+}
+
+BLUE=$(_hex "#82aaff")    # blue
+PURP=$(_hex "#c099ff")    # magenta
+TEAL=$(_hex "#86e1fc")    # cyan
+GRN=$(_hex "#c3e88d")     # green
+RED=$(_hex "#ff757f")     # red
+ORNG=$(_hex "#ffd8ab")    # bright-yellow
+YLW=$(_hex "#ffc777")     # yellow
+GRAY=$(_hex "#828bb8")    # fg_dark
+SEP_CLR=$(_hex "#444a73") # terminal_black
 
 SEP=" ${SEP_CLR}|${RESET} "
 
@@ -33,37 +40,37 @@ left="${BLUE}󰉋 $(basename "$cwd")${RESET}"
 
 short_model=$(echo "$model" | sed 's/^Claude //; s/ [0-9].*//' | tr '[:upper:]' '[:lower:]')
 
-if [ "$used_pct" -ge 80 ]; then
-    pct_color=$RED
+if [ "$used_pct" -ge 75 ]; then
+  pct_color=$RED
 elif [ "$used_pct" -ge 50 ]; then
-    pct_color=$ORNG
+  pct_color=$ORNG
 else
-    pct_color=$TEAL
+  pct_color=$TEAL
 fi
 
 total_tokens=$((total_input + total_output))
 if [ "$total_tokens" -ge 1000000 ]; then
-    token_display="$(awk "BEGIN{printf \"%.1f\", $total_tokens/1000000}")M"
+  token_display="$(awk "BEGIN{printf \"%.1f\", $total_tokens/1000000}")M"
 elif [ "$total_tokens" -ge 1000 ]; then
-    token_display="$(awk "BEGIN{printf \"%.1f\", $total_tokens/1000}")k"
+  token_display="$(awk "BEGIN{printf \"%.1f\", $total_tokens/1000}")k"
 else
-    token_display="${total_tokens}"
+  token_display="${total_tokens}"
 fi
 
 diff_seg=""
 if [ "$lines_added" -gt 0 ] || [ "$lines_removed" -gt 0 ]; then
-    if [ "$lines_added" -gt 0 ]; then
-        diff_icon_color=$GRN
-    else
-        diff_icon_color=$RED
-    fi
-    diff_parts=""
-    [ "$lines_added" -gt 0 ] && diff_parts="${GRN}${lines_added}${RESET}"
-    if [ "$lines_removed" -gt 0 ]; then
-        [ -n "$diff_parts" ] && diff_parts="${diff_parts} "
-        diff_parts="${diff_parts}${RED}${lines_removed}${RESET}"
-    fi
-    diff_seg="${SEP}${diff_icon_color}󰦒${RESET} ${diff_parts}"
+  if [ "$lines_added" -gt 0 ]; then
+    diff_icon_color=$GRN
+  else
+    diff_icon_color=$RED
+  fi
+  diff_parts=""
+  [ "$lines_added" -gt 0 ] && diff_parts="${GRN}${lines_added}${RESET}"
+  if [ "$lines_removed" -gt 0 ]; then
+    [ -n "$diff_parts" ] && diff_parts="${diff_parts} "
+    diff_parts="${diff_parts}${RED}${lines_removed}${RESET}"
+  fi
+  diff_seg="${SEP}${diff_icon_color}󰦒${RESET} ${diff_parts}"
 fi
 
 cost_display=$(awk "BEGIN{printf \"%.3f\", $cost_usd}")
@@ -72,31 +79,31 @@ token_seg="${token_seg} ${pct_color}\$${cost_display}${RESET}"
 
 update_seg=""
 if [ -n "$version" ]; then
-    CACHE_FILE="/tmp/claude-statusline-latest-version"
-    CACHE_MAX_AGE=1800
+  CACHE_FILE="/tmp/claude-statusline-latest-version"
+  CACHE_MAX_AGE=1800
 
-    latest=""
-    if [ -f "$CACHE_FILE" ]; then
-        cache_age=$(( $(date +%s) - $(stat -f %m "$CACHE_FILE" 2>/dev/null || echo 0) ))
-        if [ "$cache_age" -le "$CACHE_MAX_AGE" ]; then
-            latest=$(cat "$CACHE_FILE")
-        fi
+  latest=""
+  if [ -f "$CACHE_FILE" ]; then
+    cache_age=$(($(date +%s) - $(stat -f %m "$CACHE_FILE" 2>/dev/null || echo 0)))
+    if [ "$cache_age" -le "$CACHE_MAX_AGE" ]; then
+      latest=$(cat "$CACHE_FILE")
     fi
+  fi
 
-    if [ -z "$latest" ]; then
-        latest=$(npm view @anthropic-ai/claude-code version 2>/dev/null || echo "")
-        [ -n "$latest" ] && echo "$latest" > "$CACHE_FILE"
-    fi
+  if [ -z "$latest" ]; then
+    latest=$(npm view @anthropic-ai/claude-code version 2>/dev/null || echo "")
+    [ -n "$latest" ] && echo "$latest" >"$CACHE_FILE"
+  fi
 
-    if [ -n "$latest" ] && [ "$latest" != "$version" ]; then
-        update_seg="${SEP}${YLW}󰄾 ${latest}${RESET}"
-    fi
+  if [ -n "$latest" ] && [ "$latest" != "$version" ]; then
+    update_seg="${SEP}${YLW}󰄾 ${latest}${RESET}"
+  fi
 fi
 
 printf "%s%s%s%s%s%s%s%s%s\n" \
-    "$left" \
-    "$diff_seg" \
-    "$SEP" "${PURP}󰚩 ${short_model}${RESET}" \
-    "$SEP" "$token_seg" \
-    "$SEP" "${pct_color}󰓌 ${used_pct}%${RESET}" \
-    "$update_seg"
+  "$left" \
+  "$diff_seg" \
+  "$SEP" "${PURP}󰚩 ${short_model}${RESET}" \
+  "$SEP" "$token_seg" \
+  "$SEP" "${pct_color}󰓌 ${used_pct}%${RESET}" \
+  "$update_seg"

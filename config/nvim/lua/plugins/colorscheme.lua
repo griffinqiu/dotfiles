@@ -22,7 +22,7 @@ return {
   {
     "folke/tokyonight.nvim",
     opts = {
-      style = "storm",
+      style = "moon",
     },
   },
   { "maxmx03/solarized.nvim" },
@@ -37,7 +37,7 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "tokyonight",
+      colorscheme = "tokyonight-moon",
     },
   },
 }

@@ -2,14 +2,14 @@ pretty: true
 dark-mode: false
 code-theme: "nord"
 
-# 颜色配置（使用 Tokyo Night 配色参数）
-user-input-color: "#9ece6a" # 绿色 - 用户输入 (color2)
-tool-output-color: "#a9b1d6" # 灰色 - 工具输出 (color7)
-tool-error-color: "#f7768e" # 红色 - 错误信息 (color1)
-tool-warning-color: "#e0af68" # 橙色 - 警告信息 (color3)
-assistant-output-color: "#7aa2f7" # 蓝色 - 助手输出 (color4)
+# 颜色配置（tokyonight moon: https://github.com/folke/tokyonight.nvim）
+user-input-color: "#c3e88d" # green
+tool-output-color: "#828bb8" # fg_dark
+tool-error-color: "#ff757f" # red
+tool-warning-color: "#ffc777" # yellow
+assistant-output-color: "#82aaff" # blue
 
-completion-menu-color: "#c0caf5" # 前景色 (foreground)
-completion-menu-bg-color: "#1a1b26" # 背景色 (background)
-completion-menu-current-color: "#1a1b26" # 当前项文字颜色 (background)
-completion-menu-current-bg-color: "#7aa2f7" # 当前项背景色 (color4)
+completion-menu-color: "#c8d3f5" # fg
+completion-menu-bg-color: "#222436" # bg
+completion-menu-current-color: "#222436" # bg
+completion-menu-current-bg-color: "#82aaff" # blue
