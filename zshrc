@@ -38,29 +38,29 @@ export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
 
-# fzf colors: kanagawa dragon (https://github.com/rebelot/kanagawa.nvim)
+# fzf colors: everforest dark medium (https://github.com/neanias/everforest-nvim)
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --highlight-line \
   --info=inline-right \
   --ansi \
   --layout=reverse \
   --border=none \
-  --color=bg+:#2d4f67 \
-  --color=bg:#181616 \
-  --color=border:#393836 \
-  --color=fg:#c5c9c5 \
-  --color=gutter:#181616 \
-  --color=header:#b6927b \
-  --color=hl+:#8ba4b0 \
-  --color=hl:#8ba4b0 \
-  --color=info:#a6a69c \
-  --color=marker:#e46876 \
-  --color=pointer:#e46876 \
-  --color=prompt:#8a9a7b \
-  --color=query:#c5c9c5:regular \
-  --color=scrollbar:#393836 \
-  --color=separator:#b6927b \
-  --color=spinner:#e46876 \
+  --color=bg+:#543a48 \
+  --color=bg:#2d353b \
+  --color=border:#3d484d \
+  --color=fg:#d3c6aa \
+  --color=gutter:#2d353b \
+  --color=header:#e69875 \
+  --color=hl+:#7fbbb3 \
+  --color=hl:#7fbbb3 \
+  --color=info:#859289 \
+  --color=marker:#e67e80 \
+  --color=pointer:#e67e80 \
+  --color=prompt:#a7c080 \
+  --color=query:#d3c6aa:regular \
+  --color=scrollbar:#3d484d \
+  --color=separator:#e69875 \
+  --color=spinner:#e67e80 \
 "
 
 [[ -f ~/.zshrc.oh-my-zsh ]] && source ~/.zshrc.oh-my-zsh

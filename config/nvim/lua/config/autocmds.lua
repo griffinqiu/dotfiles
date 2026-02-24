@@ -14,11 +14,11 @@ vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
   command = "set filetype=dockerfile",
 })
 
+-- Emacs-style keybindings for non-snacks input contexts
+-- (snacks_picker_input and snacks_input are configured via lua/plugins/snacks.lua)
 vim.api.nvim_create_autocmd("FileType", {
   pattern = {
     "TelescopePrompt",
-    "snacks_input",
-    "snacks_picker_input",
     "neo-tree-popup",
     "AvantePromptInput",
     "AvanteInput",

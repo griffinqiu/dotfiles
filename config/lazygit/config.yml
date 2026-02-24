@@ -2,32 +2,32 @@ gui:
   scrollHeight: 10
   scrollOffBehavior: jump
   nerdFontsVersion: "3"
-  # kanagawa dragon: https://github.com/rebelot/kanagawa.nvim
+  # everforest dark medium: https://github.com/neanias/everforest-nvim
   theme:
     activeBorderColor:
-      - "#b6927b"
+      - "#e69875"
       - "bold"
     inactiveBorderColor:
-      - "#8ba4b0"
+      - "#7fbbb3"
     searchingActiveBorderColor:
-      - "#b6927b"
+      - "#e69875"
       - "bold"
     optionsTextColor:
-      - "#8ba4b0"
+      - "#7fbbb3"
     selectedLineBgColor:
-      - "#2d4f67"
+      - "#343f44"
     cherryPickedCommitFgColor:
-      - "#8ba4b0"
+      - "#7fbbb3"
     cherryPickedCommitBgColor:
-      - "#a292a3"
+      - "#d699b6"
     markedBaseCommitFgColor:
-      - "#8ba4b0"
+      - "#7fbbb3"
     markedBaseCommitBgColor:
-      - "#c4b28a"
+      - "#dbbc7f"
     unstagedChangesColor:
-      - "#c4746e"
+      - "#e67e80"
     defaultFgColor:
-      - "#c5c9c5"
+      - "#d3c6aa"
 customCommands:
   - key: <c-a>
     description: Pick AI commits

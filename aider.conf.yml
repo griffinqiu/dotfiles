@@ -2,14 +2,14 @@ pretty: true
 dark-mode: true
 code-theme: "monokai"
 
-# 颜色配置（kanagawa dragon: https://github.com/rebelot/kanagawa.nvim）
-user-input-color: "#8a9a7b"
-tool-output-color: "#8ea4a2"
-tool-error-color: "#c4746e"
-tool-warning-color: "#c4b28a"
-assistant-output-color: "#c5c9c5"
+# 颜色配置（everforest dark medium: https://github.com/neanias/everforest-nvim）
+user-input-color: "#a7c080"
+tool-output-color: "#83c092"
+tool-error-color: "#e67e80"
+tool-warning-color: "#dbbc7f"
+assistant-output-color: "#d3c6aa"
 
-completion-menu-color: "#c5c9c5"
-completion-menu-bg-color: "#282727"
-completion-menu-current-color: "#181616"
-completion-menu-current-bg-color: "#8a9a7b"
+completion-menu-color: "#d3c6aa"
+completion-menu-bg-color: "#343f44"
+completion-menu-current-color: "#2d353b"
+completion-menu-current-bg-color: "#a7c080"

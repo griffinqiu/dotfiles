@@ -105,7 +105,7 @@ Plug 'scrooloose/nerdcommenter'
 " Search and replace
 Plug 'lfv89/vim-interestingwords'
   let g:interestingWordsDefaultMappings = 0
-  let g:interestingWordsGUIColors = ['#e46876', '#e6c384', '#87a987', '#7fb4ca', '#938aa9', '#7aa89f', '#c8c093']
+  let g:interestingWordsGUIColors = ['#e67e80', '#dbbc7f', '#a7c080', '#7fbbb3', '#d699b6', '#83c092', '#e69875']
   let g:interestingWordsTermColors = ['1', '2', '3', '4', '5', '6', '7']
 Plug 'dyng/ctrlsf.vim'
   nmap <C-G>g <Plug>CtrlSFPrompt

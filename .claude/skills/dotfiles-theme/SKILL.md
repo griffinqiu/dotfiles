@@ -18,6 +18,7 @@ description: 管理 dotfiles 中所有工具的配色方案。当用户需要切
 | Ghostty | `config/ghostty/colors` | 单一颜色文件，切换时更新内容 |
 | Kitty | `config/kitty/colors.conf` | 单一颜色文件，切换时更新内容 |
 | Zellij | `config/zellij/themes/colors.kdl` | 单一颜色文件，切换时更新内容 |
+| Sidekick NES diff | `config/nvim/lua/plugins/colorscheme.lua` | 主题插件 `on_highlights` 回调，覆盖 `SidekickDiff*` highlight group |
 | interestingwords | `config/nvim/lua/plugins/misc.lua` 和 `vimrc.bundles` | 硬编码 hex，从当前主题 bright 色取最易辨认的亮色 |
 | fzf | `zshrc` | 硬编码 hex，注释标注主题名 |
 | aider | `aider.conf.yml` | 硬编码 hex，注释标注主题名 |
@@ -48,6 +49,38 @@ tmux powerkit 的主题文件由插件自身管理，**不能往插件目录里�
 
 - 主配置（`tmux.conf`）只写变体名：`@powerkit_theme_variant`
 - 只能使用插件已有的变体。如果目标主题没有对应变体，选视觉上最接近的已有变体
+
+### Sidekick NES diff
+
+Sidekick 的 NES（Next Edit Suggestion）功能用自己独立的 diff 渲染，通过三个 highlight group 控制颜色：
+
+| Group | 默认链接 | 语义 |
+|---|---|---|
+| `SidekickDiffAdd` | `DiffText` | 新增内容背景 |
+| `SidekickDiffDelete` | `DiffDelete` | 删除内容背景 |
+| `SidekickDiffContext` | `DiffChange` | 变更区域的上下文背景 |
+
+覆盖方式：在 `colorscheme.lua` 的 **当前主题插件** `opts` 里加 `on_highlights` 回调（Lua 原生主题）。颜色取主题调色板的语义背景色：
+- `SidekickDiffAdd` → 主题的 `bg_green`（绿色系背景）
+- `SidekickDiffDelete` → 主题的 `bg_red`（红色系背景）
+- `SidekickDiffContext` → 主题的 `bg2`（中性灰背景）
+
+示例（everforest）：
+```lua
+{ "neanias/everforest-nvim",
+  config = function()
+    require("everforest").setup({
+      on_highlights = function(hl, palette)
+        hl.SidekickDiffAdd     = { bg = palette.bg_green }
+        hl.SidekickDiffDelete  = { bg = palette.bg_red }
+        hl.SidekickDiffContext = { bg = palette.bg2 }
+      end,
+    })
+  end,
+},
+```
+
+注意：`neanias/everforest-nvim` 不支持 lazy.nvim 的 `opts` 自动传入，必须用 `config` 函数显式调用 `setup()`。
 
 ### 硬编码 hex 的工具
 
@@ -106,9 +139,10 @@ tmux powerkit 的主题文件由插件自身管理，**不能往插件目录里�
 
 **第四步：更新硬编码 hex 的工具**
 
-6. `config/nvim/lua/plugins/misc.lua` — `colors` 数组：从当前主题调色板的 bright 色（color9–color15）中取 7 个最易辨认的亮色，替换数组内容
+6. `config/nvim/lua/plugins/colorscheme.lua` — 当前主题插件的 `on_highlights` 回调：覆盖 `SidekickDiffAdd`、`SidekickDiffDelete`、`SidekickDiffContext`，取主题调色板的 `bg_green`、`bg_red`、`bg2`
+7. `config/nvim/lua/plugins/misc.lua` — `colors` 数组：从当前主题调色板的 bright 色（color9–color15）中取 7 个最易辨认的亮色，替换数组内容
    `vimrc.bundles` — `g:interestingWordsGUIColors` 数组：同上，保持与 misc.lua 一致（`g:interestingWordsTermColors` 使用终端颜色索引，无需修改）
-7. `zshrc` — fzf 配色块：更新注释主题名，替换全部颜色值（从 extras/fzf 复制）
-7. `aider.conf.yml` — 更新注释主题名，替换全部颜色值（从颜色定义源文件取语义变量）
-8. `config/lazygit/config.yml` — 更新注释主题名，替换 `gui.theme` 下全部颜色值（从 extras/lazygit 或颜色定义源文件取值）
-9. `claude/statusline-command.sh` — 更新注释主题名，替换顶部的 hex 颜色变量
+8. `zshrc` — fzf 配色块：更新注释主题名，替换全部颜色值（从 extras/fzf 复制）
+9. `aider.conf.yml` — 更新注释主题名，替换全部颜色值（从颜色定义源文件取语义变量）
+10. `config/lazygit/config.yml` — 更新注释主题名，替换 `gui.theme` 下全部颜色值（从 extras/lazygit 或颜色定义源文件取值）
+11. `claude/statusline-command.sh` — 更新注释主题名，替换顶部的 hex 颜色变量

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Claude Code statusLine - lualine flat style, kanagawa dragon
+# Claude Code statusLine - lualine flat style, everforest dark
 
 read -r -d '' input </dev/stdin
 
@@ -17,22 +17,22 @@ eval "$(echo "$input" | jq -r '
 
 RESET=$'\033[0m'
 
-# kanagawa dragon - https://github.com/rebelot/kanagawa.nvim
+# everforest dark medium - https://github.com/neanias/everforest-nvim
 # switching themes: update hex values below
 _hex() {
   local h="${1#'#'}"
   printf '\033[38;2;%d;%d;%dm' $((16#${h:0:2})) $((16#${h:2:2})) $((16#${h:4:2}))
 }
 
-BLUE=$(_hex "#8ba4b0")    # dragonBlue2
-PURP=$(_hex "#a292a3")    # dragonPink
-TEAL=$(_hex "#7fb4ca")    # springBlue
-GRN=$(_hex "#8a9a7b")     # dragonGreen2
-RED=$(_hex "#c4746e")     # dragonRed
-ORNG=$(_hex "#b6927b")    # dragonOrange
-YLW=$(_hex "#c4b28a")     # dragonYellow
-GRAY=$(_hex "#a6a69c")    # dragonGray
-SEP_CLR=$(_hex "#393836") # dragonBlack5
+BLUE=$(_hex "#7fbbb3")    # blue
+PURP=$(_hex "#d699b6")    # purple
+TEAL=$(_hex "#83c092")    # aqua
+GRN=$(_hex "#a7c080")     # green
+RED=$(_hex "#e67e80")     # red
+ORNG=$(_hex "#e69875")    # orange
+YLW=$(_hex "#dbbc7f")     # yellow
+GRAY=$(_hex "#859289")    # grey1
+SEP_CLR=$(_hex "#343f44") # bg1
 
 SEP=" ${SEP_CLR}|${RESET} "
 

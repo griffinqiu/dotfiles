@@ -1,20 +1,20 @@
-// kanagawa-dragon
-// https://github.com/rebelot/kanagawa.nvim
+// everforest dark medium
+// https://github.com/neanias/everforest-nvim
 
 themes {
     colors {
-        fg "#c5c9c5"
-        bg "#282727"
+        fg "#d3c6aa"
+        bg "#343f44"
         // Black should match the terminal background color
         // This ensures the top and bottom bars are transparent
-        black "#181616"
-        red "#c4746e"
-        green "#8a9a7b"
-        yellow "#c4b28a"
-        blue "#8ba4b0"
-        magenta "#a292a3"
-        cyan "#8ea4a2"
-        white "#c8c093"
-        orange "#b6927b"
+        black "#2d353b"
+        red "#e67e80"
+        green "#a7c080"
+        yellow "#dbbc7f"
+        blue "#7fbbb3"
+        magenta "#d699b6"
+        cyan "#83c092"
+        white "#d3c6aa"
+        orange "#e69875"
     }
 }

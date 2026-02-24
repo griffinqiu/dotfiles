@@ -19,10 +19,20 @@ return {
     end,
   },
   -- Lua-native themes
-  { "ellisonleao/gruvbox.nvim" },
+  { "ellisonleao/gruvbox.nvim", opts = { contrast = "soft" } },
   { "maxmx03/solarized.nvim" },
   { "rebelot/kanagawa.nvim" },
-  { "neanias/everforest-nvim" },
+  { "neanias/everforest-nvim",
+    config = function()
+      require("everforest").setup({
+        on_highlights = function(hl, palette)
+          hl.SidekickDiffAdd     = { bg = palette.bg_green }
+          hl.SidekickDiffDelete  = { bg = palette.bg_red }
+          hl.SidekickDiffContext = { bg = palette.bg2 }
+        end,
+      })
+    end,
+  },
   { "EdenEast/nightfox.nvim" },
   { "rose-pine/neovim" },
 
@@ -71,7 +81,7 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "kanagawa-dragon",
+      colorscheme = "everforest",
     },
   },
 }

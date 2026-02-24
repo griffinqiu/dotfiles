@@ -1,23 +1,23 @@
-# kanagawa-dragon
-palette = 0=#0d0c0c
-palette = 1=#c4746e
-palette = 2=#8a9a7b
-palette = 3=#c4b28a
-palette = 4=#8ba4b0
-palette = 5=#a292a3
-palette = 6=#8ea4a2
-palette = 7=#c8c093
-palette = 8=#a6a69c
-palette = 9=#e46876
-palette = 10=#87a987
-palette = 11=#e6c384
-palette = 12=#7fb4ca
-palette = 13=#938aa9
-palette = 14=#7aa89f
-palette = 15=#c5c9c5
+# everforest dark medium
+palette = 0=#2d353b
+palette = 1=#e67e80
+palette = 2=#a7c080
+palette = 3=#dbbc7f
+palette = 4=#7fbbb3
+palette = 5=#d699b6
+palette = 6=#83c092
+palette = 7=#d3c6aa
+palette = 8=#475258
+palette = 9=#e67e80
+palette = 10=#a7c080
+palette = 11=#dbbc7f
+palette = 12=#7fbbb3
+palette = 13=#d699b6
+palette = 14=#83c092
+palette = 15=#d3c6aa
 
-background = 181616
-foreground = c5c9c5
-cursor-color = c8c093
-selection-background = 2d4f67
-selection-foreground = c8c093
+background = 2d353b
+foreground = d3c6aa
+cursor-color = d3c6aa
+selection-background = 543a48
+selection-foreground = d3c6aa

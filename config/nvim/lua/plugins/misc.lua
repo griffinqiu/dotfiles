@@ -11,7 +11,7 @@ return {
   {
     "Mr-LLLLL/interestingwords.nvim",
     opts = {
-      colors = { "#e46876", "#e6c384", "#87a987", "#7fb4ca", "#938aa9", "#7aa89f", "#c8c093" },
+      colors = { "#e67e80", "#dbbc7f", "#a7c080", "#7fbbb3", "#d699b6", "#83c092", "#e69875" },
       search_count = true,
       navigation = true,
       scroll_center = true,
