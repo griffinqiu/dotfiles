@@ -9,8 +9,9 @@ eval "$(echo "$input" | jq -r '
   "used_pct=" + ((.context_window.used_percentage // 0) | floor | tostring),
   "lines_added=" + ((.cost.total_lines_added // 0) | tostring),
   "lines_removed=" + ((.cost.total_lines_removed // 0) | tostring),
-  "total_input=" + ((.context_window.total_input_tokens // 0) | tostring),
-  "total_output=" + ((.context_window.total_output_tokens // 0) | tostring),
+  "cur_input=" + ((.context_window.current_usage.input_tokens // 0) | tostring),
+  "cur_cache_create=" + ((.context_window.current_usage.cache_creation_input_tokens // 0) | tostring),
+  "cur_cache_read=" + ((.context_window.current_usage.cache_read_input_tokens // 0) | tostring),
   "cost_usd=" + ((.cost.total_cost_usd // 0) | tostring),
   "version=" + (.version // "" | @sh)
 ')"
@@ -48,13 +49,13 @@ else
   pct_color=$TEAL
 fi
 
-total_tokens=$((total_input + total_output))
-if [ "$total_tokens" -ge 1000000 ]; then
-  token_display="$(awk "BEGIN{printf \"%.1f\", $total_tokens/1000000}")M"
-elif [ "$total_tokens" -ge 1000 ]; then
-  token_display="$(awk "BEGIN{printf \"%.1f\", $total_tokens/1000}")k"
+context_tokens=$((cur_input + cur_cache_create + cur_cache_read))
+if [ "$context_tokens" -ge 1000000 ]; then
+  token_display="$(awk "BEGIN{printf \"%.1f\", $context_tokens/1000000}")M"
+elif [ "$context_tokens" -ge 1000 ]; then
+  token_display="$(awk "BEGIN{printf \"%.1f\", $context_tokens/1000}")k"
 else
-  token_display="${total_tokens}"
+  token_display="${context_tokens}"
 fi
 
 diff_seg=""
@@ -74,8 +75,10 @@ if [ "$lines_added" -gt 0 ] || [ "$lines_removed" -gt 0 ]; then
 fi
 
 cost_display=$(awk "BEGIN{printf \"%.3f\", $cost_usd}")
-token_seg="${pct_color}󰍛 ${token_display}${RESET}"
-token_seg="${token_seg} ${pct_color}\$${cost_display}${RESET}"
+
+token_seg="${pct_color}󰍛 ${token_display} · ${used_pct}%${RESET}"
+cost_seg="${YLW} ${cost_display}${RESET}"
+
 
 update_seg=""
 if [ -n "$version" ]; then
@@ -96,7 +99,7 @@ if [ -n "$version" ]; then
   fi
 
   if [ -n "$latest" ] && [ "$latest" != "$version" ]; then
-    update_seg="${SEP}${YLW}󰄾 ${latest}${RESET}"
+    update_seg="${SEP}${GRAY}󰄾 ${latest}${RESET}"
   fi
 fi
 
@@ -105,5 +108,5 @@ printf "%s%s%s%s%s%s%s%s%s\n" \
   "$diff_seg" \
   "$SEP" "${PURP}󰚩 ${short_model}${RESET}" \
   "$SEP" "$token_seg" \
-  "$SEP" "${pct_color}󰓌 ${used_pct}%${RESET}" \
+  "$SEP" "$cost_seg" \
   "$update_seg"
