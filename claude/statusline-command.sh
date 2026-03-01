@@ -52,10 +52,10 @@ fi
 context_tokens=$((cur_input + cur_cache_create + cur_cache_read))
 if [ "$context_tokens" -ge 1000000 ]; then
   token_display="$(awk "BEGIN{printf \"%.1f\", $context_tokens/1000000}")M"
-elif [ "$context_tokens" -ge 1000 ]; then
-  token_display="$(awk "BEGIN{printf \"%.1f\", $context_tokens/1000}")k"
+elif [ "$context_tokens" -eq 0 ]; then
+  token_display="0k"
 else
-  token_display="${context_tokens}"
+  token_display="$(awk "BEGIN{printf \"%.1f\", $context_tokens/1000}")k"
 fi
 
 diff_seg=""
