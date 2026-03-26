@@ -1,0 +1,40 @@
+#!/bin/bash
+
+set -e
+
+if [ $# -eq 0 ]; then
+  echo "Usage: workon <tag> [base-branch]"
+  echo "Example: workon feat-auth"
+  echo "         workon feat-auth main"
+  exit 1
+fi
+
+TAG="$1"
+BASE="${2:-HEAD}"
+
+GIT_ROOT=$(git rev-parse --show-toplevel)
+PROJECT_NAME=$(basename "$GIT_ROOT")
+PARENT_DIR=$(dirname "$GIT_ROOT")
+WORKTREE_PATH="$PARENT_DIR/$PROJECT_NAME-$TAG"
+WINDOW_NAME="$TAG"
+
+if tmux has-session 2>/dev/null && tmux list-windows -F "#{window_name}" | grep -q "^$WINDOW_NAME$"; then
+  echo "Window '$WINDOW_NAME' already exists, switching..."
+  tmux select-window -t "$WINDOW_NAME"
+  exit 0
+fi
+
+if [ -d "$WORKTREE_PATH" ]; then
+  echo "Worktree already exists at $WORKTREE_PATH"
+else
+  echo "Creating worktree '$TAG' from $BASE..."
+  git worktree add "$WORKTREE_PATH" -b "$TAG" "$BASE"
+fi
+
+tmux new-window -n "$WINDOW_NAME" -c "$WORKTREE_PATH"
+tmux send-keys -t "$WINDOW_NAME.0" "nvim" Enter
+tmux split-window -h -t "$WINDOW_NAME.0" -c "$WORKTREE_PATH"
+tmux send-keys -t "$WINDOW_NAME.1" "claude" Enter
+tmux select-window -t "$WINDOW_NAME"
+
+echo "Ready: $WINDOW_NAME [nvim | claude]"

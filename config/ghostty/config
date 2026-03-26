@@ -12,3 +12,5 @@ theme = /Users/griffin/.config/ghostty/colors
 # macOS
 macos-option-as-alt = true
 keybind = shift+enter=text:\x1b\r
+keybind = super+shift+right_bracket=next_tab
+keybind = super+shift+left_bracket=previous_tab

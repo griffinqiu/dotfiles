@@ -1,0 +1,65 @@
+#!/bin/bash
+
+set -e
+
+CURRENT_DIR=$(pwd)
+MAIN_WORKTREE=$(git worktree list --porcelain | head -1 | sed 's/worktree //')
+
+if [ "$CURRENT_DIR" = "$MAIN_WORKTREE" ]; then
+  echo "ERROR: Must run workdone from inside a worktree, not the main tree."
+  echo "Hint: switch to a worktree tmux window first."
+  exit 1
+fi
+
+DO_MERGE=false
+if [ "$1" = "--merge" ]; then
+  DO_MERGE=true
+fi
+
+# Derive tag from worktree directory name: project-tag → tag
+PROJECT_NAME=$(basename "$MAIN_WORKTREE")
+TAG=$(basename "$CURRENT_DIR" | sed "s/^${PROJECT_NAME}-//")
+WORKTREE_PATH="$CURRENT_DIR"
+WINDOW_NAME="$TAG"
+
+# Check for uncommitted changes
+if ! git diff --quiet || ! git diff --cached --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
+  echo "ERROR: Working tree is not clean. Commit, stash, or remove untracked files first."
+  git status --short
+  exit 1
+fi
+
+BRANCH=$(git branch --show-current)
+
+# Switch to main window first (avoids self-destruction)
+MAIN_WINDOW=$(tmux list-windows -F "#{window_name}:#{window_id}" | head -1 | cut -d: -f1)
+tmux select-window -t "$MAIN_WINDOW"
+
+# Kill worktree window
+if tmux list-windows -F "#{window_name}" | grep -q "^$WINDOW_NAME$"; then
+  tmux kill-window -t "$WINDOW_NAME"
+fi
+
+# Merge from the main worktree
+if [ "$DO_MERGE" = true ] && git -C "$MAIN_WORKTREE" show-ref --verify --quiet "refs/heads/$BRANCH"; then
+  MAIN_BRANCH=$(git -C "$MAIN_WORKTREE" branch --show-current)
+  echo "Merging '$BRANCH' into '$MAIN_BRANCH'..."
+  git -C "$MAIN_WORKTREE" merge "$BRANCH" --no-ff -m "feat: merge $BRANCH into $MAIN_BRANCH"
+fi
+
+# Remove worktree
+if git worktree list --porcelain | grep -q "$WORKTREE_PATH"; then
+  echo "Removing worktree..."
+  git -C "$MAIN_WORKTREE" worktree remove "$WORKTREE_PATH"
+fi
+
+# Delete branch only when merged
+if [ "$DO_MERGE" = true ] && git -C "$MAIN_WORKTREE" show-ref --verify --quiet "refs/heads/$BRANCH"; then
+  git -C "$MAIN_WORKTREE" branch -d "$BRANCH"
+fi
+
+if [ "$DO_MERGE" = true ]; then
+  echo "Done: '$TAG' merged and cleaned up"
+else
+  echo "Done: '$TAG' worktree removed (branch kept)"
+fi
