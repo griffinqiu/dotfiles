@@ -2,7 +2,6 @@ promptToReturnFromSubprocess: false
 gui:
   scrollHeight: 10
   scrollOffBehavior: jump
-  showCommandLog: false
   nerdFontsVersion: "3"
   # everforest dark medium: https://github.com/neanias/everforest-nvim
   theme:

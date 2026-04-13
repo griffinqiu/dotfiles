@@ -11,8 +11,8 @@ fi
 
 RAW=$(ai-commit-suggest "$@")
 if [ -z "$RAW" ]; then
-  echo "Generation failed."
-  exit 1
+  sleep 1
+  exit 0
 fi
 
 HEADER="<CR>: commit directly  |  <M-g>: edit before commit  |  <Esc>: cancel"

@@ -7,9 +7,12 @@ DEFAULT_PROVIDER="codex"
 DETAILED=""
 for arg in "$@"; do
   case "$arg" in
-    --detailed|-d) DETAILED=1 ;;
-    --short|-s)    DETAILED=0 ;;
-    *) echo "Unknown arg: $arg" >&2; exit 1 ;;
+  --detailed | -d) DETAILED=1 ;;
+  --short | -s) DETAILED=0 ;;
+  *)
+    echo "Unknown arg: $arg" >&2
+    exit 1
+    ;;
   esac
 done
 
@@ -29,7 +32,7 @@ if [ -z "$DETAILED" ]; then
   read -r ADDED DELETED <<EOF
 $(git diff --cached --numstat -- . $DIFF_EXCLUDES | awk '{a+=$1;d+=$2} END{print a+0, d+0}')
 EOF
-  EFFECTIVE=$(( (ADDED + DELETED) / 2 ))
+  EFFECTIVE=$(((ADDED + DELETED) / 2))
   # shellcheck disable=SC2086
   FILE_COUNT=$(git diff --cached --name-only -- . $DIFF_EXCLUDES | wc -l | tr -d ' ')
   if { [ "$FILE_COUNT" -ge 10 ] && [ "$EFFECTIVE" -gt 200 ]; } || [ "$EFFECTIVE" -gt 500 ]; then
@@ -41,8 +44,8 @@ EOF
 fi
 
 DIFF_SIZE=${#DIFF}
-SIZE_SMALL=81920     # 80 KB
-SIZE_MEDIUM=409600   # 400 KB
+SIZE_SMALL=81920   # 80 KB
+SIZE_MEDIUM=409600 # 400 KB
 
 if [ "$DIFF_SIZE" -le "$SIZE_SMALL" ]; then
   DIFF_SECTION="Full diff:
@@ -146,17 +149,17 @@ wait_with_timer() {
     sleep 0.1
     tick=$((tick + 1))
     elapsed=$(awk "BEGIN{printf \"%.1f\", $tick/10}")
-    printf '\r\033[K\033[36m⏳\033[0m %s %s/%ss' "$label" "$elapsed" "$TIMEOUT_SECS" >&2
+    printf '\r\033[K\033[36m●\033[0m %s %s/%ss' "$label" "$elapsed" "$TIMEOUT_SECS" >&2
     if [ "$tick" -ge $((TIMEOUT_SECS * 10)) ]; then
       kill "$pid" 2>/dev/null
       sleep 0.2
       kill -KILL "$pid" 2>/dev/null
-      wait "$pid" 2>/dev/null
-      printf '\r\033[K\033[33m⏱ %s timeout after %ss\033[0m\n' "$label" "$TIMEOUT_SECS" >&2
+      { wait "$pid"; } 2>/dev/null
+      printf '\r\033[K\033[33m●\033[0m %s timeout after %ss\n' "$label" "$TIMEOUT_SECS" >&2
       return 124
     fi
   done
-  wait "$pid"
+  { wait "$pid"; } 2>/dev/null
   rc=$?
   printf '\r\033[K' >&2
   return "$rc"
@@ -164,9 +167,11 @@ wait_with_timer() {
 
 run_copilot() {
   outfile=$(mktemp)
-  ( gh copilot -- -p "$PROMPT" --silent --allow-all-tools \
-      --model claude-sonnet-4.5 > "$outfile" 2>/dev/null ) &
-  wait_with_timer $! "copilot"
+  (gh copilot -- -p "$PROMPT" --silent --allow-all-tools \
+    --model claude-sonnet-4.5 >"$outfile" 2>/dev/null) &
+  pid=$!
+  disown "$pid" 2>/dev/null || true
+  wait_with_timer "$pid" "copilot"
   rc=$?
   [ "$rc" = "0" ] && cat "$outfile"
   rm -f "$outfile"
@@ -175,13 +180,15 @@ run_copilot() {
 
 run_codex() {
   outfile=$(mktemp)
-  ( codex exec "$PROMPT" \
-      --sandbox read-only \
-      -m gpt-5.4 \
-      -c model_reasoning_effort=low \
-      -c tools.web_search=false \
-      -o "$outfile" >/dev/null 2>&1 ) &
-  wait_with_timer $! "codex"
+  (codex exec "$PROMPT" \
+    --sandbox read-only \
+    -m gpt-5.4 \
+    -c model_reasoning_effort=low \
+    -c tools.web_search=false \
+    -o "$outfile" >/dev/null 2>&1) &
+  pid=$!
+  disown "$pid" 2>/dev/null || true
+  wait_with_timer "$pid" "codex"
   rc=$?
   [ "$rc" = "0" ] && cat "$outfile"
   rm -f "$outfile"
@@ -189,14 +196,20 @@ run_codex() {
 }
 
 case "$PROVIDER" in
-  copilot)
-    run_copilot || run_codex || { echo "Both providers failed." >&2; exit 1; }
-    ;;
-  codex)
-    run_codex || run_copilot || { echo "Both providers failed." >&2; exit 1; }
-    ;;
-  *)
-    echo "Unknown provider: $PROVIDER (use 'copilot' or 'codex')" >&2
+copilot)
+  run_copilot || run_codex || {
+    echo "Both providers failed." >&2
     exit 1
-    ;;
+  }
+  ;;
+codex)
+  run_codex || run_copilot || {
+    echo "Both providers failed." >&2
+    exit 1
+  }
+  ;;
+*)
+  echo "Unknown provider: $PROVIDER (use 'copilot' or 'codex')" >&2
+  exit 1
+  ;;
 esac
