@@ -3,8 +3,8 @@ local emacs_keys = {
   ["<c-e>"] = { "<end>", mode = "i", expr = true },
   ["<c-b>"] = { "<left>", mode = "i", expr = true },
   ["<c-f>"] = { "<right>", mode = "i", expr = true },
-  ["<c-d>"] = { "<delete>", mode = "i", expr = true },
-  ["<c-h>"] = { "<bs>", mode = "i", expr = true },
+  -- ["<c-d>"] = { "<delete>", mode = "i", expr = true },
+  -- ["<c-h>"] = { "<bs>", mode = "i", expr = true },
 }
 
 return {
