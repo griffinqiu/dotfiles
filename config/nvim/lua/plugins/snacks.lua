@@ -1,10 +1,10 @@
 local emacs_keys = {
-  -- ["<c-a>"] = { "<home>", mode = "i", expr = true },
-  -- ["<c-e>"] = { "<end>", mode = "i", expr = true },
-  -- ["<c-b>"] = { "<left>", mode = "i", expr = true },
-  -- ["<c-f>"] = { "<right>", mode = "i", expr = true },
-  -- ["<c-d>"] = { "<delete>", mode = "i", expr = true },
-  -- ["<c-h>"] = { "<bs>", mode = "i", expr = true },
+  ["<c-a>"] = { "<home>", mode = "i", expr = true },
+  ["<c-e>"] = { "<end>", mode = "i", expr = true },
+  ["<c-b>"] = { "<left>", mode = "i", expr = true },
+  ["<c-f>"] = { "<right>", mode = "i", expr = true },
+  ["<c-d>"] = { "<delete>", mode = "i", expr = true },
+  ["<c-h>"] = { "<bs>", mode = "i", expr = true },
 }
 
 return {
