@@ -4,17 +4,93 @@
 # Override with: AI_COMMIT_PROVIDER=codex ai-commit-suggest
 DEFAULT_PROVIDER="codex"
 
+DETAILED=0
+for arg in "$@"; do
+  case "$arg" in
+    --detailed|-d) DETAILED=1 ;;
+    *) echo "Unknown arg: $arg" >&2; exit 1 ;;
+  esac
+done
+
 PROVIDER="${AI_COMMIT_PROVIDER:-$DEFAULT_PROVIDER}"
 
-DIFF="$(git diff --cached)"
+DIFF_EXCLUDES=":!*.lock :!package-lock.json :!yarn.lock :!pnpm-lock.yaml :!go.sum :!Cargo.lock :!composer.lock :!Gemfile.lock :!*.min.js :!*.min.css"
+
+# shellcheck disable=SC2086
+DIFF="$(git diff --cached -- . $DIFF_EXCLUDES)"
 if [ -z "$DIFF" ]; then
-  echo "No staged changes." >&2
+  echo "No staged changes (after excluding lockfiles/minified)." >&2
   exit 1
+fi
+
+DIFF_SIZE=${#DIFF}
+SIZE_SMALL=81920     # 80 KB
+SIZE_MEDIUM=409600   # 400 KB
+
+if [ "$DIFF_SIZE" -le "$SIZE_SMALL" ]; then
+  DIFF_SECTION="Full diff:
+\`\`\`diff
+${DIFF}
+\`\`\`"
+elif [ "$DIFF_SIZE" -le "$SIZE_MEDIUM" ]; then
+  echo "[diff truncated: ${DIFF_SIZE} bytes -> stat + name-status summary]" >&2
+  # shellcheck disable=SC2086
+  STAT="$(git diff --cached --stat -- . $DIFF_EXCLUDES)"
+  # shellcheck disable=SC2086
+  NAMES="$(git diff --cached --name-status -- . $DIFF_EXCLUDES)"
+  DIFF_SECTION="Diff too large for inline inclusion. File-level summary only.
+
+Stat:
+\`\`\`
+${STAT}
+\`\`\`
+
+Name-status:
+\`\`\`
+${NAMES}
+\`\`\`"
+else
+  echo "[diff very large: ${DIFF_SIZE} bytes -> name-status only]" >&2
+  # shellcheck disable=SC2086
+  NAMES="$(git diff --cached --name-status -- . $DIFF_EXCLUDES)"
+  NAMES_SIZE=${#NAMES}
+  if [ "$NAMES_SIZE" -gt 524288 ]; then
+    echo "Diff too large even at name-status level (${NAMES_SIZE} bytes). Please commit in smaller chunks." >&2
+    exit 1
+  fi
+  DIFF_SECTION="Diff extremely large. Only file-level name-status available. Infer intent from paths.
+
+Name-status:
+\`\`\`
+${NAMES}
+\`\`\`"
 fi
 
 RECENT_LOGS="$(git log -n 10 --pretty=format:'%h %s' 2>/dev/null || true)"
 
-PROMPT="Suggest 10 commit messages for the following diff.
+if [ "$DETAILED" = "1" ]; then
+  PROMPT="Write ONE complete git commit message in conventional commits format for the following changes.
+
+Required structure (exactly this shape):
+1. Subject line: \`<type>(<scope>): <short description>\` — max 72 chars, imperative mood, lowercase after colon
+2. One blank line
+3. Body: explain WHY the change was made and summarize WHAT changed at a high level. Wrap lines at 72 chars. Use short paragraphs or dashes for lists if needed.
+
+Rules:
+- Omit scope when not directly relevant
+- The body should explain motivation, not restate the diff line by line
+- If multiple distinct changes are in the diff, group them logically in the body
+
+Recent commits for style reference:
+\`\`\`
+${RECENT_LOGS}
+\`\`\`
+
+${DIFF_SECTION}
+
+Output ONLY the commit message itself. No markdown code fences, no preamble, no trailing commentary."
+else
+  PROMPT="Suggest 10 commit messages for the following changes.
 
 Rules:
 - Format: conventional commits \`<type>(<scope>): <description>\`
@@ -28,12 +104,10 @@ Recent commits for style reference:
 ${RECENT_LOGS}
 \`\`\`
 
-Diff:
-\`\`\`diff
-${DIFF}
-\`\`\`
+${DIFF_SECTION}
 
 Output ONLY 10 raw commit messages, one per line. No numbers, bullets, or extra text."
+fi
 
 run_copilot() {
   gh copilot -- -p "$PROMPT" --silent --allow-all-tools \

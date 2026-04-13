@@ -55,3 +55,27 @@ customCommands:
       rm -f "$COMMIT_MSG_FILE"
     context: files
     output: terminal
+  - key: <c-e>
+    description: Elaborate AI commit (title + body)
+    command: |
+      COMMIT_MSG_FILE=$(mktemp)
+      echo "Generating detailed commit message..."
+      if ! ai-commit-suggest --detailed > "$COMMIT_MSG_FILE"; then
+          echo "Generation failed."
+          rm -f "$COMMIT_MSG_FILE"
+          exit 1
+      fi
+      if [ ! -s "$COMMIT_MSG_FILE" ]; then
+          echo "Empty output, aborted."
+          rm -f "$COMMIT_MSG_FILE"
+          exit 1
+      fi
+      ${EDITOR:-vim} "$COMMIT_MSG_FILE"
+      if [ -s "$COMMIT_MSG_FILE" ]; then
+          git commit -F "$COMMIT_MSG_FILE"
+      else
+          echo "Commit message is empty, commit aborted."
+      fi
+      rm -f "$COMMIT_MSG_FILE"
+    context: files
+    output: terminal
