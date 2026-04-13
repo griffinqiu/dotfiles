@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# Primary provider: "copilot" or "codex"
+# Override with: AI_COMMIT_PROVIDER=codex ai-commit-suggest
+DEFAULT_PROVIDER="codex"
+
+PROVIDER="${AI_COMMIT_PROVIDER:-$DEFAULT_PROVIDER}"
+
+DIFF="$(git diff --cached)"
+if [ -z "$DIFF" ]; then
+  echo "No staged changes." >&2
+  exit 1
+fi
+
+RECENT_LOGS="$(git log -n 10 --pretty=format:'%h %s' 2>/dev/null || true)"
+
+PROMPT="Suggest 10 commit messages for the following diff.
+
+Rules:
+- Format: conventional commits \`<type>(<scope>): <description>\`
+- Omit scope when not directly relevant
+- Abstract to a higher level, don't describe code changes literally
+- If multiple changes, capture them all in each message
+- Cover diverse scenarios, minimize overlap
+
+Recent commits for style reference:
+\`\`\`
+${RECENT_LOGS}
+\`\`\`
+
+Diff:
+\`\`\`diff
+${DIFF}
+\`\`\`
+
+Output ONLY 10 raw commit messages, one per line. No numbers, bullets, or extra text."
+
+run_copilot() {
+  gh copilot -- -p "$PROMPT" --silent --allow-all-tools \
+    --model claude-sonnet-4.5 2>/dev/null
+}
+
+run_codex() {
+  OUTFILE="$(mktemp)"
+  codex exec "$PROMPT" \
+    --sandbox read-only \
+    -m gpt-5.4 \
+    -c model_reasoning_effort=low \
+    -c tools.web_search=false \
+    -o "$OUTFILE" >/dev/null 2>&1
+  cat "$OUTFILE"
+  rm -f "$OUTFILE"
+}
+
+case "$PROVIDER" in
+  copilot)
+    run_copilot || run_codex || { echo "Both providers failed." >&2; exit 1; }
+    ;;
+  codex)
+    run_codex || run_copilot || { echo "Both providers failed." >&2; exit 1; }
+    ;;
+  *)
+    echo "Unknown provider: $PROVIDER (use 'copilot' or 'codex')" >&2
+    exit 1
+    ;;
+esac

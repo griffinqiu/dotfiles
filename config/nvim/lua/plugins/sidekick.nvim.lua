@@ -65,6 +65,9 @@ return {
       return {
         nes = {
           enabled = false,
+          diff = {
+            show = "cursor",
+          },
         },
         cli = {
           -- mux = {
@@ -122,6 +125,7 @@ return {
       }
     end,
     keys = {
+      { "<tab>", false },
       {
         "<c-j>",
         function()
