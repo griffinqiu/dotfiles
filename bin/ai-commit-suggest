@@ -4,10 +4,11 @@
 # Override with: AI_COMMIT_PROVIDER=codex ai-commit-suggest
 DEFAULT_PROVIDER="codex"
 
-DETAILED=0
+DETAILED=""
 for arg in "$@"; do
   case "$arg" in
     --detailed|-d) DETAILED=1 ;;
+    --short|-s)    DETAILED=0 ;;
     *) echo "Unknown arg: $arg" >&2; exit 1 ;;
   esac
 done
@@ -21,6 +22,22 @@ DIFF="$(git diff --cached -- . $DIFF_EXCLUDES)"
 if [ -z "$DIFF" ]; then
   echo "No staged changes (after excluding lockfiles/minified)." >&2
   exit 1
+fi
+
+if [ -z "$DETAILED" ]; then
+  # shellcheck disable=SC2086
+  read -r ADDED DELETED <<EOF
+$(git diff --cached --numstat -- . $DIFF_EXCLUDES | awk '{a+=$1;d+=$2} END{print a+0, d+0}')
+EOF
+  EFFECTIVE=$(( (ADDED + DELETED) / 2 ))
+  # shellcheck disable=SC2086
+  FILE_COUNT=$(git diff --cached --name-only -- . $DIFF_EXCLUDES | wc -l | tr -d ' ')
+  if { [ "$FILE_COUNT" -ge 10 ] && [ "$EFFECTIVE" -gt 200 ]; } || [ "$EFFECTIVE" -gt 500 ]; then
+    DETAILED=1
+    echo "[auto: detailed mode | +${ADDED}/-${DELETED} lines (eff ${EFFECTIVE}) / ${FILE_COUNT} files]" >&2
+  else
+    DETAILED=0
+  fi
 fi
 
 DIFF_SIZE=${#DIFF}
@@ -69,7 +86,7 @@ fi
 RECENT_LOGS="$(git log -n 10 --pretty=format:'%h %s' 2>/dev/null || true)"
 
 if [ "$DETAILED" = "1" ]; then
-  PROMPT="Write 3 distinct complete git commit messages in conventional commits format for the following changes.
+  PROMPT="Write 5 distinct complete git commit messages in conventional commits format for the following changes.
 
 Each candidate must follow this structure exactly:
 1. Subject line: \`<type>(<scope>): <short description>\` — max 72 chars, imperative mood, lowercase after colon
@@ -80,7 +97,7 @@ Rules:
 - Omit scope when not directly relevant
 - The body should explain motivation, not restate the diff line by line
 - If multiple distinct changes are in the diff, group them logically in the body
-- Make the 3 candidates genuinely different (different framings, different emphasis)
+- Make the 5 candidates genuinely different (different framings, different emphasis, different levels of abstraction)
 
 Recent commits for style reference:
 \`\`\`
@@ -89,12 +106,14 @@ ${RECENT_LOGS}
 
 ${DIFF_SECTION}
 
-Output format (critical — separator must be on its own line):
+Output format (critical — separator must be on its own line between every pair of candidates):
 <commit message 1>
 ===COMMIT===
 <commit message 2>
 ===COMMIT===
-<commit message 3>
+...
+===COMMIT===
+<commit message 5>
 
 Do NOT put the separator before the first candidate or after the last. No markdown code fences, no preamble, no trailing commentary."
 else
