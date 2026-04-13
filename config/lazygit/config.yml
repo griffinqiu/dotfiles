@@ -33,6 +33,10 @@ customCommands:
   - key: <c-a>
     description: Pick AI commits
     command: |
+      if [ -z "$(git diff --cached --name-only)" ]; then
+          echo "No staged changes. Stage files first (space in files panel)."
+          exit 0
+      fi
       fzf_output=$(ai-commit-suggest | fzf --height 40% --border --ansi \
           --expect=alt-g \
           --header "<CR>: commit directly  |  <M-g>: edit before commit  |  <Esc>: cancel" \
@@ -56,21 +60,32 @@ customCommands:
     context: files
     output: terminal
   - key: <c-e>
-    description: Elaborate AI commit (title + body)
+    description: Elaborate AI commits (title + body)
     command: |
+      if [ -z "$(git diff --cached --name-only)" ]; then
+          echo "No staged changes. Stage files first (space in files panel)."
+          exit 0
+      fi
+      RAW=$(ai-commit-suggest --detailed)
+      if [ -z "$RAW" ]; then
+          echo "Generation failed or empty."
+          exit 1
+      fi
+      fzf_output=$(printf '%s\n' "$RAW" | perl -0777 -pe 's/\n===COMMIT===\n/\0/g; s/^\n+//; s/\n+$//' \
+          | fzf --read0 --height 80% --border --ansi \
+          --expect=alt-g \
+          --header "<CR>: commit directly  |  <M-g>: edit before commit  |  <Esc>: cancel" \
+          --preview "printf '%s\n' {}" --preview-window=up:wrap:70%)
+      pressed_key=$(printf '%s' "$fzf_output" | head -n 1)
+      selected_msg=$(printf '%s' "$fzf_output" | tail -n +2)
+      if [ -z "$selected_msg" ]; then
+          exit 0
+      fi
       COMMIT_MSG_FILE=$(mktemp)
-      echo "Generating detailed commit message..."
-      if ! ai-commit-suggest --detailed > "$COMMIT_MSG_FILE"; then
-          echo "Generation failed."
-          rm -f "$COMMIT_MSG_FILE"
-          exit 1
+      printf '%s\n' "$selected_msg" > "$COMMIT_MSG_FILE"
+      if [ "$pressed_key" = "alt-g" ]; then
+          ${EDITOR:-vim} "$COMMIT_MSG_FILE"
       fi
-      if [ ! -s "$COMMIT_MSG_FILE" ]; then
-          echo "Empty output, aborted."
-          rm -f "$COMMIT_MSG_FILE"
-          exit 1
-      fi
-      ${EDITOR:-vim} "$COMMIT_MSG_FILE"
       if [ -s "$COMMIT_MSG_FILE" ]; then
           git commit -F "$COMMIT_MSG_FILE"
       else

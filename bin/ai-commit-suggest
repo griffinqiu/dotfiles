@@ -69,9 +69,9 @@ fi
 RECENT_LOGS="$(git log -n 10 --pretty=format:'%h %s' 2>/dev/null || true)"
 
 if [ "$DETAILED" = "1" ]; then
-  PROMPT="Write ONE complete git commit message in conventional commits format for the following changes.
+  PROMPT="Write 3 distinct complete git commit messages in conventional commits format for the following changes.
 
-Required structure (exactly this shape):
+Each candidate must follow this structure exactly:
 1. Subject line: \`<type>(<scope>): <short description>\` — max 72 chars, imperative mood, lowercase after colon
 2. One blank line
 3. Body: explain WHY the change was made and summarize WHAT changed at a high level. Wrap lines at 72 chars. Use short paragraphs or dashes for lists if needed.
@@ -80,6 +80,7 @@ Rules:
 - Omit scope when not directly relevant
 - The body should explain motivation, not restate the diff line by line
 - If multiple distinct changes are in the diff, group them logically in the body
+- Make the 3 candidates genuinely different (different framings, different emphasis)
 
 Recent commits for style reference:
 \`\`\`
@@ -88,7 +89,14 @@ ${RECENT_LOGS}
 
 ${DIFF_SECTION}
 
-Output ONLY the commit message itself. No markdown code fences, no preamble, no trailing commentary."
+Output format (critical — separator must be on its own line):
+<commit message 1>
+===COMMIT===
+<commit message 2>
+===COMMIT===
+<commit message 3>
+
+Do NOT put the separator before the first candidate or after the last. No markdown code fences, no preamble, no trailing commentary."
 else
   PROMPT="Suggest 10 commit messages for the following changes.
 
