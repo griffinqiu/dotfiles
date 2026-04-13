@@ -1,4 +1,6 @@
 promptToReturnFromSubprocess: false
+os:
+  editPreset: nvim
 gui:
   scrollHeight: 10
   scrollOffBehavior: jump
