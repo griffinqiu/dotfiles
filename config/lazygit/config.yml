@@ -32,19 +32,26 @@ customCommands:
   - key: <c-a>
     description: Pick AI commits
     command: |
-      ai-commit-suggest \
-        | fzf --height 40% --border --ansi --preview "echo {}" --preview-window=up:wrap \
-        | {
-            read -r selected_msg
-            COMMIT_MSG_FILE=$(mktemp)
-            echo "$selected_msg" > "$COMMIT_MSG_FILE"
-            ${EDITOR:-vim} "$COMMIT_MSG_FILE"
-            if [ -s "$COMMIT_MSG_FILE" ]; then
-                git commit -F "$COMMIT_MSG_FILE"
-            else
-                echo "Commit message is empty, commit aborted."
-            fi
-            rm -f "$COMMIT_MSG_FILE"
-        }
+      fzf_output=$(ai-commit-suggest | fzf --height 40% --border --ansi \
+          --expect=ctrl-g \
+          --header "Enter: commit directly  |  Ctrl-G: edit before commit  |  Esc: cancel" \
+          --preview "echo {}" --preview-window=up:wrap)
+      pressed_key=$(printf '%s\n' "$fzf_output" | sed -n '1p')
+      selected_msg=$(printf '%s\n' "$fzf_output" | sed -n '2p')
+      if [ -z "$selected_msg" ]; then
+          echo "Cancelled."
+          exit 0
+      fi
+      COMMIT_MSG_FILE=$(mktemp)
+      echo "$selected_msg" > "$COMMIT_MSG_FILE"
+      if [ "$pressed_key" = "ctrl-g" ]; then
+          ${EDITOR:-vim} "$COMMIT_MSG_FILE"
+      fi
+      if [ -s "$COMMIT_MSG_FILE" ]; then
+          git commit -F "$COMMIT_MSG_FILE"
+      else
+          echo "Commit message is empty, commit aborted."
+      fi
+      rm -f "$COMMIT_MSG_FILE"
     context: files
     output: terminal
