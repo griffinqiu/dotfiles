@@ -136,21 +136,56 @@ ${DIFF_SECTION}
 Output ONLY 10 raw commit messages, one per line. No numbers, bullets, or extra text."
 fi
 
+TIMEOUT_SECS=60
+
+wait_with_timer() {
+  pid=$1
+  label=$2
+  tick=0
+  while kill -0 "$pid" 2>/dev/null; do
+    sleep 0.1
+    tick=$((tick + 1))
+    elapsed=$(awk "BEGIN{printf \"%.1f\", $tick/10}")
+    printf '\r\033[K\033[36m⏳\033[0m %s %s/%ss' "$label" "$elapsed" "$TIMEOUT_SECS" >&2
+    if [ "$tick" -ge $((TIMEOUT_SECS * 10)) ]; then
+      kill "$pid" 2>/dev/null
+      sleep 0.2
+      kill -KILL "$pid" 2>/dev/null
+      wait "$pid" 2>/dev/null
+      printf '\r\033[K\033[33m⏱ %s timeout after %ss\033[0m\n' "$label" "$TIMEOUT_SECS" >&2
+      return 124
+    fi
+  done
+  wait "$pid"
+  rc=$?
+  printf '\r\033[K' >&2
+  return "$rc"
+}
+
 run_copilot() {
-  gh copilot -- -p "$PROMPT" --silent --allow-all-tools \
-    --model claude-sonnet-4.5 2>/dev/null
+  outfile=$(mktemp)
+  ( gh copilot -- -p "$PROMPT" --silent --allow-all-tools \
+      --model claude-sonnet-4.5 > "$outfile" 2>/dev/null ) &
+  wait_with_timer $! "copilot"
+  rc=$?
+  [ "$rc" = "0" ] && cat "$outfile"
+  rm -f "$outfile"
+  return "$rc"
 }
 
 run_codex() {
-  OUTFILE="$(mktemp)"
-  codex exec "$PROMPT" \
-    --sandbox read-only \
-    -m gpt-5.4 \
-    -c model_reasoning_effort=low \
-    -c tools.web_search=false \
-    -o "$OUTFILE" >/dev/null 2>&1
-  cat "$OUTFILE"
-  rm -f "$OUTFILE"
+  outfile=$(mktemp)
+  ( codex exec "$PROMPT" \
+      --sandbox read-only \
+      -m gpt-5.4 \
+      -c model_reasoning_effort=low \
+      -c tools.web_search=false \
+      -o "$outfile" >/dev/null 2>&1 ) &
+  wait_with_timer $! "codex"
+  rc=$?
+  [ "$rc" = "0" ] && cat "$outfile"
+  rm -f "$outfile"
+  return "$rc"
 }
 
 case "$PROVIDER" in

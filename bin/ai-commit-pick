@@ -1,0 +1,71 @@
+#!/bin/sh
+# Interactive commit message picker for lazygit / terminal use.
+# Delegates generation to `ai-commit-suggest`, handles fzf selection,
+# optional editing, and final `git commit`.
+
+if [ -z "$(git diff --cached --name-only)" ]; then
+  printf '\n  \033[1;33m请先 stage 文件\033[0m\n'
+  sleep 1
+  exit 0
+fi
+
+RAW=$(ai-commit-suggest "$@")
+if [ -z "$RAW" ]; then
+  echo "Generation failed."
+  exit 1
+fi
+
+HEADER="<CR>: commit directly  |  <M-g>: edit before commit  |  <Esc>: cancel"
+
+if printf '%s' "$RAW" | grep -q '^===COMMIT===$'; then
+  TMP_DIR=$(mktemp -d)
+  trap 'rm -rf "$TMP_DIR"' EXIT
+
+  printf '%s\n' "$RAW" | TMP_DIR="$TMP_DIR" perl -0777 -e '
+    my $dir = $ENV{TMP_DIR};
+    my $in = do { local $/; <STDIN> };
+    $in =~ s/^\n+//; $in =~ s/\n+$//;
+    my @parts = split /\n===COMMIT===\n/, $in;
+    for my $i (0..$#parts) {
+      my $p = $parts[$i];
+      $p =~ s/^\n+//; $p =~ s/\n+$//;
+      open(my $fh, ">", "$dir/$i") or die;
+      print $fh $p;
+      close $fh;
+      my ($title) = split /\n/, $p;
+      print "$dir/$i\t$title\n";
+    }
+  ' > "$TMP_DIR/list"
+
+  fzf_output=$(fzf --delimiter='\t' --with-nth=2 --height 80% --border --ansi \
+      --expect=alt-g --header "$HEADER" \
+      --preview 'cat {1}' --preview-window=up:wrap:70% < "$TMP_DIR/list" || true)
+
+  pressed_key=$(printf '%s' "$fzf_output" | head -n 1)
+  selected_line=$(printf '%s' "$fzf_output" | tail -n +2)
+  [ -z "$selected_line" ] && exit 0
+  selected_file=$(printf '%s' "$selected_line" | cut -f1)
+  selected_msg=$(cat "$selected_file")
+else
+  fzf_output=$(printf '%s' "$RAW" | fzf --height 40% --border --ansi \
+      --expect=alt-g --header "$HEADER" \
+      --preview "echo {}" --preview-window=up:wrap || true)
+  pressed_key=$(printf '%s' "$fzf_output" | sed -n '1p')
+  selected_msg=$(printf '%s' "$fzf_output" | sed -n '2p')
+  [ -z "$selected_msg" ] && exit 0
+fi
+
+COMMIT_MSG_FILE=$(mktemp)
+printf '%s\n' "$selected_msg" > "$COMMIT_MSG_FILE"
+
+if [ "$pressed_key" = "alt-g" ]; then
+  ${EDITOR:-vim} "$COMMIT_MSG_FILE"
+fi
+
+if [ -s "$COMMIT_MSG_FILE" ]; then
+  git commit -F "$COMMIT_MSG_FILE"
+else
+  echo "Commit message is empty, commit aborted."
+fi
+
+rm -f "$COMMIT_MSG_FILE"
