@@ -37,7 +37,6 @@ _load_settings "$HOME/.zsh/configs"
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
-
 # fzf colors: everforest dark medium (https://github.com/neanias/everforest-nvim)
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --highlight-line \

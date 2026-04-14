@@ -167,43 +167,59 @@ wait_with_timer() {
 
 run_copilot() {
   outfile=$(mktemp)
+  errfile=$(mktemp)
   (gh copilot -- -p "$PROMPT" --silent --allow-all-tools \
-    --model claude-sonnet-4.5 >"$outfile" 2>/dev/null) &
+    --model claude-sonnet-4.5 >"$outfile" 2>"$errfile") &
   pid=$!
-  disown "$pid" 2>/dev/null || true
   wait_with_timer "$pid" "copilot"
   rc=$?
-  [ "$rc" = "0" ] && cat "$outfile"
-  rm -f "$outfile"
-  return "$rc"
+  if [ "$rc" = "0" ] && [ -s "$outfile" ]; then
+    cat "$outfile"
+    rm -f "$outfile" "$errfile"
+    return 0
+  fi
+  [ -s "$errfile" ] && printf '\033[33mcopilot failed:\033[0m %s\n' "$(head -5 "$errfile")" >&2
+  [ "$rc" = "0" ] && printf '\033[33mcopilot:\033[0m empty output\n' >&2
+  rm -f "$outfile" "$errfile"
+  return 1
 }
 
 run_codex() {
   outfile=$(mktemp)
+  errfile=$(mktemp)
   (codex exec "$PROMPT" \
     --sandbox read-only \
     -m gpt-5.4 \
     -c model_reasoning_effort=low \
     -c tools.web_search=false \
-    -o "$outfile" >/dev/null 2>&1) &
+    -o "$outfile" >"$errfile" 2>&1) &
   pid=$!
-  disown "$pid" 2>/dev/null || true
   wait_with_timer "$pid" "codex"
   rc=$?
-  [ "$rc" = "0" ] && cat "$outfile"
-  rm -f "$outfile"
-  return "$rc"
+  if [ "$rc" = "0" ] && [ -s "$outfile" ]; then
+    cat "$outfile"
+    rm -f "$outfile" "$errfile"
+    return 0
+  fi
+  [ -s "$errfile" ] && printf '\033[33mcodex failed:\033[0m %s\n' "$(head -5 "$errfile")" >&2
+  [ "$rc" = "0" ] && printf '\033[33mcodex:\033[0m empty output\n' >&2
+  rm -f "$outfile" "$errfile"
+  return 1
+}
+
+fallback_to() {
+  printf '\033[36m↻ falling back to %s…\033[0m\n' "$1" >&2
 }
 
 case "$PROVIDER" in
 copilot)
-  run_copilot || run_codex || {
+  run_copilot || { fallback_to codex; run_codex; } || {
     echo "Both providers failed." >&2
     exit 1
   }
   ;;
 codex)
-  run_codex || run_copilot || {
+  run_codex || { fallback_to copilot; run_copilot; } || {
     echo "Both providers failed." >&2
     exit 1
   }
