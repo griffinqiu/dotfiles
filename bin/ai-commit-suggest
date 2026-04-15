@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Primary provider: "copilot" or "codex"
-# Override with: AI_COMMIT_PROVIDER=codex ai-commit-suggest
+# Provider priority: codex > claude > gemini > copilot
+# Override with: AI_COMMIT_PROVIDER=claude ai-commit-suggest
 DEFAULT_PROVIDER="codex"
 
 DETAILED=""
@@ -169,17 +169,17 @@ run_copilot() {
   outfile=$(mktemp)
   errfile=$(mktemp)
   (gh copilot -- -p "$PROMPT" --silent --allow-all-tools \
-    --model claude-sonnet-4.5 >"$outfile" 2>"$errfile") &
+    --model claude-sonnet-4-6 >"$outfile" 2>"$errfile") &
   pid=$!
-  wait_with_timer "$pid" "copilot"
+  wait_with_timer "$pid" "GitHub Copilot"
   rc=$?
   if [ "$rc" = "0" ] && [ -s "$outfile" ]; then
     cat "$outfile"
     rm -f "$outfile" "$errfile"
     return 0
   fi
-  [ -s "$errfile" ] && printf '\033[33mcopilot failed:\033[0m %s\n' "$(head -5 "$errfile")" >&2
-  [ "$rc" = "0" ] && printf '\033[33mcopilot:\033[0m empty output\n' >&2
+  [ -s "$errfile" ] && printf '\033[33mGitHub Copilot failed:\033[0m %s\n' "$(head -5 "$errfile")" >&2
+  [ "$rc" = "0" ] && printf '\033[33mGitHub Copilot:\033[0m empty output\n' >&2
   rm -f "$outfile" "$errfile"
   return 1
 }
@@ -194,38 +194,112 @@ run_codex() {
     -c tools.web_search=false \
     -o "$outfile" >"$errfile" 2>&1) &
   pid=$!
-  wait_with_timer "$pid" "codex"
+  wait_with_timer "$pid" "OpenAI Codex"
   rc=$?
   if [ "$rc" = "0" ] && [ -s "$outfile" ]; then
     cat "$outfile"
     rm -f "$outfile" "$errfile"
     return 0
   fi
-  [ -s "$errfile" ] && printf '\033[33mcodex failed:\033[0m %s\n' "$(head -5 "$errfile")" >&2
-  [ "$rc" = "0" ] && printf '\033[33mcodex:\033[0m empty output\n' >&2
+  [ -s "$errfile" ] && printf '\033[33mOpenAI Codex failed:\033[0m %s\n' "$(head -5 "$errfile")" >&2
+  [ "$rc" = "0" ] && printf '\033[33mOpenAI Codex:\033[0m empty output\n' >&2
   rm -f "$outfile" "$errfile"
   return 1
 }
 
-fallback_to() {
-  printf '\033[36m↻ falling back to %s…\033[0m\n' "$1" >&2
+run_gemini() {
+  outfile=$(mktemp)
+  errfile=$(mktemp)
+  (gemini -p "$PROMPT" --sandbox \
+    -m gemini-2.5-pro \
+    >"$outfile" 2>"$errfile") &
+  pid=$!
+  wait_with_timer "$pid" "Google Gemini"
+  rc=$?
+  if [ "$rc" = "0" ] && [ -s "$outfile" ]; then
+    cat "$outfile"
+    rm -f "$outfile" "$errfile"
+    return 0
+  fi
+  [ -s "$errfile" ] && printf '\033[33mGoogle Gemini failed:\033[0m %s\n' "$(head -5 "$errfile")" >&2
+  [ "$rc" = "0" ] && printf '\033[33mGoogle Gemini:\033[0m empty output\n' >&2
+  rm -f "$outfile" "$errfile"
+  return 1
 }
 
-case "$PROVIDER" in
-copilot)
-  run_copilot || { fallback_to codex; run_codex; } || {
-    echo "Both providers failed." >&2
+run_claude() {
+  outfile=$(mktemp)
+  errfile=$(mktemp)
+  (claude -p "$PROMPT" --bare \
+    --model sonnet \
+    --allowedTools '' \
+    >"$outfile" 2>"$errfile") &
+  pid=$!
+  wait_with_timer "$pid" "Anthropic Claude"
+  rc=$?
+  if [ "$rc" = "0" ] && [ -s "$outfile" ]; then
+    cat "$outfile"
+    rm -f "$outfile" "$errfile"
+    return 0
+  fi
+  [ -s "$errfile" ] && printf '\033[33mAnthropic Claude failed:\033[0m %s\n' "$(head -5 "$errfile")" >&2
+  [ "$rc" = "0" ] && printf '\033[33mAnthropic Claude:\033[0m empty output\n' >&2
+  rm -f "$outfile" "$errfile"
+  return 1
+}
+
+provider_label() {
+  case "$1" in
+    gemini)  echo "Google Gemini"    ;;
+    codex)   echo "OpenAI Codex"     ;;
+    copilot) echo "GitHub Copilot"   ;;
+    claude)  echo "Anthropic Claude" ;;
+  esac
+}
+
+fallback_to() {
+  printf '\033[36m↻ falling back to %s…\033[0m\n' "$(provider_label "$1")" >&2
+}
+
+PROVIDERS="codex claude gemini copilot"
+
+run_provider() {
+  case "$1" in
+    gemini)  run_gemini  ;;
+    codex)   run_codex   ;;
+    copilot) run_copilot ;;
+    claude)  run_claude  ;;
+    *)       return 1    ;;
+  esac
+}
+
+case "$PROVIDERS" in
+  *"$PROVIDER"*) ;;
+  *)
+    echo "Unknown provider: $PROVIDER (use one of: $PROVIDERS)" >&2
     exit 1
-  }
-  ;;
-codex)
-  run_codex || { fallback_to copilot; run_copilot; } || {
-    echo "Both providers failed." >&2
-    exit 1
-  }
-  ;;
-*)
-  echo "Unknown provider: $PROVIDER (use 'copilot' or 'codex')" >&2
-  exit 1
-  ;;
+    ;;
 esac
+
+# Build fallback order: chosen provider first, then remaining in priority order
+ORDERED="$PROVIDER"
+for p in $PROVIDERS; do
+  case " $ORDERED " in
+    *" $p "*) ;;
+    *) ORDERED="$ORDERED $p" ;;
+  esac
+done
+
+FIRST=1
+for p in $ORDERED; do
+  if [ "$FIRST" = "1" ]; then
+    FIRST=0
+    run_provider "$p" && exit 0
+  else
+    fallback_to "$p"
+    run_provider "$p" && exit 0
+  fi
+done
+
+echo "All providers failed." >&2
+exit 1
