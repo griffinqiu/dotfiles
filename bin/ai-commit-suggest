@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Provider priority: claude > codex > gemini > copilot
+# Provider priority: copilot > claude > gemini > codex
 # Override with: AI_COMMIT_PROVIDER=codex ai-commit-suggest
-DEFAULT_PROVIDER="claude"
+DEFAULT_PROVIDER="copilot"
 
 DETAILED=""
 for arg in "$@"; do
@@ -235,15 +235,15 @@ run_claude() {
     --allowedTools '' \
     >"$outfile" 2>"$errfile") &
   pid=$!
-  wait_with_timer "$pid" "Anthropic Claude"
+  wait_with_timer "$pid" "Anthropic Claude Code"
   rc=$?
   if [ "$rc" = "0" ] && [ -s "$outfile" ]; then
     cat "$outfile"
     rm -f "$outfile" "$errfile"
     return 0
   fi
-  [ -s "$errfile" ] && printf '\033[33mAnthropic Claude failed:\033[0m %s\n' "$(head -5 "$errfile")" >&2
-  [ "$rc" = "0" ] && printf '\033[33mAnthropic Claude:\033[0m empty output\n' >&2
+  [ -s "$errfile" ] && printf '\033[33mAnthropic Claude Code failed:\033[0m %s\n' "$(head -5 "$errfile")" >&2
+  [ "$rc" = "0" ] && printf '\033[33mAnthropic Claude Code:\033[0m empty output\n' >&2
   rm -f "$outfile" "$errfile"
   return 1
 }
@@ -253,7 +253,7 @@ provider_label() {
     gemini)  echo "Google Gemini"    ;;
     codex)   echo "OpenAI Codex"     ;;
     copilot) echo "GitHub Copilot"   ;;
-    claude)  echo "Anthropic Claude" ;;
+    claude)  echo "Anthropic Claude Code" ;;
   esac
 }
 
@@ -261,7 +261,7 @@ fallback_to() {
   printf '\033[36m↻ falling back to %s…\033[0m\n' "$(provider_label "$1")" >&2
 }
 
-PROVIDERS="claude codex gemini copilot"
+PROVIDERS="copilot claude gemini codex"
 
 run_provider() {
   case "$1" in
