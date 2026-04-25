@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Patch Chrome's "Local State" so Gemini (glic) is available for non-US accounts.
+# Run this manually whenever Gemini disappears from Chrome's side panel.
+#
+# Usage:
+#   1. Quit Chrome completely (Cmd+Q, not just close the window).
+#   2. Run: chrome-enable-gemini
+#   3. Launch Chrome again.
+
+set -euo pipefail
+
+local_state="$HOME/Library/Application Support/Google/Chrome/Local State"
+
+if [[ ! -f "$local_state" ]]; then
+  echo "error: Chrome Local State not found at:" >&2
+  echo "       $local_state" >&2
+  exit 1
+fi
+
+if /usr/bin/pgrep -x "Google Chrome" >/dev/null 2>&1; then
+  echo "error: Chrome is running. Quit Chrome first (Cmd+Q), then re-run." >&2
+  exit 1
+fi
+
+cp -p "$local_state" "$local_state.bak"
+
+/usr/bin/perl -i -pe '
+  s/"is_glic_eligible":false/"is_glic_eligible":true/g;
+  s/"variations_country":"[^"]*"/"variations_country":"us"/g;
+  s/("variations_permanent_consistency_country":\["[^"]*",")[^"]*(")/$1us$2/g;
+' "$local_state"
+
+echo "patched. current values:"
+/usr/bin/grep -oE '"is_glic_eligible":[^,}]+|"variations_country":"[^"]+"|"variations_permanent_consistency_country":\[[^]]*\]' \
+  "$local_state" | sed 's/^/  /'
+echo "backup saved at: $local_state.bak"

@@ -64,3 +64,15 @@ Before completing any code changes, ensure:
 - [ ] No comments explaining obvious operations
 - [ ] Code is logically organized and easy to follow
 - [ ] Error cases are appropriately handled
+
+## Git Operations (Strict)
+
+**Never run `git commit`, `git commit --amend`, `git push`, `git push --force`, or `gh pr create` unless the user gives an explicit, in-turn instruction to do so.**
+
+This rule overrides any other "natural next step" reasoning. Even when code has been edited, tests pass, and a commit looks like the obvious thing to do next — stop at the file-change layer. Report what changed and wait.
+
+Also avoid *suggesting* a commit/push/PR ("要我帮你 commit 吗？", "next step: commit + push") — that pressures a workflow the user has explicitly rejected. If the user asks "下一步做什么?", recommend code-level next actions (more refactors, tests, doc updates) rather than git operations.
+
+Read-only git commands (`git status`, `git diff`, `git log`, `git show`, `gh pr view`) remain freely usable.
+
+Explicit trigger phrases the user may give: "commit this" / "提交" / "push" / "开 PR" / "/commit" / running `commit-commands:*` skills. Without one of these, do nothing on the git write side.

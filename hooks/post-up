@@ -28,6 +28,7 @@ brew "fd"
 brew "universal-ctags"
 brew "gawk"
 brew "gh"
+brew "glab"
 brew "bash" # ensure bash is >= 4.0
 brew "macvim"
 brew "lazygit"

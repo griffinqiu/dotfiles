@@ -42,3 +42,19 @@ customCommands:
     command: ai-commit-pick --detailed
     context: files
     output: terminal
+  - key: <c-v>
+    description: AI MR 助手（建 MR / Review 别人 / 消化评论）
+    context: localBranches
+    output: terminal
+    prompts:
+      - type: menu
+        key: SkillCmd
+        title: AI MR 助手
+        options:
+          - name: "📝 建 MR（作者自查）"
+            value: "/gitlab-mr"
+          - name: "👀 Review 别人的 MR"
+            value: "/gitlab-mr-review"
+          - name: "💬 消化收到的评论"
+            value: "/gitlab-mr-resolve"
+    command: "mr-claude '{{.Form.SkillCmd}}'"

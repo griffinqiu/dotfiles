@@ -1,0 +1,246 @@
+#!/usr/bin/env bash
+# glab-api: unified GitLab REST API wrapper for gitlab-mr* skills.
+#
+# Subcommands:
+#   mr-view <iid>
+#   mr-diffs <iid>
+#   mr-discussions <iid>
+#   mr-notes <iid>
+#   mr-find-by-source <branch>
+#   mr-create <body-file>                   POST /merge_requests
+#   mr-update <iid> <body-file>             PUT  /merge_requests/:iid
+#   mr-post-discussion <iid> <body-file>    POST /merge_requests/:iid/discussions
+#   mr-reply <iid> <disc-id> <body-text>    POST /merge_requests/:iid/discussions/:disc/notes
+#   mr-resolve <iid> <disc-id>              PUT  /merge_requests/:iid/discussions/:disc?resolved=true
+#   mr-note <iid> <body-text>               POST /merge_requests/:iid/notes
+#   whoami                                  GET  /user  (token validation)
+#   project-id                              prints URL-encoded project path
+#   host                                    prints GitLab host
+#
+# Env:
+#   LB_GITLAB_TOKEN   primary token; falls back to `glab auth status` hint
+#   GITLAB_HOST       override host detection
+#
+# Exit codes:
+#   0      success (HTTP 2xx)
+#   2      pre-flight (missing token / git remote / required tools)
+#   4xx/5xx  mapped from HTTP status (rounded: 40, 41, 43, 44 etc. stay as-is)
+
+set -euo pipefail
+
+_die() { printf '\033[31m❌ %s\033[0m\n' "$*" >&2; exit 2; }
+_log() { printf '\033[36m•\033[0m %s\n' "$*" >&2; }
+
+_require() {
+  command -v "$1" >/dev/null 2>&1 || _die "missing required command: $1${2:+ ($2)}"
+}
+
+_require curl
+_require jq
+_require git
+
+_resolve_remote() {
+  local url host path
+  url="$(git remote get-url origin 2>/dev/null || true)"
+  [ -n "$url" ] || _die "no git remote 'origin' found"
+
+  if [[ "$url" == ssh://git@* ]]; then
+    url="${url#ssh://git@}"
+    if [[ "$url" == *:*/* ]]; then
+      host="${url%%:*}"; path="${url#*/}"
+    else
+      host="${url%%/*}"; path="${url#*/}"
+    fi
+  elif [[ "$url" == git@*:* ]]; then
+    url="${url#git@}"; host="${url%%:*}"; path="${url#*:}"
+  elif [[ "$url" == http://* || "$url" == https://* ]]; then
+    url="${url#*://}"; host="${url%%/*}"; path="${url#*/}"
+  else
+    _die "unrecognized remote URL format: $url"
+  fi
+
+  path="${path#/}"; path="${path%/}"; path="${path%.git}"
+  [ -n "$host" ] && [ -n "$path" ] || _die "could not parse host/path from remote: $url"
+
+  GITLAB_HOST="${GITLAB_HOST:-$host}"
+  PROJECT_PATH="$path"
+  PROJECT_ID_ENCODED="$(printf '%s' "$PROJECT_PATH" | jq -sRr @uri)"
+  API_BASE="https://$GITLAB_HOST/api/v4"
+}
+
+_resolve_token() {
+  if [ -n "${LB_GITLAB_TOKEN:-}" ]; then
+    TOKEN="$LB_GITLAB_TOKEN"; TOKEN_SOURCE="LB_GITLAB_TOKEN"
+    return
+  fi
+  if command -v glab >/dev/null 2>&1; then
+    local token
+    token="$(glab auth status -t 2>&1 | awk '/Token:/ {print $NF}' | head -1 || true)"
+    if [ -n "$token" ] && [ "$token" != "*******************" ]; then
+      TOKEN="$token"; TOKEN_SOURCE="glab"
+      return
+    fi
+  fi
+  cat >&2 <<EOF
+❌ No GitLab token available.
+
+Set one of:
+  export LB_GITLAB_TOKEN=glpat-xxxx   # recommended
+  glab auth login                      # fallback via glab CLI
+
+Token needs 'api' scope.
+EOF
+  exit 2
+}
+
+_init() {
+  _resolve_remote
+  _resolve_token
+}
+
+# Shared curl wrapper. Prints body, returns exit code.
+#   - 2xx:  exit 0
+#   - else: body → stderr, exit = HTTP status (clamped to ≤255)
+_api() {
+  local method="$1"; shift
+  local path="$1"; shift
+  local tmp http body
+  tmp="$(mktemp)"
+  # shellcheck disable=SC2064
+  trap "rm -f '$tmp'" RETURN
+
+  http="$(curl -sS -o "$tmp" -w '%{http_code}' \
+    -X "$method" \
+    -H "PRIVATE-TOKEN: $TOKEN" \
+    -H "Content-Type: application/json" \
+    "$@" \
+    "$API_BASE$path" || echo "000")"
+
+  body="$(cat "$tmp")"
+
+  if [[ "$http" =~ ^2 ]]; then
+    printf '%s' "$body"
+    return 0
+  fi
+
+  {
+    printf '\033[31m❌ HTTP %s\033[0m  %s %s\n' "$http" "$method" "$path"
+    if printf '%s' "$body" | jq -e . >/dev/null 2>&1; then
+      printf '%s\n' "$body" | jq .
+    else
+      printf '%s\n' "$body"
+    fi
+  } >&2
+
+  local code="${http:-0}"
+  [ "$code" -gt 255 ] 2>/dev/null && code=$((code % 256 + 10))
+  exit "$code"
+}
+
+# ───────────────────────── subcommands ─────────────────────────
+
+cmd_whoami()     { _init; _api GET "/user"; }
+cmd_host()       { _init; printf '%s\n' "$GITLAB_HOST"; }
+cmd_project_id() { _init; printf '%s\n' "$PROJECT_ID_ENCODED"; }
+
+cmd_mr_view() {
+  local iid="${1:?iid required}"
+  _init
+  _api GET "/projects/$PROJECT_ID_ENCODED/merge_requests/$iid"
+}
+
+cmd_mr_diffs() {
+  local iid="${1:?iid required}"
+  _init
+  _api GET "/projects/$PROJECT_ID_ENCODED/merge_requests/$iid/diffs"
+}
+
+cmd_mr_discussions() {
+  local iid="${1:?iid required}"
+  _init
+  _api GET "/projects/$PROJECT_ID_ENCODED/merge_requests/$iid/discussions?per_page=100"
+}
+
+cmd_mr_notes() {
+  local iid="${1:?iid required}"
+  _init
+  _api GET "/projects/$PROJECT_ID_ENCODED/merge_requests/$iid/notes?per_page=100"
+}
+
+cmd_mr_find_by_source() {
+  local branch="${1:?source branch required}"
+  _init
+  local encoded
+  encoded="$(printf '%s' "$branch" | jq -sRr @uri)"
+  _api GET "/projects/$PROJECT_ID_ENCODED/merge_requests?source_branch=$encoded&state=opened"
+}
+
+cmd_mr_create() {
+  local body_file="${1:?body-file required}"
+  [ -f "$body_file" ] || _die "body file not found: $body_file"
+  _init
+  _api POST "/projects/$PROJECT_ID_ENCODED/merge_requests" --data "@$body_file"
+}
+
+cmd_mr_update() {
+  local iid="${1:?iid required}" body_file="${2:?body-file required}"
+  [ -f "$body_file" ] || _die "body file not found: $body_file"
+  _init
+  _api PUT "/projects/$PROJECT_ID_ENCODED/merge_requests/$iid" --data "@$body_file"
+}
+
+cmd_mr_post_discussion() {
+  local iid="${1:?iid required}" body_file="${2:?body-file required}"
+  [ -f "$body_file" ] || _die "body file not found: $body_file"
+  _init
+  _api POST "/projects/$PROJECT_ID_ENCODED/merge_requests/$iid/discussions" --data "@$body_file"
+}
+
+cmd_mr_reply() {
+  local iid="${1:?iid required}" disc="${2:?discussion-id required}" body="${3:?body text required}"
+  _init
+  local body_json
+  body_json="$(jq -n --arg b "$body" '{body: $b}')"
+  _api POST "/projects/$PROJECT_ID_ENCODED/merge_requests/$iid/discussions/$disc/notes" --data "$body_json"
+}
+
+cmd_mr_resolve() {
+  local iid="${1:?iid required}" disc="${2:?discussion-id required}"
+  _init
+  _api PUT "/projects/$PROJECT_ID_ENCODED/merge_requests/$iid/discussions/$disc?resolved=true"
+}
+
+cmd_mr_note() {
+  local iid="${1:?iid required}" body="${2:?body text required}"
+  _init
+  local body_json
+  body_json="$(jq -n --arg b "$body" '{body: $b}')"
+  _api POST "/projects/$PROJECT_ID_ENCODED/merge_requests/$iid/notes" --data "$body_json"
+}
+
+# ───────────────────────── dispatch ─────────────────────────
+
+usage() {
+  sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'
+  exit "${1:-0}"
+}
+
+sub="${1:-}"; shift || true
+case "$sub" in
+  mr-view)            cmd_mr_view "$@" ;;
+  mr-diffs)           cmd_mr_diffs "$@" ;;
+  mr-discussions)     cmd_mr_discussions "$@" ;;
+  mr-notes)           cmd_mr_notes "$@" ;;
+  mr-find-by-source)  cmd_mr_find_by_source "$@" ;;
+  mr-create)          cmd_mr_create "$@" ;;
+  mr-update)          cmd_mr_update "$@" ;;
+  mr-post-discussion) cmd_mr_post_discussion "$@" ;;
+  mr-reply)           cmd_mr_reply "$@" ;;
+  mr-resolve)         cmd_mr_resolve "$@" ;;
+  mr-note)            cmd_mr_note "$@" ;;
+  whoami)             cmd_whoami ;;
+  host)               cmd_host ;;
+  project-id)         cmd_project_id ;;
+  -h|--help|help|'')  usage 0 ;;
+  *) printf 'unknown subcommand: %s\n' "$sub" >&2; usage 2 ;;
+esac

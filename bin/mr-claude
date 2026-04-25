@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# mr-claude: open a Claude Code pane and feed it a slash command.
+# Called from Lazygit customCommand.
+#
+# Usage:
+#   mr-claude '<slash-command>'   e.g. mr-claude '/gitlab-mr'
+
+set -euo pipefail
+
+slash_cmd="${1:-}"
+[ -n "$slash_cmd" ] || { echo "usage: mr-claude '<slash-command>'" >&2; exit 1; }
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+
+if [ -n "${TMUX:-}" ]; then
+  # tmux freezes its server environment at startup; env vars exported in later
+  # shells are invisible to new panes unless forwarded explicitly via `-e`.
+  if [ -n "${LB_GITLAB_TOKEN:-}" ]; then
+    pane="$(tmux split-window \
+      -e "LB_GITLAB_TOKEN=$LB_GITLAB_TOKEN" \
+      -h -l 55% -c "$repo_root" -P -F '#{pane_id}' claude)"
+  else
+    pane="$(tmux split-window \
+      -h -l 55% -c "$repo_root" -P -F '#{pane_id}' claude)"
+  fi
+  # Wait for Claude Code TUI to be ready before piping the slash command.
+  sleep 1.2
+  tmux send-keys -t "$pane" "$slash_cmd" Enter
+  # Jump focus to the new pane so the user sees Claude immediately.
+  tmux select-pane -t "$pane"
+  exit 0
+fi
+
+# Fallback: no tmux. Launch claude in the current terminal; user pastes the command.
+cat >&2 <<EOF
+⚠️  tmux 未启动。将在当前终端启动 Claude Code。
+启动后请手动粘贴：$slash_cmd
+EOF
+cd "$repo_root"
+exec claude

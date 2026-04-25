@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+#
+# tmux-smart-window - Create windows with automatic group renumbering
+#
+# When windows share a base name (e.g. "dev", "dev+1", "dev+2"), inserting
+# a new one re-numbers the entire group so names stay clean:
+#   base window keeps its name
+#   windows before base → -N .. -1
+#   windows after  base → +1 .. +N
+
+set -euo pipefail
+
+MODE="${1:--a}"
+
+CURRENT_PATH=$(tmux display-message -p '#{pane_current_path}')
+CURRENT_NAME=$(tmux display-message -p '#{window_name}')
+
+strip_suffix() {
+  local name="$1"
+  while [[ "$name" =~ [+-][0-9]+$ ]]; do
+    name="${name%[+-][0-9]*}"
+  done
+  printf '%s' "$name"
+}
+
+BASE=$(strip_suffix "$CURRENT_NAME")
+
+tmux new-window "$MODE" -c "$CURRENT_PATH" -n "${BASE}+0"
+
+BASE_IDX=""
+INDICES=()
+
+while IFS=$'\t' read -r idx name; do
+  if [ "$(strip_suffix "$name")" = "$BASE" ]; then
+    INDICES+=("$idx")
+    [ "$name" = "$BASE" ] && BASE_IDX="$idx"
+  fi
+done < <(tmux list-windows -F $'#{window_index}\t#{window_name}')
+
+[ "${#INDICES[@]}" -lt 2 ] && exit 0
+
+IFS=$'\n' SORTED=($(printf '%s\n' "${INDICES[@]}" | sort -n)); unset IFS
+
+if [ -z "$BASE_IDX" ]; then
+  BASE_IDX="${SORTED[0]}"
+  tmux rename-window -t ":$BASE_IDX" "$BASE"
+fi
+
+before_total=0
+for idx in "${SORTED[@]}"; do
+  [ "$idx" -lt "$BASE_IDX" ] && before_total=$((before_total + 1))
+done
+
+n=$before_total
+after_n=0
+for idx in "${SORTED[@]}"; do
+  if [ "$idx" -lt "$BASE_IDX" ]; then
+    tmux rename-window -t ":$idx" "${BASE}-${n}"
+    n=$((n - 1))
+  elif [ "$idx" -gt "$BASE_IDX" ]; then
+    after_n=$((after_n + 1))
+    tmux rename-window -t ":$idx" "${BASE}+${after_n}"
+  fi
+done

@@ -169,7 +169,7 @@ run_copilot() {
   outfile=$(mktemp)
   errfile=$(mktemp)
   (gh copilot -- -p "$PROMPT" --silent --allow-all-tools \
-    --model claude-sonnet-4-6 >"$outfile" 2>"$errfile") &
+    --model claude-sonnet-4.6 >"$outfile" 2>"$errfile") &
   pid=$!
   wait_with_timer "$pid" "GitHub Copilot"
   rc=$?
