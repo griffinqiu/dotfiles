@@ -169,7 +169,7 @@ run_copilot() {
   outfile=$(mktemp)
   errfile=$(mktemp)
   (gh copilot -- -p "$PROMPT" --silent --allow-all-tools \
-    --model claude-sonnet-4.6 >"$outfile" 2>"$errfile") &
+    --model gpt-5-mini >"$outfile" 2>"$errfile") &
   pid=$!
   wait_with_timer "$pid" "GitHub Copilot"
   rc=$?
@@ -189,7 +189,7 @@ run_codex() {
   errfile=$(mktemp)
   (codex exec "$PROMPT" \
     --sandbox read-only \
-    -m gpt-5.4 \
+    -m gpt-5.4-mini \
     -c model_reasoning_effort=low \
     -c tools.web_search=false \
     -o "$outfile" >"$errfile" 2>&1) &
@@ -211,7 +211,7 @@ run_gemini() {
   outfile=$(mktemp)
   errfile=$(mktemp)
   (gemini -p "$PROMPT" --sandbox \
-    -m gemini-2.5-pro \
+    -m gemini-2.5-flash-lite \
     >"$outfile" 2>"$errfile") &
   pid=$!
   wait_with_timer "$pid" "Google Gemini"
@@ -231,7 +231,7 @@ run_claude() {
   outfile=$(mktemp)
   errfile=$(mktemp)
   (claude -p "$PROMPT" --bare \
-    --model sonnet \
+    --model haiku \
     --allowedTools '' \
     >"$outfile" 2>"$errfile") &
   pid=$!
