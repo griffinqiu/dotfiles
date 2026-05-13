@@ -139,7 +139,7 @@ ${DIFF_SECTION}
 Output ONLY 10 raw commit messages, one per line. No numbers, bullets, or extra text."
 fi
 
-TIMEOUT_SECS=60
+TIMEOUT_SECS=120
 
 wait_with_timer() {
   pid=$1

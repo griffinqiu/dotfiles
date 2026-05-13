@@ -1,6 +1,6 @@
 ---
 name: gitlab-mr-resolve
-description: Use when the user received reviewer comments on their GitLab MR and needs help processing them. Triggers on phrases like "处理 review 评论", "回复这些评论", "resolve MR comments", "消化评论". Fetches open discussions, AI-triages each into categories (already_fixed / real_bug / suggestion / misunderstanding / discussion), lets the author correct the classification, then processes each: auto-reply for already_fixed, propose patches for real_bug (requires author approval), reply drafts for misunderstanding, skip discussion-type. Never applies patches or posts replies without explicit author approval except for verified already_fixed cases.
+description: Use when the user received reviewer comments on their GitLab MR and needs help processing them. Triggers on phrases like "处理 review 评论", "回复这些评论", "resolve MR comments", "消化评论". Fetches open discussions, AI-triages each into categories (already_fixed / real_bug / suggestion / misunderstanding / discussion) and prints an overview without blocking, then processes each: auto-reply for already_fixed, propose patches for real_bug (requires author approval), reply drafts for misunderstanding, skip discussion-type. Author can override a misclassification at the per-item Phase 3 interrupt. Never applies patches or posts replies without explicit author approval except for verified already_fixed cases.
 ---
 
 # Skill: gitlab-mr-resolve — 消化评论
@@ -14,11 +14,12 @@ description: Use when the user received reviewer comments on their GitLab MR and
 
 ## 交互策略
 
-需要用户确认的场景（triage 分类纠正、patch 批准、回复 draft 批准），**优先调用 `AskUserQuestion`**：
+需要用户确认的场景（patch 批准、回复 draft 批准），**优先调用 `AskUserQuestion`**：
 
-- **Phase 2.1 triage 确认**：先文本展示分类表，再用 `AskUserQuestion` 问"分类是否正确"；选项 "全部正确" / "需要调整"（Other 里写哪条改哪类）
 - **Phase 3 real_bug / suggestion**：对每条用一个 `AskUserQuestion`，选项 "应用 patch" / "不改（回复 reviewer）" / "换个方案"（Other 里写新方案）
 - **Phase 3 misunderstanding**：每条一个 `AskUserQuestion`，选项 "批准发送" / "改文案"（Other 里写新文案）
+
+triage 分类**不再单独中断确认**：AI 用严格判定规则分类后，直接打印分类总览并进入 Phase 3，作者若想纠正某条的分类，可以在该条的 Phase 3 中断点用 "Other" 改向（例如选 "换个方案" 并说明 "其实这条是 misunderstanding"）。
 
 只有当 `AskUserQuestion` 工具不可用时，才退化为让用户自由文本回复。
 
@@ -29,7 +30,7 @@ description: Use when the user received reviewer comments on their GitLab MR and
 | 0 | 定位 MR（当前分支对应的 open MR）、拉 unresolved threads |
 | 1 | 对每条 thread 读相关代码 + 最近 commits |
 | 2 | triage：分 5 类 |
-| 2.1 | 作者确认/纠正分类（中断确认） |
+| 2.1 | 打印分类总览（无中断） |
 | 3 | 逐条处理（每条都可能中断确认） |
 | 4 | 批量 commit 代码改动 |
 | 5 | push 到同分支 |
@@ -99,9 +100,9 @@ bash ${CLAUDE_PLUGIN_ROOT:-$HOME/.claude/skills/gitlab-mr-resolve}/scripts/fetch
 - 不能只凭"这个文件被改过"就判 already_fixed
 - 有任何不确定 → 降级为 `real_bug` 或 `suggestion`
 
-## Phase 2.1：作者确认分类
+## Phase 2.1：分类总览（无中断）
 
-展示给作者：
+展示给作者一份总览，然后**直接进入 Phase 3**，不停下来等"OK"：
 
 ```
 Triage 结果（共 N 条待处理）：
@@ -109,27 +110,29 @@ Triage 结果（共 N 条待处理）：
 #1  [already_fixed]  path:42  Alice
     "这里应该加 nil check"
     → 已在 abc1234 加了 nil check（git show 验证）
-    → 默认动作：自动回复 + resolve
+    → 即将：自动回复 + resolve
 
 #2  [real_bug]       path:118 Bob
     "当 list 为空时会 crash"
     → 读 handle_empty 确实未处理 empty 分支
-    → 默认动作：提 patch → 等你批准
+    → 即将：提 patch → 中断等你批准
 
 #3  [misunderstanding] path:77 Carol
     "这里应该用 mutex"
     → 该函数只有单线程调用（main.go:15 唯一入口）
-    → 默认动作：起草澄清回复 → 等你批准
+    → 即将：起草澄清回复 → 中断等你批准
 
 #4  [discussion]     path:200 Dave
     "要不要把这个抽到 service 层？"
     → 架构决策，需你拍板
-    → 默认动作：跳过，留给你自己回
+    → 跳过，留给你自己回
 
-你可以直接回 "OK" 采纳分类，或者纠正例如 "#3 改成 real_bug" / "#1 不要自动回复"。
+—— 开始 Phase 3 ——
 ```
 
-**结束本轮，等作者回复**。作者回复 OK（或纠正）后进 Phase 3。
+总览只为了让作者**看到 AI 的判断和接下来的动作**，不要求作者主动 "OK"。如果作者发现某条分类错了，可以等到 Phase 3 在该条的中断点用 "Other" 写明 "其实这条是 X" 来改向（例如把 misunderstanding 选项里写 "其实应该改代码"，就等同于 real_bug 处理）。
+
+**`already_fixed` 不会停顿确认**——这是有意的设计——因为它的判定规则已经够严格（必须 `git show` 命中 file+line 才能归类），它的"动作"也只是回复 + resolve thread，对代码零侵入。若 AI 误判，作者可以在 Phase 6 报告里看到，并在 GitLab UI 上 reopen 该 thread。
 
 ## Phase 3：逐条处理
 
