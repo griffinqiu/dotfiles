@@ -1,11 +1,11 @@
 ---
 name: gitlab-mr-review
-description: Use when the user wants to AI-review someone else's GitLab Merge Request. Triggers on phrases like "review 这个 MR", "帮我 review !123", "看一下别人的 MR". Produces numbered issues in chat with an AI-recommended default selection (all [必修] + [建议], skipping [信息]); reviewer one-clicks to accept the recommendation or expands to adjust, then batch-posts inline discussions + a summary note. AI is a drafting assistant; reviewer stays the decision maker.
+description: Use when the user wants to AI-review someone else's GitLab Merge Request. Triggers on phrases like "review 这个 MR", "帮我 review !123", "看一下别人的 MR". Produces numbered issues, then auto-posts the AI-recommended selection (all [必修] + [建议], [信息] kept in summary only) as inline discussions plus one summary note — no interrupt, no per-issue confirmation.
 ---
 
 # Skill: gitlab-mr-review — Reviewer 辅助
 
-**哲学**：AI 先读代码给草稿，reviewer 人工挑选哪些发到 MR。你在 MR 上留的每一条 inline 都是你自己认可过的，AI 不会自作主张刷屏。
+**哲学**：AI 按确定性标准全权 review 并发送，**不向 reviewer 提问、不中断**。用户触发 `/gitlab-mr-review` 本身就是授权按标准把推荐集发到 MR 上。AI 仍要保持高信噪比（评级规则 + ≤15 条上限），但不需要作者再点一次"确认"。
 
 ## 语言策略
 
@@ -14,18 +14,20 @@ description: Use when the user wants to AI-review someone else's GitLab Merge Re
 
 ## 交互策略
 
-reviewer 需要决定"发哪几条 issue"时，**默认走 AI 推荐 + 一键确认**：
+**全程 AI 自决，不调用 `AskUserQuestion`、不中断 reviewer 确认。** 按下面"自决发送规则"算出发送集，直接进入校验和批量发送。reviewer 想覆盖结果就在 GitLab UI 上手动 resolve / 删评论 — skill 不替他二次确认。
 
-1. AI 按"推荐规则"先算出一份默认勾选集（见 Phase 3.1）
-2. 用 `AskUserQuestion`（单选）问"是否采用推荐"，选项固定：
-   - "采用推荐：发送 #X, #Y, #Z" → 直接进 Phase 4
-   - "调整选择" → 第二轮用 `AskUserQuestion`（multiSelect=true）展开勾选
-   - "全部不发" → 直接结束
-3. 第二轮展开时每条 issue 一个选项，label 形如：`#3 [必修] path:line — 短标题`；超过 4 条分批问
+### 自决发送规则（确定性）
 
-只有当 `AskUserQuestion` 工具不可用时，才退化为让 reviewer 文本回复"采用推荐" / "发 1,3,5" / "跳过"。
+| 评级 | 默认动作 |
+|---|---|
+| `[必修]` | 发 inline discussion |
+| `[建议]` | 发 inline discussion |
+| `[信息]` | 不发 inline，仅写入 summary note 的 "context_notes" |
 
-这套设计仍守住 "AI 是 drafting；reviewer is decision maker" 的哲学——决策权仍在 reviewer——但常态下变成一次点击。
+附加约束：
+- 总条数硬上限 ≤15（Phase 2 阶段已经控制）
+- 若某条 inline 通过 Phase 4 三层降级最终落到"降级"档，自动转 summary，不发 inline
+- summary note 永远发（包含 positives + recommendations + 降级条目）
 
 ## 执行顺序
 
@@ -34,9 +36,8 @@ reviewer 需要决定"发哪几条 issue"时，**默认走 AI 推荐 + 一键确
 | 0 | 解析目标 MR（iid）、取 `diff_refs` + 变更行映射 |
 | 1 | 读 `git diff base...head`，跨文件 Grep 关联上下文 |
 | 2 | 多维度 review，生成带编号的 issues |
-| 3 | 列表展示给 reviewer + AI 推荐默认勾选集 |
-| 3.1 | reviewer 一键确认推荐 / 或展开调整（中断确认） |
-| 4 | 对选中的条目做行号三层降级校验 |
+| 3 | 控制台打印 issues + 即将发送清单（无中断） |
+| 4 | 对发送集做行号三层降级校验 |
 | 5 | 批量发 inline discussions + 一条 summary note |
 | 6 | 报告统计（发成功 / 降级 / 跳过） |
 
@@ -97,14 +98,12 @@ glab-api mr-diffs "$IID" > /tmp/mr-$IID-diffs.json
 
 **条数上限：默认 ≤15 条。** 宁少勿滥，提高信噪比。
 
-## Phase 3：展示给 reviewer
+## Phase 3：展示发送清单（无中断）
 
-统一格式（每条带唯一编号）：
-
-先用文本把全部 issues 铺陈给 reviewer 过目（含 positives + recommendations），格式：
+把全部 issues 铺陈给 reviewer **作为汇报**（让他在 chat 里能看到 AI 的判断），然后**直接进 Phase 4**，不停下等批准：
 
 ```
-已识别 N 条关注点（默认不发，勾选后才发）：
+已识别 N 条关注点：
 
 #1  [必修] 正确性  path/to/file.ts:42
     短标题 — 详细说明
@@ -116,38 +115,13 @@ glab-api mr-diffs "$IID" > /tmp/mr-$IID-diffs.json
 —— 整体观感 ——
 做得好的：...
 跨文件建议：...
+
+—— 即将发送（按自决规则）——
+inline：#1, #2, #4, #5（所有 [必修] + [建议]）
+summary：#3（[信息]，并入 context_notes）
 ```
 
-在文本铺陈的末尾，紧接着一行**推荐勾选集**：
-
-```
-—— AI 推荐 ——
-默认发送：#1, #2, #4, #5（所有 [必修] + [建议]）
-默认不发：#3（[信息]，留在 summary 里）
-```
-
-然后立刻进入 Phase 3.1 中断确认。
-
-## Phase 3.1：一键确认 / 展开调整
-
-**第一轮（默认路径）**：用 `AskUserQuestion`（单选）：
-
-- "采用推荐：发 #1, #2, #4, #5"（推荐项）
-- "调整选择"
-- "全部不发"
-
-**推荐规则**（AI 自决，确定性）：
-- 所有 `[必修]` → 默认勾
-- 所有 `[建议]` → 默认勾
-- 所有 `[信息]` → 默认不勾（已在 summary 里覆盖，发 inline 反而刷屏）
-
-reviewer 选"采用推荐" → 跳到 Phase 4。
-reviewer 选"全部不发" → 跳到 Phase 6，summary 仍然发。
-reviewer 选"调整选择" → 进入第二轮。
-
-**第二轮（展开勾选）**：用 `AskUserQuestion`（multiSelect=true），每条 issue 一个选项，**默认预勾选 = 第一轮的推荐集**。超过 4 条分批问。
-
-按 reviewer 最终勾选组装发送清单。fallback 文本回复支持 "采用推荐" / "1,3,5" / "1-3" / "跳过"。
+如果 reviewer 在 Phase 5 发送完成前打断并明确说"#2 不要发 / 全部别发 / 只发 #1"，按打断意图重算发送集再发；没有打断 → 按自决规则直接发。
 
 ## Phase 4：行号三层降级校验
 

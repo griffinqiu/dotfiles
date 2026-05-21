@@ -231,7 +231,7 @@ run_claude() {
   outfile=$(mktemp)
   errfile=$(mktemp)
   (claude -p "$PROMPT" --bare \
-    --model haiku \
+    --model sonnet \
     --allowedTools '' \
     >"$outfile" 2>"$errfile") &
   pid=$!
