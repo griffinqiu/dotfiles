@@ -70,3 +70,6 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
 
 [[ -f ~/.local/bin/env ]] && source ~/.local/bin/env
 export XDG_CONFIG_HOME="$HOME/.config"
+
+# OpenClaw Completion
+source "/Users/griffin/.openclaw/completions/openclaw.zsh"
