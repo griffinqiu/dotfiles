@@ -83,3 +83,8 @@ if ! command -v bun &>/dev/null; then
   echo 'Installing bun'
   curl -fsSL https://bun.sh/install | bash
 fi
+
+if [ ! -x "$HOME"/.local/bin/mise ] && ! command -v mise &>/dev/null; then
+  echo 'Installing mise'
+  curl -fsSL https://mise.run | sh
+fi

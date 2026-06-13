@@ -218,7 +218,7 @@ configuration:
 [Ruby](https://www.ruby-lang.org/en/) configuration:
 
 * Add trusted binstubs to the `PATH`.
-* Load the ASDF version manager.
+* Load the [mise](https://mise.jdx.dev) version manager (asdf kept as fallback).
 
 Shell aliases and scripts:
 
