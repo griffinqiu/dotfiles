@@ -1,4 +1,5 @@
-# Install behavior, kept in dotfiles as env vars (no ~/.config/mise needed).
+# Install behavior kept here as env vars; tool versions are declared in
+# ~/.config/mise/config.toml (managed via `mise use -g`, untracked like the old ~/.tool-versions).
 # MISE_RUBY_COMPILE=false -> try precompiled ruby first, fall back to compiling
 # if none exists for the platform. macOS 26 has no prebuilt ruby yet, so installs
 # still compile today; switches to precompiled automatically once upstream ships

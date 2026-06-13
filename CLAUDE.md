@@ -107,7 +107,7 @@ The zsh setup uses a modular approach:
 
 ### Language-Specific Tools
 
-- **Ruby**: mise version management (asdf fallback), bundler integration, Rails helpers
+- **Ruby**: mise version management, bundler integration, Rails helpers
 - **Go**: Custom build/test commands, coverage integration
 - **Git**: Enhanced workflow with thoughtbot-style branch management
 - **Terminal**: Tmux with custom prefix (`Ctrl+s`), improved status bar
@@ -152,7 +152,7 @@ The zsh setup uses a modular approach:
 ### Package Management
 
 - Homebrew bundle in post-up hook
-- mise for language version management (asdf kept as transition fallback)
+- mise for language version management (Node, Ruby, and more)
 - Vim-plug for legacy Vim plugins
 - Lazy.nvim for Neovim plugin management
 
