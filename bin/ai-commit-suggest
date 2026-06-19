@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Provider priority: codex > claude > copilot > gemini
+# Provider priority: claude > codex > copilot > gemini
 # Override with: AI_COMMIT_PROVIDER=claude ai-commit-suggest
-DEFAULT_PROVIDER="codex"
+DEFAULT_PROVIDER="claude"
 
 DETAILED=""
 for arg in "$@"; do
@@ -261,7 +261,7 @@ fallback_to() {
   printf '\033[36m↻ falling back to %s…\033[0m\n' "$(provider_label "$1")" >&2
 }
 
-PROVIDERS="codex claude copilot gemini"
+PROVIDERS="claude codex copilot gemini"
 
 run_provider() {
   case "$1" in
