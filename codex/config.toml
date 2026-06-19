@@ -1,0 +1,28 @@
+model = "gpt-5.5"
+model_reasoning_effort = "xhigh"
+personality = "pragmatic"
+service_tier = "fast"
+approval_policy = "never"
+sandbox_mode = "workspace-write"
+
+[notice]
+hide_rate_limit_model_nudge = true
+
+[tui]
+status_line = [
+  "model-with-reasoning",
+  "current-dir",
+  "branch-changes",
+  "run-state",
+  "approval-mode",
+  "context-remaining",
+  "context-used",
+  "fast-mode",
+]
+status_line_use_colors = true
+
+[tui.model_availability_nux]
+"gpt-5.5" = 1
+
+[projects."/Users/griffin/dotfiles"]
+trust_level = "trusted"
