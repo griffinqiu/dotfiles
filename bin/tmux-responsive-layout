@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# Responsive tmux status bar.
+#
+# Switches the PowerKit status bar between a full desktop layout and a minimal
+# phone layout based on the width of the client that is currently driving the
+# session. Wired to the client-resized / client-attached / client-session-changed
+# hooks so it re-evaluates whenever the attached device (and thus the terminal
+# width) changes.
+#
+#   desktop (>= threshold): window names + the full right-hand plugin cluster
+#   phone   (<  threshold): bare window indexes (1, 2, 3), no right-hand cluster
+#
+# The width is passed in as $1 by the hook (expanded from #{client_width} in the
+# triggering client's context); it falls back to querying the attached client.
+
+set -uo pipefail
+
+tmux_get() { tmux show-option -gqv "$1"; }
+
+threshold=$(tmux_get "@responsive_width_threshold")
+[ -n "$threshold" ] || threshold=80
+
+width="${1:-}"
+[ -n "$width" ] || width=$(tmux display-message -p '#{client_width}')
+case "$width" in
+  '' | *[!0-9]*) exit 0 ;;
+esac
+
+if [ "$width" -lt "$threshold" ]; then
+  desired="phone"
+else
+  desired="desktop"
+fi
+
+# Only re-render when the mode actually flips across the threshold; plain resizes
+# within the same mode are a no-op.
+if [ "$(tmux_get "@_responsive_mode")" = "$desired" ]; then
+  exit 0
+fi
+
+if [ "$desired" = "phone" ]; then
+  # Collapse each window to "<index> <first-letter-of-name>" and drop the icon.
+  # PowerKit's option loader mis-parses an empty value (tmux prints it as ''),
+  # rendering literal quotes, so use non-empty formats: the title takes the first
+  # character of the window name and the icon expands to nothing via #{?1,,}.
+  tmux set -g @powerkit_active_window_title "#{=1:#{window_name}}"
+  tmux set -g @powerkit_inactive_window_title "#{=1:#{window_name}}"
+  tmux set -g @powerkit_active_window_icon "#{?1,,}"
+  tmux set -g @powerkit_inactive_window_icon "#{?1,,}"
+  # The state-flag icons (activity/bell/zoomed/marked) outrank the normal icon in
+  # PowerKit's chain, so blank them too or e.g. an activity-flagged window (common
+  # with monitor-activity on) still shows a glyph after switching away.
+  tmux set -g @powerkit_window_activity_icon "#{?1,,}"
+  tmux set -g @powerkit_window_bell_icon "#{?1,,}"
+  tmux set -g @powerkit_window_marked_icon "#{?1,,}"
+  tmux set -g @powerkit_zoomed_window_icon "#{?1,,}"
+  tmux set -g @powerkit_status_order "session,windows"
+  tmux set -g @powerkit_plugins ""
+else
+  tmux set -gu @powerkit_active_window_title
+  tmux set -gu @powerkit_inactive_window_title
+  tmux set -gu @powerkit_active_window_icon
+  tmux set -gu @powerkit_inactive_window_icon
+  tmux set -gu @powerkit_window_activity_icon
+  tmux set -gu @powerkit_window_bell_icon
+  tmux set -gu @powerkit_window_marked_icon
+  tmux set -gu @powerkit_zoomed_window_icon
+  tmux set -gu @powerkit_status_order
+  tmux set -g @powerkit_plugins "$(tmux_get "@responsive_desktop_plugins")"
+fi
+
+tmux set -g @_responsive_mode "$desired"
+
+# Re-render PowerKit so the updated options regenerate the status-bar formats.
+powerkit="$HOME/.tmux/plugins/tmux-powerkit/tmux-powerkit.tmux"
+[ -x "$powerkit" ] && "$powerkit" >/dev/null 2>&1
+
+# PowerKit hardcodes the full session name (#S) in status-left with no format
+# option, so on phone shorten it to the first 3 characters to reclaim width.
+# Done after the re-render, which rewrites status-left back to the full name.
+if [ "$desired" = "phone" ]; then
+  status_left=$(tmux show-option -gqv status-left | sed 's/ #S / #{=3:#{session_name}} /')
+  tmux set -g status-left "$status_left"
+fi
+
+tmux refresh-client -S 2>/dev/null || true
