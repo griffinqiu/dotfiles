@@ -1,19 +1,26 @@
 #!/bin/sh
-# Session mouse follows the device in use: off for desktop terminals
-# (ghostty/kitty TERM, local or via mosh), on for anything else (Moshi).
-# prefix+m sets @mouse_manual, pausing automation until next attach/detach.
+# Session mouse follows the device in use: on when the focused/last-active
+# client is mosh (e.g. Moshi on iOS), off for local terminals. prefix+m sets
+# @mouse_manual, which pauses automation until the next attach/detach.
 
-DESKTOP_TERMS='xterm-ghostty|xterm-kitty'
-
-is_desktop() {
-  echo "$1" | grep -qxE "$DESKTOP_TERMS"
+is_mosh() {
+  pid=$1
+  depth=0
+  while [ -n "$pid" ] && [ "$pid" -gt 1 ] && [ "$depth" -lt 20 ]; do
+    case "$(ps -o comm= -p "$pid" 2>/dev/null)" in
+      *mosh-server*) return 0 ;;
+    esac
+    pid=$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d '[:space:]')
+    depth=$((depth + 1))
+  done
+  return 1
 }
 
-set_mouse() {
-  if is_desktop "$2"; then
-    tmux set-option -t "$1" mouse off
-  else
+set_mouse_by_pid() {
+  if is_mosh "$2"; then
     tmux set-option -t "$1" mouse on
+  else
+    tmux set-option -t "$1" mouse off
   fi
 }
 
@@ -23,17 +30,25 @@ is_manual() {
 
 if [ "$1" = focus ] && [ -n "$2" ] && [ -n "$3" ]; then
   is_manual "$2" && exit 0
-  set_mouse "$2" "$3"
+  set_mouse_by_pid "$2" "$3"
   exit 0
 fi
 
 # Connection-level recompute: manual overrides reset to automatic
+if ! pgrep -q mosh-server 2>/dev/null; then
+  tmux list-sessions -F '#{session_id} #{?mouse,on,off}' 2>/dev/null | while read -r session state; do
+    tmux set-option -u -t "$session" @mouse_manual 2>/dev/null
+    [ "$state" = on ] && tmux set-option -t "$session" mouse off
+  done
+  exit 0
+fi
+
 for session in $(tmux list-sessions -F '#{session_id}' 2>/dev/null); do
   tmux set-option -u -t "$session" @mouse_manual 2>/dev/null
-  last_term=$(tmux list-clients -t "$session" -F '#{client_activity} #{client_termname}' 2>/dev/null \
+  last_active_pid=$(tmux list-clients -t "$session" -F '#{client_activity} #{client_pid}' 2>/dev/null \
     | sort -rn | head -1 | awk '{print $2}')
-  if [ -n "$last_term" ]; then
-    set_mouse "$session" "$last_term"
+  if [ -n "$last_active_pid" ]; then
+    set_mouse_by_pid "$session" "$last_active_pid"
   else
     tmux set-option -t "$session" mouse off
   fi
