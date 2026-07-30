@@ -129,7 +129,7 @@ show_agent_labels_on_pane_borders = true
 
 [ui.toast]
 delivery = "herdr"
-delay_seconds = 30
+delay_seconds = 1
 
 [experimental]
 pane_history = false
