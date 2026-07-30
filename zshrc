@@ -73,3 +73,7 @@ export XDG_CONFIG_HOME="$HOME/.config"
 
 # OpenClaw Completion
 source "/Users/griffin/.openclaw/completions/openclaw.zsh"
+
+ocagent() {
+  openclaw tui --session "agent:$1:main"
+}

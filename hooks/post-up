@@ -8,6 +8,8 @@ echo "  \__,_|\___/ \__| |_| |_|_|\___||___/"
 echo ""
 
 brew bundle --file=- <<EOF
+tap "griffinqiu/tap"
+brew "griffinqiu/tap/bootmux"
 brew "fzf"
 brew "tig"
 brew "ncdu"
