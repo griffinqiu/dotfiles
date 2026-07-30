@@ -24,12 +24,12 @@ workspace_picker = ""
 new_workspace = ""
 rename_workspace = ""
 close_workspace = "prefix+shift+d"
-previous_workspace = "prefix+shift+p"
-next_workspace = "prefix+shift+n"
-switch_workspace = "prefix+shift+1..9"
-previous_agent = "prefix+ctrl+p"
-next_agent = "prefix+ctrl+n"
-focus_agent = "prefix+ctrl+1..9"
+previous_workspace = "prefix+ctrl+p"
+next_workspace = "prefix+ctrl+n"
+switch_workspace = "prefix+ctrl+1..9"
+previous_agent = "prefix+shift+p"
+next_agent = "prefix+shift+n"
+focus_agent = "prefix+shift+1..9"
 remote_image_paste = "alt+v"
 
 # Keep c as Herdr's ordinary append-tab action. The four positional variants
@@ -123,13 +123,13 @@ width = "80%"
 height = "80%"
 
 [ui]
-agent_panel_sort = "spaces"
+agent_panel_sort = "priority"
 prompt_new_tab_name = false
 show_agent_labels_on_pane_borders = true
 
 [ui.toast]
 delivery = "herdr"
-delay_seconds = 1
+delay_seconds = 30
 
 [experimental]
 pane_history = false
