@@ -6,6 +6,31 @@
 
 onboarding = false
 
+[theme]
+# Herdr has no built-in Everforest theme. Use a valid base theme and override
+# every exposed palette token with the Everforest Dark Medium colors used by
+# Neovim's everforest-nvim configuration.
+name = "tokyo-night"
+auto_switch = false
+
+[theme.custom]
+accent = "#7fbbb3"
+panel_bg = "#2d353b"
+surface0 = "#343f44"
+surface1 = "#3d484d"
+surface_dim = "#232a2e"
+overlay0 = "#7a8478"
+overlay1 = "#859289"
+text = "#d3c6aa"
+subtext0 = "#9da9a0"
+mauve = "#d699b6"
+green = "#a7c080"
+yellow = "#dbbc7f"
+red = "#e67e80"
+blue = "#7fbbb3"
+teal = "#83c092"
+peach = "#e69875"
+
 [terminal]
 # Match tmux's pane_current_path behavior for new panes and tabs.
 new_cwd = "follow"
@@ -15,7 +40,7 @@ prefix = "ctrl+a"
 
 # General
 help = "prefix+?"
-settings = ""
+settings = "prefix+t"
 detach = "prefix+d"
 reload_config = "prefix+r"
 open_notification_target = ""
@@ -28,14 +53,14 @@ new_workspace = ""
 new_worktree = ""
 open_worktree = ""
 remove_worktree = ""
-rename_workspace = "prefix+$"
+rename_workspace = "prefix+shift+w"
 close_workspace = ""
-previous_workspace = "prefix+("
-next_workspace = "prefix+)"
-previous_agent = ""
-next_agent = ""
-focus_agent = ""
-switch_workspace = ""
+previous_workspace = "prefix+shift+p"
+next_workspace = "prefix+shift+n"
+previous_agent = "prefix+ctrl+p"
+next_agent = "prefix+ctrl+n"
+focus_agent = "prefix+ctrl+1..9"
+switch_workspace = "prefix+shift+1..9"
 remote_image_paste = ""
 
 # tmux windows map to Herdr tabs. Herdr cannot preserve tmux-smart-window's
@@ -49,10 +74,10 @@ new_tab = [
   "prefix+shift+a",
 ]
 rename_tab = "prefix+comma"
-previous_tab = ["prefix+ctrl+p", "prefix+alt+p"]
-next_tab = ["prefix+ctrl+n", "prefix+alt+n"]
+previous_tab = "prefix+p"
+next_tab = "prefix+n"
 switch_tab = "prefix+1..9"
-close_tab = "prefix+ampersand"
+close_tab = "prefix+shift+x"
 
 # Panes and copy mode
 rename_pane = ""
@@ -68,7 +93,7 @@ swap_pane_up = ["prefix+shift+u", "prefix+{"]
 swap_pane_right = ""
 cycle_pane_next = "prefix+o"
 cycle_pane_previous = ""
-last_pane = ["prefix+p", "prefix+;", "prefix+^"]
+last_pane = "prefix+;"
 split_vertical = ["prefix+v", "prefix+shift+v"]
 split_horizontal = ["prefix+s", "prefix+shift+s"]
 close_pane = ["prefix+ctrl+q", "prefix+x"]
@@ -162,3 +187,7 @@ prompt_new_tab_name = false
 # - S/V: create a split with an exact 40-row/120-column size
 # - copy-mode Tab: exit copy mode (Herdr fixes this to q/Esc)
 # - repeatable 10-cell resize and tmux plugin-specific bindings
+show_agent_labels_on_pane_borders = true
+
+[experimental]
+pane_history = false
