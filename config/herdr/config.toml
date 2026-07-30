@@ -1,16 +1,144 @@
-# Herdr 0.7.5 keymap matching the effective tmux configuration in tmux.conf.
-# Herdr reads this file from ~/.config/herdr/config.toml after `rcup`.
-#
-# Herdr handles prefix+prefix itself, so Ctrl-a Ctrl-a still sends Ctrl-a to
-# the focused terminal just like tmux's `send-prefix`.
-
 onboarding = false
+
+[terminal]
+# Match tmux's pane_current_path behavior for new panes and tabs.
+new_cwd = "follow"
+
+[keys]
+prefix = "ctrl+a"
+
+# General
+help = "prefix+?"
+# settings = "prefix+ctrl+t"
+detach = "prefix+shift+q"
+reload_config = "prefix+shift+r"
+open_notification_target = "prefix+shift+o"
+
+# Workspace/session navigation. prefix+w is reused below for the bootmux project
+# picker instead of Herdr's persistent workspace navigation mode.
+goto = "prefix+g"
+new_worktree = "prefix+t"
+open_worktree = "prefix+ctrl+t"
+remove_worktree = "prefix+shift+t"
+workspace_picker = ""
+new_workspace = ""
+rename_workspace = ""
+close_workspace = "prefix+shift+d"
+previous_workspace = "prefix+shift+p"
+next_workspace = "prefix+shift+n"
+switch_workspace = "prefix+shift+1..9"
+previous_agent = "prefix+ctrl+p"
+next_agent = "prefix+ctrl+n"
+focus_agent = "prefix+ctrl+1..9"
+remote_image_paste = "alt+v"
+
+# Keep c as Herdr's ordinary append-tab action. The four positional variants
+# below use herdr-smart-tab so they match the tmux bindings.
+new_tab = "prefix+c"
+rename_tab = "prefix+comma"
+previous_tab = "prefix+p"
+next_tab = "prefix+n"
+switch_tab = "prefix+1..9"
+close_tab = "prefix+shift+x"
+
+# Panes and copy mode
+rename_pane = ""
+edit_scrollback = "prefix+alt+g"
+copy_mode = "prefix+tab"
+focus_pane_left = ["prefix+h", "prefix+left"]
+focus_pane_down = ["prefix+j", "prefix+down"]
+focus_pane_up = ["prefix+k", "prefix+up"]
+focus_pane_right = ["prefix+l", "prefix+right"]
+swap_pane_left = ""
+swap_pane_down = ""
+swap_pane_up = ""
+swap_pane_right = ""
+cycle_pane_next = ""
+cycle_pane_previous = ""
+last_pane = "prefix+o"
+split_vertical = "prefix+v"
+split_horizontal = "prefix+s"
+close_pane = ["prefix+ctrl+q", "prefix+x"]
+zoom = "prefix+z"
+
+resize_mode = "prefix+r"
+toggle_sidebar = ["prefix+b", "prefix+ctrl+b"]
+
+navigate_workspace_up = ""
+navigate_workspace_down = ""
+navigate_pane_left = "h"
+navigate_pane_down = "j"
+navigate_pane_up = "k"
+navigate_pane_right = "l"
+
+# Match tmux window creation:
+# i/a insert before/after the active tab and maintain base-N/base/base+N names.
+# I/A create at the beginning/end without grouped renaming.
+[[keys.command]]
+key = "prefix+i"
+type = "shell"
+command = '"${HOME}/dotfiles/bin/herdr-smart-tab" before'
+description = "new tab before current (tmux i)"
+
+[[keys.command]]
+key = "prefix+a"
+type = "shell"
+command = '"${HOME}/dotfiles/bin/herdr-smart-tab" after'
+description = "new tab after current (tmux a)"
+
+[[keys.command]]
+key = "prefix+shift+i"
+type = "shell"
+command = '"${HOME}/dotfiles/bin/herdr-smart-tab" first'
+description = "new tab at beginning (tmux I)"
+
+[[keys.command]]
+key = "prefix+shift+a"
+type = "shell"
+command = '"${HOME}/dotfiles/bin/herdr-smart-tab" last'
+description = "new tab at end (tmux A)"
+
+# Herdr has no clear-scrollback API. Forwarding Ctrl-l preserves the visible
+# clear-screen behavior, but retained Herdr scrollback remains available.
+[[keys.command]]
+key = "prefix+ctrl+l"
+type = "shell"
+command = '"${HERDR_BIN_PATH:-herdr}" pane send-keys "$HERDR_ACTIVE_PANE_ID" ctrl+l'
+description = "clear focused terminal (tmux C-l)"
+
+[[keys.command]]
+key = "prefix+ctrl+g"
+type = "popup"
+command = "lazygit"
+description = "open lazygit"
+width = "80%"
+height = "80%"
+
+[[keys.command]]
+key = "prefix+w"
+type = "popup"
+command = "bootmux picker"
+description = "open bootmux project picker"
+width = "80%"
+height = "80%"
+
+[ui]
+agent_panel_sort = "spaces"
+prompt_new_tab_name = false
+show_agent_labels_on_pane_borders = true
+
+[ui.toast]
+delivery = "herdr"
+delay_seconds = 1
+
+[experimental]
+pane_history = false
 
 [theme]
 # Herdr has no built-in Everforest theme. Use a valid base theme and override
 # every exposed palette token with the Everforest Dark Medium colors used by
 # Neovim's everforest-nvim configuration.
-name = "tokyo-night"
+name = "catppuccin"
 auto_switch = false
 
 [theme.custom]
@@ -30,164 +158,3 @@ red = "#e67e80"
 blue = "#7fbbb3"
 teal = "#83c092"
 peach = "#e69875"
-
-[terminal]
-# Match tmux's pane_current_path behavior for new panes and tabs.
-new_cwd = "follow"
-
-[keys]
-prefix = "ctrl+a"
-
-# General
-help = "prefix+?"
-settings = "prefix+t"
-detach = "prefix+d"
-reload_config = "prefix+r"
-open_notification_target = ""
-
-# Workspace/session navigation. prefix+w is reused below for the bootmux project
-# picker instead of Herdr's persistent workspace navigation mode.
-workspace_picker = ""
-goto = "prefix+g"
-new_workspace = ""
-new_worktree = ""
-open_worktree = ""
-remove_worktree = ""
-rename_workspace = "prefix+shift+w"
-close_workspace = ""
-previous_workspace = "prefix+shift+p"
-next_workspace = "prefix+shift+n"
-previous_agent = "prefix+ctrl+p"
-next_agent = "prefix+ctrl+n"
-focus_agent = "prefix+ctrl+1..9"
-switch_workspace = "prefix+shift+1..9"
-remote_image_paste = ""
-
-# tmux windows map to Herdr tabs. Herdr cannot preserve tmux-smart-window's
-# before/after insertion and grouped renaming, but all five creation keys keep
-# their primary "new window/tab" behavior.
-new_tab = [
-  "prefix+c",
-  "prefix+i",
-  "prefix+shift+i",
-  "prefix+a",
-  "prefix+shift+a",
-]
-rename_tab = "prefix+comma"
-previous_tab = "prefix+p"
-next_tab = "prefix+n"
-switch_tab = "prefix+1..9"
-close_tab = "prefix+shift+x"
-
-# Panes and copy mode
-rename_pane = ""
-edit_scrollback = ""
-copy_mode = "prefix+tab"
-focus_pane_left = ["prefix+h", "prefix+left"]
-focus_pane_down = ["prefix+j", "prefix+down"]
-focus_pane_up = ["prefix+k", "prefix+up"]
-focus_pane_right = ["prefix+l", "prefix+right"]
-swap_pane_left = ""
-swap_pane_down = ["prefix+shift+d", "prefix+}"]
-swap_pane_up = ["prefix+shift+u", "prefix+{"]
-swap_pane_right = ""
-cycle_pane_next = "prefix+o"
-cycle_pane_previous = ""
-last_pane = "prefix+;"
-split_vertical = ["prefix+v", "prefix+shift+v"]
-split_horizontal = ["prefix+s", "prefix+shift+s"]
-close_pane = ["prefix+ctrl+q", "prefix+x"]
-zoom = "prefix+z"
-
-# tmux uses r to reload and H/J/K/L to resize, so disable Herdr's conflicting
-# prefix+r resize mode. The custom commands below keep H/J/K/L available.
-resize_mode = ""
-toggle_sidebar = ["prefix+b", "prefix+ctrl+b"]
-
-# Keep vi-style movement in Herdr's modal navigation surface.
-navigate_workspace_up = "up"
-navigate_workspace_down = "down"
-navigate_pane_left = "h"
-navigate_pane_down = "j"
-navigate_pane_up = "k"
-navigate_pane_right = "l"
-
-# Herdr resizes by a fraction rather than tmux's fixed 10 cells. 0.1 is the
-# closest stable equivalent exposed by the Herdr 0.7.5 CLI.
-[[keys.command]]
-key = "prefix+shift+h"
-type = "shell"
-command = '"${HERDR_BIN_PATH:-herdr}" pane resize --pane "$HERDR_ACTIVE_PANE_ID" --direction left --amount 0.1'
-description = "resize pane left (tmux H)"
-
-[[keys.command]]
-key = "prefix+shift+j"
-type = "shell"
-command = '"${HERDR_BIN_PATH:-herdr}" pane resize --pane "$HERDR_ACTIVE_PANE_ID" --direction down --amount 0.1'
-description = "resize pane down (tmux J)"
-
-[[keys.command]]
-key = "prefix+shift+k"
-type = "shell"
-command = '"${HERDR_BIN_PATH:-herdr}" pane resize --pane "$HERDR_ACTIVE_PANE_ID" --direction up --amount 0.1'
-description = "resize pane up (tmux K)"
-
-[[keys.command]]
-key = "prefix+shift+l"
-type = "shell"
-command = '"${HERDR_BIN_PATH:-herdr}" pane resize --pane "$HERDR_ACTIVE_PANE_ID" --direction right --amount 0.1'
-description = "resize pane right (tmux L)"
-
-# Herdr has no clear-scrollback API. Forwarding Ctrl-l preserves the visible
-# clear-screen behavior, but retained Herdr scrollback remains available.
-[[keys.command]]
-key = "prefix+ctrl+l"
-type = "shell"
-command = '"${HERDR_BIN_PATH:-herdr}" pane send-keys "$HERDR_ACTIVE_PANE_ID" ctrl+l'
-description = "clear focused terminal (tmux C-l)"
-
-# tmux-yank mirrors copied text to the macOS clipboard, so prefix+] pastes the
-# same clipboard source into the focused Herdr pane.
-[[keys.command]]
-key = "prefix+]"
-type = "shell"
-command = '"${HERDR_BIN_PATH:-herdr}" pane send-text "$HERDR_ACTIVE_PANE_ID" "$(pbpaste)"'
-description = "paste macOS clipboard (tmux ])"
-
-[[keys.command]]
-key = "prefix+ctrl+g"
-type = "popup"
-command = "lazygit"
-description = "open lazygit"
-width = "80%"
-height = "80%"
-
-[[keys.command]]
-# Accept both tmux-style release timing and a still-held Ctrl on the RHS.
-key = ["prefix+w", "prefix+ctrl+w"]
-type = "popup"
-command = "bootmux picker"
-description = "open bootmux project picker"
-width = "80%"
-height = "80%"
-
-[ui]
-# Preserve the setting from the config Herdr created on first launch.
-agent_panel_sort = "spaces"
-# Ctrl-a b hides the Spaces and Agents sidebar completely instead of leaving
-# the compact icon rail visible.
-sidebar_collapsed_mode = "hidden"
-
-# tmux creates windows immediately instead of prompting for a name.
-prompt_new_tab_name = false
-
-# No exact Herdr 0.7.5 equivalents exist for these tmux behaviors:
-# - prefix+=: re-tile existing live panes
-# - prefix+m: toggle mouse capture for the current session
-# - S/V: create a split with an exact 40-row/120-column size
-# - copy-mode Tab: exit copy mode (Herdr fixes this to q/Esc)
-# - repeatable 10-cell resize and tmux plugin-specific bindings
-show_agent_labels_on_pane_borders = true
-
-[experimental]
-pane_history = false

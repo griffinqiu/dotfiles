@@ -1,0 +1,229 @@
+#!/usr/bin/env bash
+#
+# Reproduce the tmux a/A/i/I window-creation behavior for Herdr tabs.
+#
+# Herdr 0.7.5 exposes tab.move through its public socket API, but does not
+# provide a matching CLI subcommand. The remaining operations use the CLI.
+
+set -euo pipefail
+
+usage() {
+  printf 'usage: herdr-smart-tab <before|after|first|last>\n' >&2
+}
+
+mode="${1:-}"
+case "$mode" in
+  before | after | first | last) ;;
+  *)
+    usage
+    exit 2
+    ;;
+esac
+
+socket_path="${HERDR_SOCKET_PATH:-}"
+workspace_id="${HERDR_ACTIVE_WORKSPACE_ID:-}"
+requested_tab_id="${HERDR_ACTIVE_TAB_ID:-}"
+pane_cwd="${HERDR_ACTIVE_PANE_CWD:-${PWD:-}}"
+herdr_bin="${HERDR_BIN_PATH:-}"
+
+if [ -z "$herdr_bin" ]; then
+  herdr_bin="$(command -v herdr || true)"
+fi
+
+notify_error() {
+  local message="$1"
+  printf 'herdr-smart-tab: %s\n' "$message" >&2
+  if [ -n "$herdr_bin" ] && [ -x "$herdr_bin" ]; then
+    "$herdr_bin" notification show "Unable to create Herdr tab" \
+      --body "$message" >/dev/null 2>&1 || true
+  fi
+}
+
+die() {
+  notify_error "$1"
+  exit 1
+}
+
+[ -n "$socket_path" ] || die "HERDR_SOCKET_PATH is unavailable"
+[ -S "$socket_path" ] || die "Herdr socket is unavailable"
+[ -n "$workspace_id" ] || die "active workspace is unavailable"
+[ -n "$requested_tab_id" ] || die "active tab is unavailable"
+[ -n "$pane_cwd" ] || die "active pane cwd is unavailable"
+[ -n "$herdr_bin" ] && [ -x "$herdr_bin" ] || die "herdr binary is unavailable"
+
+jq_bin="$(command -v jq || true)"
+nc_bin="$(command -v nc || true)"
+[ -n "$jq_bin" ] || die "jq is required"
+[ -n "$nc_bin" ] || die "nc is required"
+
+# Herdr runs custom shell commands detached. Serialize them per server so quick
+# repeated keypresses cannot interleave create, move, and rename requests.
+lock_key="$(printf '%s' "$socket_path" | cksum | awk '{print $1}')"
+lock_root="${TMPDIR:-/tmp}"
+lock_file="${lock_root%/}/herdr-smart-tab-${lock_key}.lock"
+exec 9>"$lock_file"
+if ! /usr/bin/lockf -s -t 5 9; then
+  die "timed out waiting for another tab creation"
+fi
+
+strip_suffix() {
+  local label="$1"
+  while [[ "$label" =~ [+-][0-9]+$ ]]; do
+    label="${label%[+-][0-9]*}"
+  done
+  printf '%s' "$label"
+}
+
+list_tabs() {
+  local response
+  if ! response="$("$herdr_bin" tab list --workspace "$workspace_id")"; then
+    die "could not list tabs"
+  fi
+  if ! "$jq_bin" -e \
+    '.result.type == "tab_list" and (.result.tabs | type == "array")' \
+    >/dev/null <<<"$response"; then
+    die "Herdr returned an invalid tab list"
+  fi
+  printf '%s' "$response"
+}
+
+move_tab() {
+  local tab_id="$1"
+  local insert_index="$2"
+  local request_id request response
+
+  request_id="herdr-smart-tab:$$:${RANDOM}"
+  request="$("$jq_bin" -cn \
+    --arg id "$request_id" \
+    --arg tab_id "$tab_id" \
+    --argjson insert_index "$insert_index" \
+    '{id: $id, method: "tab.move", params: {
+      tab_id: $tab_id,
+      insert_index: $insert_index
+    }}')"
+
+  if ! response="$(printf '%s\n' "$request" | "$nc_bin" -U -w 2 "$socket_path")"; then
+    die "tab.move request failed"
+  fi
+  if ! "$jq_bin" -e --arg id "$request_id" \
+    '.id == $id and .result.type == "tab_list"' \
+    >/dev/null <<<"$response"; then
+    local api_message
+    api_message="$("$jq_bin" -r '.error.message // "invalid tab.move response"' \
+      <<<"$response" 2>/dev/null || true)"
+    die "$api_message"
+  fi
+}
+
+rename_tab() {
+  local tab_id="$1"
+  local label="$2"
+  if ! "$herdr_bin" tab rename "$tab_id" "$label" >/dev/null; then
+    die "could not rename tab $tab_id"
+  fi
+}
+
+renumber_group() {
+  local base="$1"
+  local tabs_json item item_id item_label item_base target_label
+  local base_group_index=-1
+  local index
+  local -a group_ids
+
+  group_ids=()
+  tabs_json="$(list_tabs)"
+
+  while IFS= read -r item; do
+    item_id="$("$jq_bin" -r '.tab_id' <<<"$item")"
+    item_label="$("$jq_bin" -r '.label' <<<"$item")"
+    item_base="$(strip_suffix "$item_label")"
+    if [ "$item_base" = "$base" ]; then
+      group_ids[${#group_ids[@]}]="$item_id"
+      if [ "$item_label" = "$base" ]; then
+        base_group_index=$((${#group_ids[@]} - 1))
+      fi
+    fi
+  done < <("$jq_bin" -c '.result.tabs[]' <<<"$tabs_json")
+
+  [ "${#group_ids[@]}" -ge 2 ] || return 0
+
+  if [ "$base_group_index" -lt 0 ]; then
+    base_group_index=0
+    rename_tab "${group_ids[0]}" "$base"
+  fi
+
+  for ((index = 0; index < ${#group_ids[@]}; index++)); do
+    if [ "$index" -lt "$base_group_index" ]; then
+      target_label="${base}-$((base_group_index - index))"
+    elif [ "$index" -gt "$base_group_index" ]; then
+      target_label="${base}+$((index - base_group_index))"
+    else
+      continue
+    fi
+    rename_tab "${group_ids[$index]}" "$target_label"
+  done
+}
+
+tabs_before=""
+current_tab_id="$requested_tab_id"
+current_index=""
+base=""
+
+if [ "$mode" = "before" ] || [ "$mode" = "after" ]; then
+  tabs_before="$(list_tabs)"
+
+  # A queued keypress should behave like tmux's synchronous binding: after the
+  # previous invocation focuses its new tab, the next invocation uses it.
+  focused_tab_id="$("$jq_bin" -r \
+    '[.result.tabs[] | select(.focused == true)][0].tab_id // empty' \
+    <<<"$tabs_before")"
+  if [ -n "$focused_tab_id" ]; then
+    current_tab_id="$focused_tab_id"
+  fi
+
+  if ! current_index="$("$jq_bin" -er --arg tab_id "$current_tab_id" \
+    '.result.tabs | map(.tab_id) | index($tab_id)' <<<"$tabs_before")"; then
+    die "source tab no longer exists"
+  fi
+  if ! current_label="$("$jq_bin" -er --arg tab_id "$current_tab_id" \
+    '.result.tabs[] | select(.tab_id == $tab_id) | .label' <<<"$tabs_before")"; then
+    die "source tab label is unavailable"
+  fi
+  base="$(strip_suffix "$current_label")"
+fi
+
+create_args=(tab create --workspace "$workspace_id" --cwd "$pane_cwd" --focus)
+if [ "$mode" = "before" ] || [ "$mode" = "after" ]; then
+  create_args+=(--label "${base}+0")
+fi
+
+if ! create_response="$("$herdr_bin" "${create_args[@]}")"; then
+  die "could not create tab"
+fi
+if ! new_tab_id="$("$jq_bin" -er '.result.tab.tab_id' <<<"$create_response")"; then
+  die "Herdr did not return the new tab id"
+fi
+
+if [ "$mode" = "before" ] || [ "$mode" = "after" ]; then
+  tabs_after_create="$(list_tabs)"
+  if ! current_index="$("$jq_bin" -er --arg tab_id "$current_tab_id" \
+    '.result.tabs | map(.tab_id) | index($tab_id)' <<<"$tabs_after_create")"; then
+    die "source tab disappeared after tab creation"
+  fi
+fi
+
+case "$mode" in
+  first)
+    move_tab "$new_tab_id" 0
+    ;;
+  last)
+    ;;
+  before)
+    move_tab "$new_tab_id" "$current_index"
+    renumber_group "$base"
+    ;;
+  after)
+    move_tab "$new_tab_id" "$((current_index + 1))"
+    renumber_group "$base"
+    ;;
+esac
