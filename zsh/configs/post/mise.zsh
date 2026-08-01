@@ -7,6 +7,9 @@
 export MISE_RUBY_COMPILE=false
 # Allow installing older python-build-standalone releases that lack attestations.
 export MISE_PYTHON_GITHUB_ATTESTATIONS=false
+# Auto-answer yes to mise prompts, notably config trust checks
+# (new worktrees would otherwise error until `mise trust`).
+export MISE_YES=1
 
 # Loaded before path.zsh (alphabetical order), so resolve mise explicitly.
 if [ -x "$HOME"/.local/bin/mise ]; then

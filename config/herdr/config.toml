@@ -107,7 +107,7 @@ command = '"${HERDR_BIN_PATH:-herdr}" pane send-keys "$HERDR_ACTIVE_PANE_ID" ctr
 description = "clear focused terminal (tmux C-l)"
 
 [[keys.command]]
-key = "prefix+ctrl+g"
+key = "prefix+shift+g"
 type = "popup"
 command = "lazygit"
 description = "open lazygit"
