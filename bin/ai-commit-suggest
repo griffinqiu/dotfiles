@@ -109,16 +109,27 @@ ${RECENT_LOGS}
 
 ${DIFF_SECTION}
 
-Output format (critical — separator must be on its own line between every pair of candidates):
-<commit message 1>
-===COMMIT===
-<commit message 2>
-===COMMIT===
-...
-===COMMIT===
-<commit message 5>
+Output contract (strict — violations make the output unusable):
+- The very first character you emit must be the first character of candidate 1's subject line
+- Never emit a preamble, acknowledgement, restatement of the task, or trailing commentary
+- Never emit markdown code fences, headings, numbering, bullets, or quotes around candidates
+- The separator \`===COMMIT===\` must sit alone on its own line between every pair of candidates, never before the first or after the last
+- Every subject line must start with a lowercase type from: feat, fix, refactor, docs, test, chore, perf, ci, build, style, revert
 
-Do NOT put the separator before the first candidate or after the last. No markdown code fences, no preamble, no trailing commentary."
+Exact expected output shape:
+refactor(parser): decouple tokenizer from ast builder
+
+The tokenizer previously reached into builder internals, which made
+error recovery impossible to test in isolation.
+===COMMIT===
+refactor: extract tokenizer into its own module
+
+...
+
+===COMMIT===
+<candidate 5 subject>
+
+<candidate 5 body>"
 else
   PROMPT="Suggest 10 commit messages for the following changes.
 
@@ -136,7 +147,17 @@ ${RECENT_LOGS}
 
 ${DIFF_SECTION}
 
-Output ONLY 10 raw commit messages, one per line. No numbers, bullets, or extra text."
+Output contract (strict — violations make the output unusable):
+- Emit exactly 10 lines, one commit message per line, and nothing else
+- The very first character you emit must be the first character of message 1
+- Never emit a preamble, acknowledgement, restatement of the task, or trailing commentary
+- Never emit markdown code fences, headings, numbering, bullets, or quotes
+- Every line must start with a lowercase type from: feat, fix, refactor, docs, test, chore, perf, ci, build, style, revert
+
+Exact expected output shape:
+refactor(parser): decouple tokenizer from ast builder
+fix(parser): recover from unterminated string literals
+chore: drop unused lexer fixtures"
 fi
 
 TIMEOUT_SECS=120
@@ -248,6 +269,51 @@ run_claude() {
   return 1
 }
 
+# Models occasionally prepend a preamble or wrap output in fences despite the
+# prompt contract; drop anything that isn't a conventional-commit candidate.
+sanitize_short() {
+  awk '
+    /^[[:space:]]*```/ { next }
+    {
+      line = $0
+      sub(/^[[:space:]]*([0-9]+[.)]|[-*])[[:space:]]+/, "", line)
+      sub(/^[[:space:]]+/, "", line)
+      sub(/[[:space:]]+$/, "", line)
+      gsub(/^["`]+|["`]+$/, "", line)
+      if (line ~ /^[a-z]+(\([^)]*\))?!?: .+/ && !seen[line]++) print line
+    }
+  '
+}
+
+# Keeps each candidate from its first conventional-commit line onward, so a
+# preamble glued to candidate 1 does not discard the whole candidate.
+sanitize_detailed() {
+  perl -0777 -ne '
+    s/^[ \t]*```.*\n//mg;
+    my @kept;
+    for my $block (split /\n[ \t]*===COMMIT===[ \t]*\n/, $_) {
+      my @lines = split /\n/, $block, -1;
+      my ($start) = grep {
+        $lines[$_] =~ /\A(?:\d+[.)]|[-*])?[ \t]*[a-z]+(?:\([^)]*\))?!?: \S/
+      } 0 .. $#lines;
+      next unless defined $start;
+      my $candidate = join "\n", @lines[$start .. $#lines];
+      $candidate =~ s/\A[ \t]*(?:\d+[.)]|[-*])[ \t]+//;
+      $candidate =~ s/\s+\z//;
+      push @kept, $candidate;
+    }
+    print join("\n===COMMIT===\n", @kept), "\n" if @kept;
+  '
+}
+
+sanitize_output() {
+  if [ "$DETAILED" = "1" ]; then
+    sanitize_detailed
+  else
+    sanitize_short
+  fi
+}
+
 provider_label() {
   case "$1" in
     gemini)  echo "Google Gemini"    ;;
@@ -273,6 +339,21 @@ run_provider() {
   esac
 }
 
+try_provider() {
+  rawfile=$(mktemp)
+  if run_provider "$1" >"$rawfile"; then
+    CLEANED=$(sanitize_output <"$rawfile")
+    if [ -n "$CLEANED" ]; then
+      printf '%s\n' "$CLEANED"
+      rm -f "$rawfile"
+      return 0
+    fi
+    printf '\033[33m%s:\033[0m no usable commit messages in output\n' "$(provider_label "$1")" >&2
+  fi
+  rm -f "$rawfile"
+  return 1
+}
+
 case "$PROVIDERS" in
   *"$PROVIDER"*) ;;
   *)
@@ -294,10 +375,10 @@ FIRST=1
 for p in $ORDERED; do
   if [ "$FIRST" = "1" ]; then
     FIRST=0
-    run_provider "$p" && exit 0
+    try_provider "$p" && exit 0
   else
     fallback_to "$p"
-    run_provider "$p" && exit 0
+    try_provider "$p" && exit 0
   fi
 done
 
