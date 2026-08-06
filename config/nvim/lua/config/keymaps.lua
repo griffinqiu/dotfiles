@@ -33,6 +33,20 @@ if vim.fn.executable("lazygit") == 1 then
   del("n", "<leader>gg")
 end
 
+local GITSIGNS_BLAME_FILETYPE = "gitsigns-blame"
+
+local function toggle_git_blame()
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if vim.bo[vim.api.nvim_win_get_buf(win)].filetype == GITSIGNS_BLAME_FILETYPE then
+      vim.api.nvim_win_close(win, false)
+      return
+    end
+  end
+  require("gitsigns").blame()
+end
+
+map("n", "<leader>gb", toggle_git_blame, { desc = "Blame Buffer (toggle)" })
+
 -- Diagnostic configuration with LazyVim icons
 local function setup_diagnostics(enabled)
   vim.diagnostic.config({
