@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Provider priority: codex > claude > copilot > gemini
-# Override with: AI_COMMIT_PROVIDER=claude ai-commit-suggest
-DEFAULT_PROVIDER="codex"
+# Provider priority: claude > codex > copilot > gemini
+# Override with: AI_COMMIT_PROVIDER=codex ai-commit-suggest
+DEFAULT_PROVIDER="claude"
 
 DETAILED=""
 for arg in "$@"; do
@@ -190,7 +190,7 @@ run_copilot() {
   outfile=$(mktemp)
   errfile=$(mktemp)
   (gh copilot -- -p "$PROMPT" --silent --allow-all-tools \
-    --model gpt-5-mini >"$outfile" 2>"$errfile") &
+    --model gpt-5.6-luna >"$outfile" 2>"$errfile") &
   pid=$!
   wait_with_timer "$pid" "GitHub Copilot"
   rc=$?
@@ -210,7 +210,7 @@ run_codex() {
   errfile=$(mktemp)
   (codex exec "$PROMPT" \
     --sandbox read-only \
-    -m gpt-5.4-mini \
+    -m gpt-5.6-luna \
     -c model_reasoning_effort=low \
     -c tools.web_search=false \
     -o "$outfile" >"$errfile" 2>&1) &
@@ -232,7 +232,7 @@ run_gemini() {
   outfile=$(mktemp)
   errfile=$(mktemp)
   (gemini -p "$PROMPT" --sandbox \
-    -m gemini-2.5-flash-lite \
+    -m gemini-3.5-flash \
     >"$outfile" 2>"$errfile") &
   pid=$!
   wait_with_timer "$pid" "Google Gemini"
@@ -252,7 +252,7 @@ run_claude() {
   outfile=$(mktemp)
   errfile=$(mktemp)
   (claude -p "$PROMPT" --bare \
-    --model sonnet \
+    --model claude-sonnet-5 \
     --allowedTools '' \
     >"$outfile" 2>"$errfile") &
   pid=$!
@@ -327,7 +327,7 @@ fallback_to() {
   printf '\033[36m↻ falling back to %s…\033[0m\n' "$(provider_label "$1")" >&2
 }
 
-PROVIDERS="codex claude copilot gemini"
+PROVIDERS="claude codex copilot gemini"
 
 run_provider() {
   case "$1" in
