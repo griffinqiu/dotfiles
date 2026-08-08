@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# Provider priority: claude > codex > copilot > gemini
+# Default provider: copilot; remaining fallback order: claude > codex > gemini
 # Override with: AI_COMMIT_PROVIDER=codex ai-commit-suggest
-DEFAULT_PROVIDER="claude"
+DEFAULT_PROVIDER="copilot"
 
 DETAILED=""
 for arg in "$@"; do
@@ -186,6 +186,23 @@ wait_with_timer() {
   return "$rc"
 }
 
+# Some CLIs report auth/quota errors on stdout with a non-zero exit, so fall
+# back to stdout when stderr is empty and always surface the exit code.
+report_failure() {
+  label=$1
+  rc=$2
+  outfile=$3
+  errfile=$4
+  if [ "$rc" = "0" ]; then
+    printf '\033[33m%s:\033[0m empty output\n' "$label" >&2
+    return
+  fi
+  detail=$(head -5 "$errfile" 2>/dev/null)
+  [ -z "$detail" ] && detail=$(head -5 "$outfile" 2>/dev/null)
+  [ -z "$detail" ] && detail="no output"
+  printf '\033[33m%s failed (exit %s):\033[0m %s\n' "$label" "$rc" "$detail" >&2
+}
+
 run_copilot() {
   outfile=$(mktemp)
   errfile=$(mktemp)
@@ -199,8 +216,7 @@ run_copilot() {
     rm -f "$outfile" "$errfile"
     return 0
   fi
-  [ -s "$errfile" ] && printf '\033[33mGitHub Copilot failed:\033[0m %s\n' "$(head -5 "$errfile")" >&2
-  [ "$rc" = "0" ] && printf '\033[33mGitHub Copilot:\033[0m empty output\n' >&2
+  report_failure "GitHub Copilot" "$rc" "$outfile" "$errfile"
   rm -f "$outfile" "$errfile"
   return 1
 }
@@ -222,8 +238,7 @@ run_codex() {
     rm -f "$outfile" "$errfile"
     return 0
   fi
-  [ -s "$errfile" ] && printf '\033[33mOpenAI Codex failed:\033[0m %s\n' "$(head -5 "$errfile")" >&2
-  [ "$rc" = "0" ] && printf '\033[33mOpenAI Codex:\033[0m empty output\n' >&2
+  report_failure "OpenAI Codex" "$rc" "$outfile" "$errfile"
   rm -f "$outfile" "$errfile"
   return 1
 }
@@ -242,8 +257,7 @@ run_gemini() {
     rm -f "$outfile" "$errfile"
     return 0
   fi
-  [ -s "$errfile" ] && printf '\033[33mGoogle Gemini failed:\033[0m %s\n' "$(head -5 "$errfile")" >&2
-  [ "$rc" = "0" ] && printf '\033[33mGoogle Gemini:\033[0m empty output\n' >&2
+  report_failure "Google Gemini" "$rc" "$outfile" "$errfile"
   rm -f "$outfile" "$errfile"
   return 1
 }
@@ -251,7 +265,8 @@ run_gemini() {
 run_claude() {
   outfile=$(mktemp)
   errfile=$(mktemp)
-  (claude -p "$PROMPT" --bare \
+  # No --bare: it disables keychain reads, and auth here is an OAuth login.
+  (claude -p "$PROMPT" \
     --model claude-sonnet-5 \
     --allowedTools '' \
     >"$outfile" 2>"$errfile") &
@@ -263,8 +278,7 @@ run_claude() {
     rm -f "$outfile" "$errfile"
     return 0
   fi
-  [ -s "$errfile" ] && printf '\033[33mAnthropic Claude Code failed:\033[0m %s\n' "$(head -5 "$errfile")" >&2
-  [ "$rc" = "0" ] && printf '\033[33mAnthropic Claude Code:\033[0m empty output\n' >&2
+  report_failure "Anthropic Claude Code" "$rc" "$outfile" "$errfile"
   rm -f "$outfile" "$errfile"
   return 1
 }

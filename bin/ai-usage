@@ -1,0 +1,1131 @@
+#!/usr/bin/env python3
+"""Report Claude Code and Codex usage from local session logs.
+
+Claude Code is read from ~/.claude/projects/**/*.jsonl. Codex is read from
+~/.codex/sessions/**/*.jsonl and ~/.codex/archived_sessions/*.jsonl. Nothing is
+uploaded.
+
+The dollar figure is the API-equivalent cost at each provider's first-party
+standard API list price. It is useful for comparing traffic, but it is not a
+Pro/Max/ChatGPT subscription invoice. For Codex, the report also estimates
+ChatGPT/Codex credits and applies the recorded Fast-mode multiplier. If old logs
+do not say whether Fast mode was active, a minimum-maximum range is shown.
+Claude Code and Codex are always reported as separate groups; no mixed total is
+shown.
+
+The default window is the rolling last 7 days. Week-based flags use Beijing
+time and reset on Saturday; because the exact product reset hours differ, they
+intentionally use Saturday 00:00 as one shared reporting boundary.
+
+  ai-usage                              # rolling last 7 days (default)
+  ai-usage --provider codex --last-week
+  ai-usage --last-7-days                # rolling 7 x 24 hours
+  ai-usage --last-30-days               # rolling 30 x 24 hours
+  ai-usage --weeks 6                    # one row per week, newest first
+  ai-usage --months 5                   # one row per calendar month
+  ai-usage --since 2026-07-01 --until 2026-08-01
+  ai-usage --breakdown all              # add per-day and per-project tables
+  ai-usage --weeks 8 --html ~/usage.html
+"""
+
+import argparse
+import glob
+import json
+import os
+import sys
+from collections import defaultdict
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+
+# USD per 1M tokens. These are first-party standard API prices, not subscription
+# charges. Verified against the providers' official price/model pages 2026-08-08.
+CLAUDE_API_PRICING = {
+    "claude-fable-5": (10.00, 50.00),
+    "claude-mythos-5": (10.00, 50.00),
+    "claude-opus-5": (5.00, 25.00),
+    "claude-opus-4-8": (5.00, 25.00),
+    "claude-opus-4-7": (5.00, 25.00),
+    "claude-opus-4-6": (5.00, 25.00),
+    "claude-sonnet-5": (3.00, 15.00),
+    "claude-sonnet-4-6": (3.00, 15.00),
+    "claude-haiku-4-5": (1.00, 5.00),
+}
+
+# (uncached input, cached input, output), USD per 1M tokens.
+CODEX_API_PRICING = {
+    "gpt-5.6-sol": (5.00, 0.50, 30.00),
+    "gpt-5.6-terra": (2.50, 0.25, 15.00),
+    "gpt-5.6-luna": (1.00, 0.10, 6.00),
+    "gpt-5.6": (5.00, 0.50, 30.00),
+    "gpt-5.5": (5.00, 0.50, 30.00),
+    "gpt-5.4-mini": (0.75, 0.075, 4.50),
+    "gpt-5.4-nano": (0.20, 0.02, 1.25),
+    "gpt-5.4": (2.50, 0.25, 15.00),
+}
+
+# ChatGPT/Codex credits per 1M tokens: input, cached input, output.
+CODEX_CREDIT_PRICING = {
+    "gpt-5.6-sol": (125.00, 12.50, 750.00),
+    "gpt-5.6-terra": (50.00, 5.00, 300.00),
+    "gpt-5.6-luna": (5.00, 0.50, 30.00),
+    "gpt-5.6": (125.00, 12.50, 750.00),
+    "gpt-5.5": (125.00, 12.50, 750.00),
+    "gpt-5.4-mini": (18.75, 1.875, 113.00),
+    "gpt-5.4": (62.50, 6.25, 375.00),
+}
+
+CLAUDE_CACHE_WRITE_5M_MULTIPLIER = 1.25
+CLAUDE_CACHE_WRITE_1H_MULTIPLIER = 2.00
+CLAUDE_CACHE_READ_MULTIPLIER = 0.10
+CODEX_CACHE_WRITE_MULTIPLIER = 1.25
+CODEX_LONG_CONTEXT_THRESHOLD = 272_000
+
+# GPT-5.6/5.5 Fast uses 2.5x credits; GPT-5.4 Fast uses 2x.
+CODEX_FAST_MULTIPLIERS = {
+    "gpt-5.6": 2.50,
+    "gpt-5.5": 2.50,
+    "gpt-5.4": 2.00,
+}
+FAST_TIERS = {"fast", "priority"}
+STANDARD_TIERS = {"default", "standard", "flex"}
+
+REPORT_TZ_NAME = os.environ.get("AI_USAGE_TIMEZONE", "Asia/Shanghai")
+try:
+    REPORT_TZ = ZoneInfo(REPORT_TZ_NAME)
+except Exception:
+    sys.exit(f"ai-usage: unknown timezone {REPORT_TZ_NAME!r}")
+
+CLAUDE_LOG_ROOT = os.path.expanduser(
+    os.environ.get("AI_USAGE_CLAUDE_ROOT", "~/.claude/projects")
+)
+CODEX_LOG_ROOT = os.path.expanduser(
+    os.environ.get("AI_USAGE_CODEX_ROOT", "~/.codex")
+)
+CLAUDE_LOG_GLOB = os.path.join(CLAUDE_LOG_ROOT, "**", "*.jsonl")
+CODEX_LOG_GLOBS = (
+    os.path.join(CODEX_LOG_ROOT, "sessions", "**", "*.jsonl"),
+    os.path.join(CODEX_LOG_ROOT, "archived_sessions", "*.jsonl"),
+)
+
+WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+TOKEN_FIELDS = ("input", "output", "cache_write_5m", "cache_write_1h", "cache_read")
+EXTRA_FIELDS = (
+    "reasoning",
+    "requests",
+    "api_cost_usd",
+    "credits_min",
+    "credits_max",
+    "unknown_tier_requests",
+)
+
+
+def resolve_from(pricing, model):
+    """Match a model id, tolerating dated snapshot suffixes."""
+    if model in pricing:
+        return pricing[model]
+    for known in sorted(pricing, key=len, reverse=True):
+        # Only accept a numeric snapshot suffix. Without this guard, an
+        # unlisted sibling such as gpt-5.4-nano could accidentally inherit the
+        # price for gpt-5.4.
+        suffix = model[len(known) + 1 :] if model.startswith(known + "-") else ""
+        if suffix[:4].isdigit():
+            return pricing[known]
+    return None
+
+
+def model_key(provider, model):
+    return f"{provider}/{model}"
+
+
+def split_model_key(key):
+    return key.split("/", 1) if "/" in key else ("unknown", key)
+
+
+def parse_timestamp(text):
+    if not isinstance(text, str) or not text:
+        return None
+    try:
+        return datetime.fromisoformat(text.replace("Z", "+00:00")).astimezone(REPORT_TZ)
+    except (TypeError, ValueError):
+        return None
+
+
+def parse_day(text):
+    try:
+        return datetime.strptime(text, "%Y-%m-%d").replace(tzinfo=REPORT_TZ)
+    except (TypeError, ValueError):
+        sys.exit(f"ai-usage: invalid date {text!r}, expected YYYY-MM-DD")
+
+
+def nonnegative_int(value):
+    try:
+        return max(int(value or 0), 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def normalize_project(path, fallback="unknown"):
+    if not isinstance(path, str) or not path:
+        return fallback
+    normalized = os.path.normpath(path)
+    user_home = os.path.expanduser("~")
+    if normalized == user_home:
+        return "~"
+    if normalized.startswith(user_home + os.sep):
+        return "~" + normalized[len(user_home):]
+    return normalized
+
+
+def claude_project_of(path):
+    """Fallback project label for old Claude logs without a cwd field."""
+    relative = os.path.relpath(path, CLAUDE_LOG_ROOT)
+    head = relative.split(os.sep)[0]
+    return head if head != os.pardir else "unknown"
+
+
+def week_start_before(moment, reset_weekday, reset_hour):
+    """Most recent reset boundary at or before `moment`."""
+    candidate = moment.replace(hour=reset_hour, minute=0, second=0, microsecond=0)
+    days_since_reset = (candidate.weekday() - reset_weekday) % 7
+    candidate -= timedelta(days=days_since_reset)
+    if candidate > moment:
+        candidate -= timedelta(days=7)
+    return candidate
+
+
+def month_start_before(moment, months_back=0):
+    """First instant of the calendar month `months_back` months before `moment`."""
+    absolute_month = moment.year * 12 + moment.month - 1 - months_back
+    return moment.replace(
+        year=absolute_month // 12,
+        month=absolute_month % 12 + 1,
+        day=1,
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    )
+
+
+def claude_api_cost(model, counts):
+    price = resolve_from(CLAUDE_API_PRICING, model)
+    if price is None:
+        return 0.0
+    input_price, output_price = price
+    return (
+        counts["input"] / 1e6 * input_price
+        + counts["output"] / 1e6 * output_price
+        + counts["cache_write_5m"]
+        / 1e6
+        * input_price
+        * CLAUDE_CACHE_WRITE_5M_MULTIPLIER
+        + counts["cache_write_1h"]
+        / 1e6
+        * input_price
+        * CLAUDE_CACHE_WRITE_1H_MULTIPLIER
+        + counts["cache_read"]
+        / 1e6
+        * input_price
+        * CLAUDE_CACHE_READ_MULTIPLIER
+    )
+
+
+def codex_has_long_context_surcharge(model):
+    if model.startswith("gpt-5.6") or model.startswith("gpt-5.5"):
+        return True
+    return model == "gpt-5.4" or model.startswith("gpt-5.4-") and not (
+        model.startswith("gpt-5.4-mini") or model.startswith("gpt-5.4-nano")
+    )
+
+
+def codex_api_cost(model, counts):
+    price = resolve_from(CODEX_API_PRICING, model)
+    if price is None:
+        return 0.0
+    input_price, cached_price, output_price = price
+    raw_input = counts["input"] + counts["cache_read"] + counts["cache_write_5m"]
+    long_context = (
+        raw_input > CODEX_LONG_CONTEXT_THRESHOLD
+        and codex_has_long_context_surcharge(model)
+    )
+    input_multiplier = 2.0 if long_context else 1.0
+    output_multiplier = 1.5 if long_context else 1.0
+    return (
+        counts["input"] / 1e6 * input_price * input_multiplier
+        + counts["cache_read"] / 1e6 * cached_price * input_multiplier
+        + counts["cache_write_5m"]
+        / 1e6
+        * input_price
+        * CODEX_CACHE_WRITE_MULTIPLIER
+        * input_multiplier
+        + counts["output"] / 1e6 * output_price * output_multiplier
+    )
+
+
+def codex_fast_multiplier(model):
+    for prefix, multiplier in CODEX_FAST_MULTIPLIERS.items():
+        if model == prefix or model.startswith(prefix + "-"):
+            return multiplier
+    return 1.0
+
+
+def codex_credit_range(model, counts, tier):
+    price = resolve_from(CODEX_CREDIT_PRICING, model)
+    if price is None:
+        return None
+    input_price, cached_price, output_price = price
+    base = (
+        (counts["input"] + counts["cache_write_5m"]) / 1e6 * input_price
+        + counts["cache_read"] / 1e6 * cached_price
+        + counts["output"] / 1e6 * output_price
+    )
+    multiplier = codex_fast_multiplier(model)
+    normalized_tier = tier.lower() if isinstance(tier, str) else None
+    if normalized_tier in FAST_TIERS:
+        return base * multiplier, base * multiplier, False
+    if normalized_tier in STANDARD_TIERS or multiplier == 1.0:
+        return base, base, False
+    return base, base * multiplier, True
+
+
+def new_usage_data():
+    bucket = lambda: defaultdict(int)
+    return {
+        "by_model": defaultdict(bucket),
+        "by_provider": defaultdict(bucket),
+        "by_day": defaultdict(bucket),
+        "by_project": defaultdict(bucket),
+        "by_week": defaultdict(bucket),
+        "by_month": defaultdict(bucket),
+        "unpriced_models": set(),
+        "diagnostics": defaultdict(int),
+    }
+
+
+def merge_counts(target, source):
+    for field, value in source.items():
+        target[field] += value
+    return target
+
+
+def add_usage(data, provider, model, moment, project, counts, week_key):
+    key = model_key(provider, model)
+    buckets = (
+        data["by_model"][key],
+        data["by_provider"][(provider, key)],
+        data["by_day"][(moment.strftime("%Y-%m-%d"), key)],
+        data["by_project"][(project, key)],
+        data["by_week"][(week_key(moment), key)],
+        data["by_month"][(moment.strftime("%Y-%m"), key)],
+    )
+    for bucket in buckets:
+        merge_counts(bucket, counts)
+
+
+def collect_claude_records(start, end, week_key, data):
+    """Aggregate Claude assistant messages, removing resumed-session replays."""
+    seen_message_ids = set()
+    duplicates = 0
+
+    for path in glob.iglob(CLAUDE_LOG_GLOB, recursive=True):
+        fallback_project = claude_project_of(path)
+        try:
+            handle = open(path, "r", errors="replace")
+        except OSError:
+            continue
+
+        with handle:
+            for line in handle:
+                if '"usage"' not in line or '"assistant"' not in line:
+                    continue
+                try:
+                    record = json.loads(line)
+                except ValueError:
+                    continue
+                if record.get("type") != "assistant":
+                    continue
+
+                message = record.get("message") or {}
+                usage = message.get("usage")
+                moment = parse_timestamp(record.get("timestamp"))
+                if not isinstance(usage, dict) or moment is None or not start <= moment < end:
+                    continue
+
+                model = message.get("model") or "unknown"
+                if model.startswith("<"):
+                    continue
+
+                # Resumed and forked sessions replay earlier messages verbatim.
+                message_id = message.get("id") or record.get("requestId") or record.get("uuid")
+                if message_id and message_id in seen_message_ids:
+                    duplicates += 1
+                    continue
+                if message_id:
+                    seen_message_ids.add(message_id)
+
+                creation = usage.get("cache_creation") or {}
+                write_1h = nonnegative_int(creation.get("ephemeral_1h_input_tokens"))
+                write_5m = nonnegative_int(creation.get("ephemeral_5m_input_tokens"))
+                if not write_1h and not write_5m:
+                    write_5m = nonnegative_int(usage.get("cache_creation_input_tokens"))
+
+                counts = {
+                    "input": nonnegative_int(usage.get("input_tokens")),
+                    "output": nonnegative_int(usage.get("output_tokens")),
+                    "cache_write_5m": write_5m,
+                    "cache_write_1h": write_1h,
+                    "cache_read": nonnegative_int(usage.get("cache_read_input_tokens")),
+                    "reasoning": 0,
+                    "requests": 1,
+                    "credits_min": 0.0,
+                    "credits_max": 0.0,
+                    "unknown_tier_requests": 0,
+                }
+                counts["api_cost_usd"] = claude_api_cost(model, counts)
+                if resolve_from(CLAUDE_API_PRICING, model) is None:
+                    data["unpriced_models"].add(model_key("claude", model))
+
+                project = normalize_project(record.get("cwd"), fallback_project)
+                add_usage(data, "claude", model, moment, project, counts, week_key)
+
+    data["diagnostics"]["claude_replayed_messages"] += duplicates
+
+
+def codex_session_identity(path):
+    """Read the session id without loading a whole rollout file."""
+    try:
+        handle = open(path, "r", errors="replace")
+    except OSError:
+        return None
+    with handle:
+        for index, line in enumerate(handle):
+            if index > 20:
+                break
+            if '"type":"session_meta"' not in line:
+                continue
+            try:
+                record = json.loads(line)
+            except ValueError:
+                continue
+            payload = record.get("payload") or {}
+            return payload.get("id")
+    return None
+
+
+def discover_codex_files():
+    """Deduplicate active/archive copies by session id, preferring more data."""
+    selected = {}
+    duplicates = 0
+    for pattern in CODEX_LOG_GLOBS:
+        for path in glob.iglob(pattern, recursive=True):
+            identity = codex_session_identity(path) or path
+            try:
+                size = os.path.getsize(path)
+            except OSError:
+                continue
+            previous = selected.get(identity)
+            if previous is not None:
+                duplicates += 1
+                if size <= previous[0]:
+                    continue
+            selected[identity] = (size, path)
+    return [item[1] for item in selected.values()], duplicates
+
+
+def nested_parent_id(source):
+    if not isinstance(source, dict):
+        return None
+    subagent = source.get("subagent")
+    if not isinstance(subagent, dict):
+        return None
+    spawn = subagent.get("thread_spawn")
+    return spawn.get("parent_thread_id") if isinstance(spawn, dict) else None
+
+
+def scan_codex_metadata(path):
+    """Find initial model/tier/cwd so early and subagent token events are priced."""
+    meta = {
+        "path": path,
+        "id": None,
+        "parent_id": None,
+        "model": None,
+        "tier": None,
+        "cwd": None,
+    }
+    try:
+        handle = open(path, "r", errors="replace")
+    except OSError:
+        return meta
+
+    with handle:
+        for line in handle:
+            if not any(
+                needle in line
+                for needle in (
+                    '"type":"session_meta"',
+                    '"type":"turn_context"',
+                    '"type":"thread_settings_applied"',
+                )
+            ):
+                continue
+            try:
+                record = json.loads(line)
+            except ValueError:
+                continue
+            record_type = record.get("type")
+            payload = record.get("payload") or {}
+
+            if record_type == "session_meta":
+                meta["id"] = meta["id"] or payload.get("id")
+                meta["cwd"] = meta["cwd"] or payload.get("cwd")
+                meta["parent_id"] = meta["parent_id"] or nested_parent_id(
+                    payload.get("source")
+                )
+            elif record_type == "turn_context":
+                meta["model"] = meta["model"] or payload.get("model")
+                meta["cwd"] = meta["cwd"] or payload.get("cwd")
+            elif record_type == "event_msg" and payload.get("type") == "thread_settings_applied":
+                settings = payload.get("thread_settings") or {}
+                meta["model"] = meta["model"] or settings.get("model")
+                meta["tier"] = meta["tier"] or settings.get("service_tier")
+                meta["cwd"] = meta["cwd"] or settings.get("cwd")
+
+            # Most current sessions expose all of this near the beginning.
+            if meta["id"] and meta["model"] and meta["tier"] and meta["cwd"]:
+                break
+    return meta
+
+
+def inherit_codex_metadata(metas):
+    by_id = {meta["id"]: meta for meta in metas if meta.get("id")}
+
+    def resolve(meta, field, trail):
+        if meta.get(field):
+            return meta[field]
+        parent_id = meta.get("parent_id")
+        if not parent_id or parent_id in trail or parent_id not in by_id:
+            return None
+        value = resolve(by_id[parent_id], field, trail | {parent_id})
+        if value:
+            meta[field] = value
+        return value
+
+    for meta in metas:
+        for field in ("model", "tier", "cwd"):
+            resolve(meta, field, {meta.get("id")})
+
+
+def collect_codex_records(start, end, week_key, data):
+    """Aggregate incremental Codex token_count events from unique sessions."""
+    paths, duplicate_files = discover_codex_files()
+    metas = [scan_codex_metadata(path) for path in paths]
+    inherit_codex_metadata(metas)
+    skipped_rollups = 0
+
+    for meta in metas:
+        current_model = meta.get("model") or "unknown"
+        current_tier = meta.get("tier")
+        current_cwd = meta.get("cwd")
+        try:
+            handle = open(meta["path"], "r", errors="replace")
+        except OSError:
+            continue
+
+        with handle:
+            for line in handle:
+                if not any(
+                    needle in line
+                    for needle in (
+                        '"type":"token_count"',
+                        '"type":"thread_settings_applied"',
+                        '"type":"turn_context"',
+                    )
+                ):
+                    continue
+                try:
+                    record = json.loads(line)
+                except ValueError:
+                    continue
+                record_type = record.get("type")
+                payload = record.get("payload") or {}
+
+                if record_type == "turn_context":
+                    current_model = payload.get("model") or current_model
+                    current_cwd = payload.get("cwd") or current_cwd
+                    continue
+
+                if record_type != "event_msg":
+                    continue
+                payload_type = payload.get("type")
+                if payload_type == "thread_settings_applied":
+                    settings = payload.get("thread_settings") or {}
+                    current_model = settings.get("model") or current_model
+                    current_tier = settings.get("service_tier") or current_tier
+                    current_cwd = settings.get("cwd") or current_cwd
+                    continue
+                if payload_type != "token_count":
+                    continue
+
+                info = payload.get("info") or {}
+                usage = info.get("last_token_usage")
+                if not isinstance(usage, dict):
+                    continue
+
+                raw_input = nonnegative_int(usage.get("input_tokens"))
+                cached = min(nonnegative_int(usage.get("cached_input_tokens")), raw_input)
+                cache_write = min(
+                    nonnegative_int(usage.get("cache_write_input_tokens")),
+                    max(raw_input - cached, 0),
+                )
+                output = nonnegative_int(usage.get("output_tokens"))
+                reasoning = min(
+                    nonnegative_int(usage.get("reasoning_output_tokens")), output
+                )
+
+                # Parent sessions can receive child roll-ups with only total_tokens.
+                # The child's own session contains the billable components, so count
+                # it there and skip this duplicate aggregate.
+                if not any((raw_input, cached, cache_write, output, reasoning)):
+                    if nonnegative_int(usage.get("total_tokens")):
+                        skipped_rollups += 1
+                    continue
+
+                moment = parse_timestamp(record.get("timestamp"))
+                if moment is None or not start <= moment < end:
+                    continue
+
+                model = current_model or "unknown"
+                counts = {
+                    "input": max(raw_input - cached - cache_write, 0),
+                    "output": output,
+                    "cache_write_5m": cache_write,
+                    "cache_write_1h": 0,
+                    "cache_read": cached,
+                    "reasoning": reasoning,
+                    "requests": 1,
+                    "credits_min": 0.0,
+                    "credits_max": 0.0,
+                    "unknown_tier_requests": 0,
+                }
+                counts["api_cost_usd"] = codex_api_cost(model, counts)
+                if resolve_from(CODEX_API_PRICING, model) is None:
+                    data["unpriced_models"].add(model_key("codex", model))
+
+                credit_range = codex_credit_range(model, counts, current_tier)
+                if credit_range is not None:
+                    minimum, maximum, tier_unknown = credit_range
+                    counts["credits_min"] = minimum
+                    counts["credits_max"] = maximum
+                    counts["unknown_tier_requests"] = int(tier_unknown)
+
+                project = normalize_project(current_cwd)
+                add_usage(data, "codex", model, moment, project, counts, week_key)
+
+    data["diagnostics"]["codex_duplicate_session_files"] += duplicate_files
+    data["diagnostics"]["codex_componentless_rollups"] += skipped_rollups
+    data["diagnostics"]["codex_sessions_scanned"] += len(metas)
+
+
+def collect_records(start, end, week_key, provider):
+    data = new_usage_data()
+    if provider in ("all", "claude"):
+        collect_claude_records(start, end, week_key, data)
+    if provider in ("all", "codex"):
+        collect_codex_records(start, end, week_key, data)
+    return data
+
+
+def token_total(counts):
+    return sum(int(counts.get(field, 0)) for field in TOKEN_FIELDS)
+
+
+def cost_of(_model, counts):
+    return float(counts.get("api_cost_usd", 0.0))
+
+
+def collapse_model_keyed(model_keyed):
+    """Collapse a {(label, model): counts} map into {label: counts}."""
+    grouped = defaultdict(lambda: defaultdict(int))
+    for (label, _model), counts in model_keyed.items():
+        merge_counts(grouped[label], counts)
+    return grouped
+
+
+def combined_counts(by_model, provider=None):
+    result = defaultdict(int)
+    for key, counts in by_model.items():
+        key_provider, _ = split_model_key(key)
+        if provider is None or key_provider == provider:
+            merge_counts(result, counts)
+    return result
+
+
+def rows_from_group(grouped, reverse=False, by_cost=False):
+    rows = [
+        (label, counts["requests"], token_total(counts), cost_of(label, counts))
+        for label, counts in grouped.items()
+    ]
+    if by_cost:
+        return sorted(rows, key=lambda row: -row[3])
+    return sorted(rows, key=lambda row: row[0], reverse=reverse)
+
+
+def format_credit_range(minimum, maximum):
+    if abs(maximum - minimum) < 0.005:
+        return f"{minimum:,.1f}"
+    return f"{minimum:,.1f}–{maximum:,.1f}"
+
+
+def render_html(window_label, summary, sections, footnote):
+    """Self-contained offline report: inline CSS and SVG, no external requests."""
+    from html import escape
+
+    def bar_chart(rows):
+        if not rows:
+            return ""
+        peak = max(row[3] for row in rows) or 1
+        bar_height, gap, label_width = 26, 8, 170
+        height = len(rows) * (bar_height + gap)
+        bars = []
+        for index, (label, _requests, _tokens, cost) in enumerate(rows):
+            y = index * (bar_height + gap)
+            width = max(cost / peak * 440, 1)
+            bars.append(
+                f'<text class="bl" x="0" y="{y + 17}">{escape(str(label))}</text>'
+                f'<rect class="br" x="{label_width}" y="{y}" width="{width:.1f}" '
+                f'height="{bar_height}" rx="3"/>'
+                f'<text class="bv" x="{label_width + width + 8:.1f}" y="{y + 17}">'
+                f'${cost:,.0f}</text>'
+            )
+        return (
+            f'<svg viewBox="0 0 780 {height}" width="100%" height="{height}" '
+            f'role="img">{"".join(bars)}</svg>'
+        )
+
+    blocks = []
+    for title, label_header, rows, with_chart in sections:
+        if not rows:
+            continue
+        body = "".join(
+            f"<tr><td>{escape(str(label))}</td><td>{requests:,}</td>"
+            f"<td>{tokens:,}</td><td>${cost:,.2f}</td></tr>"
+            for label, requests, tokens, cost in rows
+        )
+        chart = bar_chart(rows) if with_chart else ""
+        blocks.append(
+            f"<section><h2>{escape(title)}</h2>{chart}"
+            f"<div class=\"tw\"><table><thead><tr><th>{escape(label_header)}</th>"
+            f"<th>requests</th><th>tokens</th><th>cost</th></tr></thead>"
+            f"<tbody>{body}</tbody></table></div></section>"
+        )
+
+    cards = "".join(
+        f'<div class="card"><span class="k">{escape(k)}</span>'
+        f'<span class="v">{escape(v)}</span></div>'
+        for k, v in summary
+    )
+
+    return f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI coding usage — {escape(window_label)}</title>
+<style>
+:root {{ color-scheme: light dark; --fg:#1a1a18; --muted:#6b6b66; --bg:#faf9f7;
+  --panel:#fff; --line:#e5e3de; --accent:#477c89; }}
+@media (prefers-color-scheme: dark) {{ :root {{ --fg:#e8e6e1; --muted:#9a978f;
+  --bg:#161614; --panel:#1f1e1b; --line:#33312c; --accent:#68a7b4; }} }}
+* {{ box-sizing:border-box }}
+body {{ margin:0; padding:2.5rem 1.25rem; background:var(--bg); color:var(--fg);
+  font:15px/1.55 ui-sans-serif,-apple-system,"Helvetica Neue",sans-serif; }}
+main {{ max-width:900px; margin:0 auto }}
+h1 {{ font-size:1.35rem; margin:0 0 .25rem }}
+.window {{ color:var(--muted); font-size:.9rem; margin-bottom:1.5rem }}
+.cards {{ display:flex; flex-wrap:wrap; gap:.75rem; margin-bottom:2rem }}
+.card {{ flex:1 1 150px; background:var(--panel); border:1px solid var(--line);
+  border-radius:8px; padding:.75rem .9rem; display:flex; flex-direction:column; gap:.15rem }}
+.k {{ color:var(--muted); font-size:.75rem; text-transform:uppercase; letter-spacing:.04em }}
+.v {{ font-size:1.25rem; font-weight:600; font-variant-numeric:tabular-nums }}
+section {{ margin-bottom:2.25rem }}
+h2 {{ font-size:.8rem; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--muted); margin:0 0 .75rem; font-weight:600 }}
+svg {{ margin-bottom:1rem; overflow:visible }}
+.bl {{ fill:var(--fg); font-size:12px }}
+.br {{ fill:var(--accent) }}
+.bv {{ fill:var(--muted); font-size:12px; font-variant-numeric:tabular-nums }}
+.tw {{ overflow-x:auto }}
+table {{ width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums }}
+th,td {{ text-align:right; padding:.4rem .6rem; border-bottom:1px solid var(--line);
+  white-space:nowrap }}
+th:first-child,td:first-child {{ text-align:left; white-space:normal }}
+th {{ color:var(--muted); font-size:.75rem; font-weight:600 }}
+footer {{ color:var(--muted); font-size:.8rem; border-top:1px solid var(--line);
+  padding-top:1rem; margin-top:2rem }}
+</style></head>
+<body><main>
+<h1>AI coding usage</h1>
+<p class="window">{escape(window_label)}</p>
+<div class="cards">{cards}</div>
+{"".join(blocks)}
+<footer>{escape(footnote)}</footer>
+</main></body></html>
+"""
+
+
+def print_table(title, rows, label_header, label_width=36):
+    if not rows:
+        return
+    print(f"\n{title}")
+    print(f"{label_header:<{label_width}} {'requests':>9} {'tokens':>16} {'cost $':>10}")
+    for label, requests, tokens, cost in rows:
+        text = str(label)
+        print(f"{text[:label_width]:<{label_width}} {requests:>9,} {tokens:>16,} {cost:>10.2f}")
+
+
+def counts_json(counts, include_credits=False):
+    result = {
+        "requests": int(counts.get("requests", 0)),
+        "tokens": token_total(counts),
+        "uncached_input_tokens": int(counts.get("input", 0)),
+        "cached_input_tokens": int(counts.get("cache_read", 0)),
+        "cache_write_5m_input_tokens": int(counts.get("cache_write_5m", 0)),
+        "cache_write_1h_input_tokens": int(counts.get("cache_write_1h", 0)),
+        "output_tokens": int(counts.get("output", 0)),
+        "reasoning_output_tokens": int(counts.get("reasoning", 0)),
+        "api_equivalent_cost_usd": round(float(counts.get("api_cost_usd", 0.0)), 4),
+    }
+    if include_credits:
+        result["credits_min"] = round(float(counts.get("credits_min", 0.0)), 3)
+        result["credits_max"] = round(float(counts.get("credits_max", 0.0)), 3)
+        result["unknown_tier_requests"] = int(counts.get("unknown_tier_requests", 0))
+    return result
+
+
+def provider_view(data, provider):
+    """Build independently grouped rows for one provider."""
+    provider_models = {
+        key: counts
+        for key, counts in data["by_model"].items()
+        if split_model_key(key)[0] == provider
+    }
+
+    def grouped_rows(bucket_name, reverse=False, by_cost=False):
+        filtered = {
+            key: counts
+            for key, counts in data[bucket_name].items()
+            if split_model_key(key[1])[0] == provider
+        }
+        return rows_from_group(
+            collapse_model_keyed(filtered), reverse=reverse, by_cost=by_cost
+        )
+
+    totals = combined_counts(data["by_model"], provider)
+    week_rows = [
+        (f"week of {label}", requests, tokens, cost)
+        for label, requests, tokens, cost in grouped_rows("by_week", reverse=True)
+    ]
+    model_rows = sorted(
+        (
+            (
+                split_model_key(key)[1],
+                counts["requests"],
+                token_total(counts),
+                cost_of(key, counts),
+            )
+            for key, counts in provider_models.items()
+        ),
+        key=lambda row: -row[3],
+    )
+    unpriced_models = [
+        split_model_key(key)[1]
+        for key in sorted(data["unpriced_models"])
+        if split_model_key(key)[0] == provider
+    ]
+    total_tokens = token_total(totals)
+    total_requests = totals["requests"]
+    return {
+        "provider": provider,
+        "title": "Claude Code" if provider == "claude" else "Codex",
+        "models": provider_models,
+        "totals": totals,
+        "requests": total_requests,
+        "tokens": total_tokens,
+        "cost": cost_of(provider, totals),
+        "credits_min": float(totals.get("credits_min", 0.0)),
+        "credits_max": float(totals.get("credits_max", 0.0)),
+        "unknown_tier_requests": int(totals.get("unknown_tier_requests", 0)),
+        "average_context": total_tokens // total_requests if total_requests else 0,
+        "cache_share": totals["cache_read"] / total_tokens if total_tokens else 0,
+        "month_rows": grouped_rows("by_month", reverse=True),
+        "week_rows": week_rows,
+        "model_rows": model_rows,
+        "day_rows": grouped_rows("by_day"),
+        "project_rows": grouped_rows("by_project", by_cost=True)[:12],
+        "unpriced_models": unpriced_models,
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Claude Code and Codex token usage, API-equivalent cost, and Codex credits.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__,
+    )
+    window = parser.add_mutually_exclusive_group()
+    window.add_argument(
+        "--weeks",
+        type=int,
+        nargs="?",
+        const=1,
+        metavar="N",
+        help="last N Saturday-based weeks including the current one (default 1)",
+    )
+    window.add_argument(
+        "--months",
+        type=int,
+        nargs="?",
+        const=1,
+        metavar="N",
+        help="last N calendar months including the current one (default 1)",
+    )
+    window.add_argument("--last-week", action="store_true", help="previous complete week")
+    window.add_argument(
+        "--last-month", action="store_true", help="previous complete calendar month"
+    )
+    window.add_argument(
+        "--last-7-days",
+        action="store_true",
+        help="rolling 7 days ending now (default window)",
+    )
+    window.add_argument(
+        "--last-30-days",
+        action="store_true",
+        help="rolling 30 days ending now",
+    )
+    parser.add_argument("--since", metavar="YYYY-MM-DD", help="explicit window start")
+    parser.add_argument(
+        "--until", metavar="YYYY-MM-DD", help="explicit window end (exclusive)"
+    )
+    parser.add_argument(
+        "--provider",
+        default="all",
+        choices=["all", "claude", "codex"],
+        help="logs to include (default: all)",
+    )
+    parser.add_argument(
+        "--reset-day",
+        default="sat",
+        choices=WEEKDAYS,
+        help="weekly reporting boundary in Beijing time (default: sat)",
+    )
+    parser.add_argument(
+        "--reset-hour",
+        type=int,
+        default=0,
+        metavar="H",
+        help="weekly boundary hour, 0-23 (default: 0)",
+    )
+    parser.add_argument(
+        "--breakdown",
+        default="model",
+        choices=["model", "day", "project", "all", "none"],
+        help="extra tables to print (default: model)",
+    )
+    parser.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+    parser.add_argument(
+        "--html", metavar="FILE", help="write a self-contained offline HTML report"
+    )
+    args = parser.parse_args()
+
+    if not 0 <= args.reset_hour <= 23:
+        sys.exit("ai-usage: --reset-hour must be between 0 and 23")
+
+    now = datetime.now(REPORT_TZ)
+    reset_weekday = WEEKDAYS.index(args.reset_day)
+
+    def week_key(moment):
+        return week_start_before(moment, reset_weekday, args.reset_hour).strftime("%Y-%m-%d")
+
+    current_week_start = week_start_before(now, reset_weekday, args.reset_hour)
+    if args.since or args.until:
+        start = parse_day(args.since) if args.since else current_week_start
+        end = parse_day(args.until) if args.until else now
+    elif args.weeks is not None:
+        if args.weeks < 1:
+            sys.exit("ai-usage: --weeks must be at least 1")
+        start, end = current_week_start - timedelta(weeks=args.weeks - 1), now
+    elif args.months is not None:
+        if args.months < 1:
+            sys.exit("ai-usage: --months must be at least 1")
+        start, end = month_start_before(now, args.months - 1), now
+    elif args.last_week:
+        start, end = current_week_start - timedelta(weeks=1), current_week_start
+    elif args.last_month:
+        start, end = month_start_before(now, 1), month_start_before(now, 0)
+    elif args.last_7_days:
+        start, end = now - timedelta(days=7), now
+    elif args.last_30_days:
+        start, end = now - timedelta(days=30), now
+    else:
+        start, end = now - timedelta(days=7), now
+
+    if start >= end:
+        sys.exit("ai-usage: window start must precede its end")
+
+    data = collect_records(start, end, week_key, args.provider)
+    selected_providers = (
+        ["claude", "codex"] if args.provider == "all" else [args.provider]
+    )
+    views = [provider_view(data, provider) for provider in selected_providers]
+
+    if args.json:
+        providers_json = {}
+        for view in views:
+            provider = view["provider"]
+            models_json = {
+                split_model_key(key)[1]: counts_json(
+                    counts, include_credits=provider == "codex"
+                )
+                for key, counts in sorted(view["models"].items())
+            }
+            providers_json[provider] = {
+                **counts_json(
+                    view["totals"], include_credits=provider == "codex"
+                ),
+                "models": models_json,
+                "unpriced_models": view["unpriced_models"],
+            }
+        payload = {
+            "start": start.isoformat(),
+            "end": end.isoformat(),
+            "timezone": REPORT_TZ_NAME,
+            "provider_filter": args.provider,
+            "providers": providers_json,
+            "diagnostics": dict(sorted(data["diagnostics"].items())),
+        }
+        print(json.dumps(payload, indent=2))
+        return
+
+    window_label = (
+        f"{start:%Y-%m-%d %H:%M}  ->  {end:%Y-%m-%d %H:%M}   "
+        f"({REPORT_TZ_NAME})"
+    )
+    footnote = (
+        "Dollar cost is API-equivalent at Anthropic/OpenAI standard first-party list "
+        "prices, including detectable OpenAI long-context surcharges. It is not a "
+        "subscription bill. Codex credits use the recorded Fast tier where available."
+    )
+
+    if args.html:
+        summary = []
+        sections = []
+        for view in views:
+            title = view["title"]
+            summary.extend(
+                [
+                    (f"{title} requests", f"{view['requests']:,}"),
+                    (f"{title} tokens", f"{view['tokens']:,}"),
+                    (f"{title} API-equivalent", f"${view['cost']:,.2f}"),
+                ]
+            )
+            if view["credits_max"]:
+                summary.append(
+                    (
+                        "Codex credits",
+                        format_credit_range(
+                            view["credits_min"], view["credits_max"]
+                        ),
+                    )
+                )
+            provider_sections = [
+                (f"{title} — by month", "month", view["month_rows"], True),
+                (f"{title} — by week", "period", view["week_rows"], True),
+                (f"{title} — by model", "model", view["model_rows"], True),
+                (f"{title} — by day", "date", view["day_rows"], True),
+                (
+                    f"{title} — by project",
+                    "project",
+                    view["project_rows"],
+                    True,
+                ),
+            ]
+            sections.extend(
+                section
+                for section in provider_sections
+                if "by month" not in section[0]
+                and "by week" not in section[0]
+                or len(section[2]) > 1
+            )
+        destination = os.path.abspath(os.path.expanduser(args.html))
+        os.makedirs(os.path.dirname(destination) or ".", exist_ok=True)
+        with open(destination, "w") as report:
+            report.write(render_html(window_label, summary, sections, footnote))
+        print(destination)
+        return
+
+    print(window_label)
+    diagnostics = data["diagnostics"]
+    for view in views:
+        provider = view["provider"]
+        print(f"\n{view['title'].upper()}")
+        print(
+            f"requests {view['requests']:,}   tokens {view['tokens']:,}   "
+            f"API-equivalent ${view['cost']:,.2f}"
+        )
+        if view["credits_max"]:
+            tier_note = (
+                f" ({view['unknown_tier_requests']:,} responses have unknown speed tier)"
+                if view["unknown_tier_requests"]
+                else ""
+            )
+            print(
+                "credits "
+                + format_credit_range(view["credits_min"], view["credits_max"])
+                + tier_note
+            )
+
+        if provider == "claude" and diagnostics["claude_replayed_messages"]:
+            print(
+                f"skipped {diagnostics['claude_replayed_messages']:,} replayed messages"
+            )
+        if provider == "codex" and diagnostics["codex_duplicate_session_files"]:
+            print(
+                f"skipped {diagnostics['codex_duplicate_session_files']:,} "
+                "duplicate session files"
+            )
+        if view["unpriced_models"]:
+            print(
+                "no API price on file (tokens counted, cost $0): "
+                + ", ".join(view["unpriced_models"])
+            )
+
+        if args.months is not None and len(view["month_rows"]) > 1:
+            print_table("BY MONTH", view["month_rows"], "month", label_width=14)
+        if args.weeks is not None and len(view["week_rows"]) > 1:
+            print_table("BY WEEK", view["week_rows"], "period")
+        if args.breakdown in ("model", "all"):
+            print_table("BY MODEL", view["model_rows"], "model")
+        if args.breakdown in ("day", "all"):
+            print_table("BY DAY", view["day_rows"], "date", label_width=14)
+        if args.breakdown in ("project", "all"):
+            print_table(
+                "BY PROJECT (top 12)",
+                view["project_rows"],
+                "project",
+                label_width=46,
+            )
+
+        if view["tokens"]:
+            print(
+                f"\ncache reads are {view['cache_share']:.1%} of tokens; "
+                f"average context {view['average_context']:,} tokens/response"
+            )
+        if provider == "codex" and view["totals"]["reasoning"]:
+            print(
+                f"reasoning {view['totals']['reasoning']:,} tokens "
+                "(already included in output tokens)"
+            )
+
+
+if __name__ == "__main__":
+    main()
