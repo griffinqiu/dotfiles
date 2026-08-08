@@ -77,3 +77,7 @@ source "/Users/griffin/.openclaw/completions/openclaw.zsh"
 ocagent() {
   openclaw tui --session "agent:$1:main"
 }
+
+
+# Added by Antigravity CLI installer
+export PATH="/Users/griffin/.local/bin:$PATH"

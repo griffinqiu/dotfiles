@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Default provider: copilot; remaining fallback order: claude > codex > gemini
+# Default provider: copilot; remaining fallback order: claude > codex > antigravity
 # Override with: AI_COMMIT_PROVIDER=codex ai-commit-suggest
 DEFAULT_PROVIDER="copilot"
 
@@ -243,21 +243,23 @@ run_codex() {
   return 1
 }
 
-run_gemini() {
+run_antigravity() {
   outfile=$(mktemp)
   errfile=$(mktemp)
-  (gemini -p "$PROMPT" --sandbox \
-    -m gemini-3.5-flash \
+  (agy --print "$PROMPT" \
+    --sandbox \
+    --model "Gemini 3.5 Flash" \
+    --effort low \
     >"$outfile" 2>"$errfile") &
   pid=$!
-  wait_with_timer "$pid" "Google Gemini"
+  wait_with_timer "$pid" "Google Antigravity"
   rc=$?
   if [ "$rc" = "0" ] && [ -s "$outfile" ]; then
     cat "$outfile"
     rm -f "$outfile" "$errfile"
     return 0
   fi
-  report_failure "Google Gemini" "$rc" "$outfile" "$errfile"
+  report_failure "Google Antigravity" "$rc" "$outfile" "$errfile"
   rm -f "$outfile" "$errfile"
   return 1
 }
@@ -330,10 +332,10 @@ sanitize_output() {
 
 provider_label() {
   case "$1" in
-    gemini)  echo "Google Gemini"    ;;
-    codex)   echo "OpenAI Codex"     ;;
-    copilot) echo "GitHub Copilot"   ;;
-    claude)  echo "Anthropic Claude Code" ;;
+    antigravity) echo "Google Antigravity" ;;
+    codex)       echo "OpenAI Codex"        ;;
+    copilot)     echo "GitHub Copilot"      ;;
+    claude)      echo "Anthropic Claude Code" ;;
   esac
 }
 
@@ -341,15 +343,15 @@ fallback_to() {
   printf '\033[36m↻ falling back to %s…\033[0m\n' "$(provider_label "$1")" >&2
 }
 
-PROVIDERS="claude codex copilot gemini"
+PROVIDERS="claude codex copilot antigravity"
 
 run_provider() {
   case "$1" in
-    gemini)  run_gemini  ;;
-    codex)   run_codex   ;;
-    copilot) run_copilot ;;
-    claude)  run_claude  ;;
-    *)       return 1    ;;
+    antigravity) run_antigravity ;;
+    codex)       run_codex       ;;
+    copilot)     run_copilot     ;;
+    claude)      run_claude      ;;
+    *)           return 1        ;;
   esac
 }
 
