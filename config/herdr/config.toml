@@ -106,10 +106,16 @@ type = "shell"
 command = '"${HERDR_BIN_PATH:-herdr}" pane send-keys "$HERDR_ACTIVE_PANE_ID" ctrl+l'
 description = "clear focused terminal (tmux C-l)"
 
+# Popup commands are spawned directly by the Herdr server, so they inherit the
+# server process environment rather than a pane's login shell. Under
+# `herdr --remote` the server is started over a non-interactive SSH session,
+# which loads ~/.zshenv but not ~/.zshrc, leaving PATH without ~/.local/bin
+# (so bootmux cannot find the herdr binary) and dropping EDITOR and
+# FZF_DEFAULT_OPTS. Wrapping in an interactive shell restores that environment.
 [[keys.command]]
 key = "prefix+shift+g"
 type = "popup"
-command = "lazygit"
+command = 'zsh -ic lazygit'
 description = "open lazygit"
 width = "80%"
 height = "80%"
@@ -117,7 +123,7 @@ height = "80%"
 [[keys.command]]
 key = "prefix+w"
 type = "popup"
-command = "bootmux picker"
+command = 'zsh -ic "bootmux picker"'
 description = "open bootmux project picker"
 width = "80%"
 height = "80%"
