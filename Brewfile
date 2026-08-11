@@ -31,5 +31,6 @@ brew "zoxide"
 brew "griffinqiu/tap/bootmux"
 
 cask "1password-cli"
+cask "copilot-cli"
 cask "font-hack-nerd-font"
 cask "ghostty"

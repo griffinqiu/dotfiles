@@ -107,6 +107,7 @@ nnoremap <silent> <leader>e :Explore<CR>
 
 " MacVim-only helpers: Neovim binds nothing on these keys.
 map <leader>co :botright copen<cr>
+" Spell check stays off by default; <leader>ss turns it on for the buffer.
 map <leader>ss :setlocal spell!<cr>
 map <leader>sn ]s
 map <leader>sp [s

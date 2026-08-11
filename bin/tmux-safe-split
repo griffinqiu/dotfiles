@@ -9,7 +9,7 @@
 PANE_TTY=$(tmux display-message -p '#{pane_tty}')
 TTY_SHORT="${PANE_TTY#/dev/}"
 
-CODE_AGENTS="^(claude|codex|aider)$"
+CODE_AGENTS="^(claude|codex)$"
 
 if ps -t "$TTY_SHORT" -o comm= 2>/dev/null | grep -qiE "$CODE_AGENTS"; then
   tmux display-message "Code agent running! Use <prefix>+c to open a new window instead."
