@@ -125,4 +125,22 @@ else
   skip 'mvim is not installed'
 fi
 
+# Two separate commits replaced these bodies with symlinks pointing at their own
+# path, which reads as `Too many levels of symbolic links` and silently disables
+# every affected skill. Catch it before it reaches a commit again.
+unreadable_skills=
+while IFS= read -r skill_file; do
+  [ -n "$skill_file" ] || continue
+  if [ -L "$skill_file" ] || ! head -n 1 "$skill_file" >/dev/null 2>&1; then
+    unreadable_skills="${unreadable_skills}${unreadable_skills:+, }$skill_file"
+  fi
+done <<EOF
+$(git -C "$repo_root" ls-files 'claude/skills/*' '.claude/skills/*')
+EOF
+if [ -z "$unreadable_skills" ]; then
+  pass 'skill bodies are readable regular files, not symlinks'
+else
+  fail "unreadable or symlinked skill bodies: $unreadable_skills"
+fi
+
 printf '1..%d # %d skipped\n' "$tests" "$skips"

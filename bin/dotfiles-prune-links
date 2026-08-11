@@ -1,0 +1,106 @@
+#!/bin/sh
+
+set -eu
+
+usage() {
+  cat <<'EOF'
+Usage: dotfiles-prune-links [--dry-run]
+
+Remove symlinks under $HOME that point into this checkout but no longer
+resolve. RCM creates links and never reclaims them, so deleting a tracked
+file leaves one behind.
+
+  --dry-run  List what would be removed without removing anything.
+
+Only broken symlinks whose target is inside the checkout are considered, so
+live links and paths owned by anything else are never touched.
+EOF
+}
+
+die() {
+  printf 'dotfiles-prune-links: %s\n' "$*" >&2
+  exit 2
+}
+
+resolve_repo_root() {
+  if [ -n "${DOTFILES_ROOT:-}" ]; then
+    CDPATH='' cd -P -- "$DOTFILES_ROOT" && pwd
+    return
+  fi
+
+  script_path=$0
+  while [ -L "$script_path" ]; do
+    script_dir=$(CDPATH='' cd -P -- "$(dirname -- "$script_path")" && pwd)
+    script_path=$(readlink "$script_path")
+    case "$script_path" in
+      /*) ;;
+      *) script_path=$script_dir/$script_path ;;
+    esac
+  done
+  CDPATH='' cd -P -- "$(dirname -- "$script_path")/.." && pwd
+}
+
+dry_run=false
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --dry-run) dry_run=true ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *) die "unknown option: $1" ;;
+  esac
+  shift
+done
+
+repo_root=$(resolve_repo_root) || die 'cannot resolve repository root'
+[ -d "$repo_root" ] || die "repository root is not a directory: $repo_root"
+
+candidates=$(mktemp "${TMPDIR:-/tmp}/dotfiles-prune-links.XXXXXX")
+trap 'rm -f -- "$candidates"' EXIT HUP INT TERM
+
+# RCM only links into dot-prefixed paths, and the deepest managed path is four
+# levels down (config/nvim/lua/plugins/*.lua). Pruning these caches keeps the
+# scan near a second instead of ten; missing one only costs time, never
+# correctness, so the list stays conservative.
+for home_entry in "$HOME"/.[!.]*; do
+  [ -e "$home_entry" ] || [ -L "$home_entry" ] || continue
+
+  find "$home_entry" -maxdepth 4 \
+    \( -name .Trash -o -name .bun -o -name .cache -o -name .cargo \
+    -o -name .copilot -o -name .npm -o -name .oh-my-zsh -o -name .rustup \) \
+    -prune -o -type l ! -exec test -e {} \; -print 2>/dev/null |
+    while IFS= read -r link_path; do
+      link_target=$(readlink "$link_path" 2>/dev/null) || continue
+      case "$link_target" in
+        /*) ;;
+        *) link_target=$(dirname -- "$link_path")/$link_target ;;
+      esac
+      case "$link_target" in
+        "$repo_root"/*) printf '%s\n' "$link_path" ;;
+      esac
+    done >>"$candidates"
+done
+
+total=$(wc -l <"$candidates" | tr -d ' ')
+
+if [ "$total" -eq 0 ]; then
+  printf 'No dangling links into %s.\n' "$repo_root"
+  exit 0
+fi
+
+while IFS= read -r link_path; do
+  if $dry_run; then
+    printf 'would remove %s\n' "${link_path#"$HOME"/}"
+  else
+    rm -- "$link_path"
+    printf 'Removed %s\n' "${link_path#"$HOME"/}"
+  fi
+done <"$candidates"
+
+if $dry_run; then
+  printf '%d dangling link(s) into %s; rerun without --dry-run to remove.\n' \
+    "$total" "$repo_root"
+else
+  printf 'Removed %d dangling link(s) into %s.\n' "$total" "$repo_root"
+fi

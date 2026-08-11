@@ -385,6 +385,23 @@ grep -Fqx \
   fail 'links must execute rcup resolved from the Homebrew rcm prefix'
 pass 'rcup resolves from Homebrew without relying on shell PATH refresh'
 
+# rcm never reclaims a link whose source was deleted, so the links component has
+# to, and it must leave live links and foreign targets alone.
+prune_home=$test_tmp/prune-home
+mkdir -p "$prune_home/.config"
+ln -s "$repo_root/deleted-by-a-past-commit" "$prune_home/.retired-link"
+ln -s "$repo_root/zshrc" "$prune_home/.live-link"
+ln -s "$test_tmp/never-existed" "$prune_home/.foreign-dangling-link"
+: >"$test_log"
+run_bootstrap_home "$prune_home" --only links >/dev/null
+[ ! -L "$prune_home/.retired-link" ] ||
+  fail 'links component must remove a dangling link into the checkout'
+[ -L "$prune_home/.live-link" ] ||
+  fail 'links component must keep a link that still resolves'
+[ -L "$prune_home/.foreign-dangling-link" ] ||
+  fail 'links component must keep a dangling link pointing outside the checkout'
+pass 'links component prunes retired links without touching live or foreign ones'
+
 : >"$test_log"
 run_bootstrap --only runtimes >/dev/null
 grep -Fqx 'mise:install --locked -y' "$test_log" ||
@@ -1085,7 +1102,7 @@ ln -s "$repo_root/config/ghostty/deleted-theme" \
 doctor_output=$(HOME="$stale_link_home" PATH=/usr/bin:/bin \
   DOTFILES_ROOT="$repo_root" "$repo_root/bin/dotfiles-doctor" 2>&1 || true)
 printf '%s\n' "$doctor_output" | grep -Fq \
-  'dangling links into this checkout: .config/ghostty/deleted-theme' ||
+  'dangling links into this checkout (1): .config/ghostty/deleted-theme' ||
   fail 'doctor must report a dangling link into the checkout'
 if printf '%s\n' "$doctor_output" | grep -F '[fail]' | grep -Fq dangling; then
   fail 'a dangling link must be reported as a warning, not a failure'

@@ -561,6 +561,15 @@ if $run_links; then
   else
     RCRC="$repo_root/rcrc" "$rcup_bin" -d "$repo_root"
   fi
+
+  # Runs after rcup so anything still dangling is genuinely retired: rcm
+  # creates links but never reclaims the ones whose source was deleted.
+  prune_links=${DOTFILES_PRUNE_LINKS_BIN:-$repo_root/bin/dotfiles-prune-links}
+  if [ -x "$prune_links" ]; then
+    "$prune_links"
+  else
+    printf 'warning: cannot prune retired links: %s\n' "$prune_links" >&2
+  fi
 fi
 
 if $run_runtimes; then

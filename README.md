@@ -32,7 +32,7 @@ With no options, Bootstrap runs the following components in order:
 | Component | Responsibility |
 |---|---|
 | `packages` | Install missing items from the core `Brewfile` without upgrading existing packages; install missing pinned Git dependencies |
-| `links` | Safely migrate protected paths, then create or refresh links through RCM/`rcup` |
+| `links` | Safely migrate protected paths, create or refresh links through RCM/`rcup`, then prune links whose source this checkout no longer has |
 | `runtimes` | Install exact versions from `config/mise/config.toml` and `config/mise/mise.lock` |
 | `plugins` | Restore Neovim plugins from the lockfile and install missing tmux plugins |
 
@@ -111,6 +111,10 @@ also accepts `--project DIR` and refuses conflicting paths.
   selected.
 - Known regular-file migrations are preserved as `.pre-dotfiles` backups.
 - Retired links are removed only when they point exactly into this checkout.
+  RCM creates links but never reclaims them, so deleting a tracked file leaves a
+  dangling link behind; the `links` component removes those, and
+  `bin/dotfiles-prune-links [--dry-run]` does the same on demand. Live links and
+  dangling links pointing outside the checkout are never touched.
 - Dirty or invalid pinned Git checkouts stop the run instead of being overwritten.
 - Bootstrap never runs `brew bundle cleanup`, uninstalls software, or rolls back
   earlier components after a later failure.

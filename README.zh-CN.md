@@ -31,7 +31,7 @@ Bootstrap不会安装Homebrew，也不会自动运行Doctor。首次安装软件
 | 组件 | 职责 |
 |---|---|
 | `packages` | 通过核心`Brewfile`安装缺失项，不升级已有软件包；安装缺失的固定Git依赖 |
-| `links` | 安全迁移受保护路径，再通过RCM/`rcup`建立或刷新链接 |
+| `links` | 安全迁移受保护路径，通过RCM/`rcup`建立或刷新链接，再清理源文件已从本checkout删除的链接 |
 | `runtimes` | 按`config/mise/config.toml`和`config/mise/mise.lock`安装精确版本 |
 | `plugins` | 从lockfile恢复Neovim插件，并安装缺失的tmux插件 |
 
@@ -102,7 +102,9 @@ RCM把全局层发布到`~/.claude`、`~/.codex`和`~/.agents`；点号目录层
 
 - 选中`links`时，会在软件包变更前检查Agent和Mise冲突。
 - 已知的普通文件迁移会保存为`.pre-dotfiles`备份。
-- 仅当旧链接精确指向当前checkout时才会删除。
+- 仅当旧链接精确指向当前checkout时才会删除。RCM只建链接、从不回收，因此删除
+  受管理文件会留下悬空链接；`links`组件会清理它们，`bin/dotfiles-prune-links
+  [--dry-run]`可随时手动执行。有效链接和指向checkout之外的悬空链接都不会被动。
 - 固定Git checkout存在本地修改或无效时会停止，不会覆盖内容。
 - Bootstrap不会运行`brew bundle cleanup`、卸载软件，也不会在后续组件失败时
   回滚已经完成的组件。
