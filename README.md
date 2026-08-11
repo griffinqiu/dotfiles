@@ -40,7 +40,7 @@ Bootstrap 默认依次运行 `packages`、`links`、`runtimes`、`plugins`，完
 
 | 组件 | 默认行为 |
 |---|---|
-| `packages` | 通过核心 `Brewfile` 安装缺失的 Homebrew 依赖；缺失时安装固定提交版本的 TPM；默认不升级已有依赖 |
+| `packages` | 通过核心 `Brewfile` 安装缺失的 Homebrew 依赖；缺失时安装固定提交版本的 Oh My Zsh、两个 Zsh 插件和 TPM；默认不升级已有依赖 |
 | `links` | 处理受保护路径的迁移，并在仓库根目录上调用 RCM/`rcup` 建立或刷新链接 |
 | `runtimes` | 按 `config/mise/config.toml` 和 `config/mise/mise.lock` 安装锁定的 Go、Lua、Node.js、Python、Ruby、Rust 和 Zig |
 | `plugins` | 安装或恢复 Neovim 和 tmux 插件 |
@@ -138,6 +138,7 @@ Claude-only 例外，不会镜像到 Codex。
   会先保存为对应的 `.pre-dotfiles` 备份；受保护路径发生外部、失效或类型
   冲突时会停止。
 - 旧链接只有在目标精确属于当前仓库时才会删除；外部的 `.agrc` 会保留。
+- 固定 Git 依赖存在本地修改或不是有效 checkout 时会停止，不会覆盖其内容。
 - Bootstrap 不运行 `brew bundle cleanup`，也不卸载软件；它不是事务系统，
   后续失败不会回滚已经完成的步骤。
 
@@ -189,7 +190,7 @@ order, completing the full setup managed by this repository.
 
 | Component | Default behavior |
 |---|---|
-| `packages` | Install missing Homebrew items from the core `Brewfile`; install the pinned TPM revision when missing; do not upgrade installed items by default |
+| `packages` | Install missing Homebrew items from the core `Brewfile`; install pinned Oh My Zsh, two Zsh plugins, and TPM checkouts when missing; do not upgrade installed items by default |
 | `links` | Migrate protected paths and invoke RCM/`rcup` at the repository root to create or refresh links |
 | `runtimes` | Install locked Go, Lua, Node.js, Python, Ruby, Rust, and Zig versions from `config/mise/config.toml` and `config/mise/mise.lock` |
 | `plugins` | Install or restore Neovim and tmux plugins |
@@ -300,6 +301,8 @@ instruction and skill-link topology.
   foreign, dangling, or type conflicts on protected paths stop the run.
 - Retired links are removed only when their targets belong exactly to the current
   checkout; foreign `.agrc` paths are preserved.
+- Pinned Git dependencies with local changes or invalid checkouts stop the run
+  instead of being overwritten.
 - Bootstrap does not run `brew bundle cleanup` or uninstall software. It is not
   transactional, so a later failure does not roll back completed steps.
 

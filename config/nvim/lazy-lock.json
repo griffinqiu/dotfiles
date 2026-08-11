@@ -31,7 +31,6 @@
   "markdown-preview.nvim": { "branch": "master", "commit": "9becceee5740b7db6914da87358a183ad11b2049" },
   "mason-lspconfig.nvim": { "branch": "main", "commit": "a5671269a1ddfa7790cdf97c14e600e269da550f" },
   "mason.nvim": { "branch": "main", "commit": "2a6940af80375532e5e9e7c1f2fc6319a1b7a69d" },
-  "mcphub.nvim": { "branch": "main", "commit": "163b3ad0caa3987e04e5b1d89bb89d230686d17b" },
   "mini.ai": { "branch": "main", "commit": "d73c36349aa7b0bab5f77ad71701a1d42211a1df" },
   "mini.comment": { "branch": "main", "commit": "4677392f091e8b5c18d4b535130220a6d1da4aca" },
   "mini.files": { "branch": "main", "commit": "a5689dae6b732955e33eec225b798d6815063179" },

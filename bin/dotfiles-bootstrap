@@ -316,9 +316,13 @@ if $run_runtimes; then
 fi
 
 bootstrap_tmp=
+nvim_lock_tmp=
 cleanup() {
   if [ -n "$bootstrap_tmp" ] && [ -d "$bootstrap_tmp" ]; then
     rm -rf -- "$bootstrap_tmp"
+  fi
+  if [ -n "$nvim_lock_tmp" ] && [ -f "$nvim_lock_tmp" ]; then
+    rm -f -- "$nvim_lock_tmp"
   fi
 }
 trap cleanup EXIT HUP INT TERM
@@ -330,6 +334,12 @@ install_pinned_checkout() {
   checkout_path=$4
 
   if [ -d "$checkout_path/.git" ]; then
+    checkout_changes=$(
+      "$git_bin" -C "$checkout_path" status --porcelain --untracked-files=all
+    ) || die "cannot inspect $checkout_name checkout: $checkout_path"
+    [ -z "$checkout_changes" ] ||
+      die "$checkout_name contains local changes: $checkout_path"
+
     current_revision=$("$git_bin" -C "$checkout_path" rev-parse HEAD 2>/dev/null || true)
     if [ "$current_revision" != "$checkout_revision" ]; then
       if $upgrade; then
@@ -354,9 +364,7 @@ install_pinned_checkout() {
   fi
 
   if [ -e "$checkout_path" ]; then
-    printf 'warning: %s exists but is not a Git checkout; left unchanged\n' \
-      "$checkout_path" >&2
-    return
+    die "$checkout_name path exists but is not a Git checkout: $checkout_path"
   fi
 
   bootstrap_tmp=$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-bootstrap.XXXXXX")
@@ -393,8 +401,6 @@ preflight_plugins() {
     fi
     [ -n "$nvim_bin" ] && [ -x "$nvim_bin" ] ||
       die 'Neovim is unavailable; run the packages component first'
-    command -v git >/dev/null 2>&1 ||
-      die 'git is required to install or update Neovim plugins'
     nvim_plugin_script=$repo_root/config/nvim/lua/config/plugin-sync.lua
     [ -f "$nvim_plugin_script" ] ||
       die "missing Neovim plugin runner: $nvim_plugin_script"
@@ -423,6 +429,12 @@ preflight_plugins() {
     fi
     [ -n "$tmux_bin" ] && [ -x "$tmux_bin" ] ||
       die 'tmux is unavailable; run the packages component first'
+    tmux_bin_dir=$(dirname -- "$tmux_bin")
+  fi
+
+  if [ -z "$nvim_plugin_runner" ] || [ -z "$tpm_plugin_runner" ]; then
+    command -v git >/dev/null 2>&1 ||
+      die 'git is required by the built-in plugin installers'
   fi
 }
 
@@ -431,6 +443,25 @@ run_nvim_plugins() {
   if [ -n "$nvim_plugin_runner" ]; then
     "$nvim_plugin_runner" "$plugin_mode"
     return
+  fi
+
+  if [ "$plugin_mode" = install ]; then
+    nvim_lockfile=$nvim_config_dir/lazy-lock.json
+    [ -f "$nvim_lockfile" ] ||
+      die "Neovim lockfile is unavailable: $nvim_lockfile"
+    nvim_lock_tmp=$(mktemp "${TMPDIR:-/tmp}/dotfiles-lazy-lock.XXXXXX")
+    cp "$nvim_lockfile" "$nvim_lock_tmp"
+    if DOTFILES_NVIM_SYNC_LOCKFILE="$nvim_lock_tmp" \
+      DOTFILES_NVIM_CANONICAL_LOCKFILE="$nvim_lockfile" \
+      "$nvim_bin" --headless -n -u "$nvim_config_dir/init.lua" \
+      -l "$nvim_plugin_script" "$plugin_mode"; then
+      nvim_status=0
+    else
+      nvim_status=$?
+    fi
+    rm -f -- "$nvim_lock_tmp"
+    nvim_lock_tmp=
+    return "$nvim_status"
   fi
 
   "$nvim_bin" --headless -n -u "$nvim_config_dir/init.lua" \
@@ -444,9 +475,9 @@ run_tpm_plugins() {
     return
   fi
 
-  "$tpm_install"
+  PATH="$tmux_bin_dir:$PATH" "$tpm_install"
   if [ "$plugin_mode" = update ]; then
-    if ! tpm_update_output=$("$tpm_update" all 2>&1); then
+    if ! tpm_update_output=$(PATH="$tmux_bin_dir:$PATH" "$tpm_update" all 2>&1); then
       printf '%s\n' "$tpm_update_output" >&2
       die 'TPM plugin update command failed'
     fi

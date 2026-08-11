@@ -22,7 +22,7 @@ Keep product-specific instructions or skills only in their native tree. Keep
 `claude/skills/gitlab-mr*` Claude-only unless the user explicitly requests a
 portability review. In this repository, keep the existing
 `.claude/skills/dotfiles-theme` body in place and expose it to Codex only through
-`agents/skills/dotfiles-theme`.
+`.agents/skills/dotfiles-theme`.
 
 ## Workflow
 

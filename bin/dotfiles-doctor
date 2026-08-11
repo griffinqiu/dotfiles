@@ -97,6 +97,16 @@ check_pinned_checkout() {
   else
     warn "$checkout_name is at ${current_revision:-unknown}; bootstrap pin is $expected_revision"
   fi
+
+  checkout_changes=$(git -C "$checkout_path" status --porcelain --untracked-files=all 2>/dev/null) || {
+    fail "$checkout_name checkout status is unreadable"
+    return
+  }
+  if [ -z "$checkout_changes" ]; then
+    ok "$checkout_name checkout is clean"
+  else
+    fail "$checkout_name checkout contains local changes: $checkout_path"
+  fi
 }
 
 symlink_points_to_path() {
@@ -248,6 +258,28 @@ if command -v lsrc >/dev/null 2>&1 && command -v git >/dev/null 2>&1; then
   fi
 fi
 
+# rcm creates links but never reclaims them, so deleting a tracked file leaves a
+# dangling link behind. Only ~/.* can hold them, which keeps this scan cheap.
+stale_repo_links=
+stale_repo_link_count=0
+for stale_link in $(find "$HOME"/.[!.]* -maxdepth 3 -type l \
+  ! -exec test -e {} \; -print 2>/dev/null); do
+  case "$(readlink "$stale_link" 2>/dev/null)" in
+    "$repo_root"/*)
+      stale_repo_link_count=$((stale_repo_link_count + 1))
+      [ "$stale_repo_link_count" -le 5 ] &&
+        stale_repo_links="${stale_repo_links}${stale_repo_links:+, }${stale_link#"$HOME"/}"
+      ;;
+  esac
+done
+if [ "$stale_repo_link_count" -eq 0 ]; then
+  ok 'no dangling links point into this checkout'
+else
+  [ "$stale_repo_link_count" -gt 5 ] &&
+    stale_repo_links="$stale_repo_links, ... ($stale_repo_link_count total)"
+  warn "dangling links into this checkout: $stale_repo_links"
+fi
+
 if grep -Eq '=[[:space:]]*"(latest|stable|lts)"' \
   "$repo_root/config/mise/config.toml" 2>/dev/null; then
   fail 'mise tool versions must be exact pins'
@@ -301,6 +333,7 @@ check_symlink() {
 }
 
 check_symlink zshrc "$HOME/.zshrc" "$repo_root/zshrc"
+check_symlink zshrc-oh-my-zsh "$HOME/.zshrc.oh-my-zsh" "$repo_root/zshrc.oh-my-zsh"
 check_symlink gitconfig "$HOME/.gitconfig" "$repo_root/gitconfig"
 check_symlink tmux "$HOME/.tmux.conf" "$repo_root/tmux.conf"
 check_symlink Ghostty "$HOME/.config/ghostty/config" "$repo_root/config/ghostty/config"

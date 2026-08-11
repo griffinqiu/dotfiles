@@ -66,6 +66,12 @@ EOF
 cat >"$test_tmp/bin/nvim-built-in" <<'EOF'
 #!/bin/sh
 printf 'nvim-built-in:%s\n' "$*" >>"$TEST_LOG"
+if [ -n "${DOTFILES_NVIM_SYNC_LOCKFILE:-}" ]; then
+  [ -f "$DOTFILES_NVIM_SYNC_LOCKFILE" ] || exit 84
+  [ "$DOTFILES_NVIM_SYNC_LOCKFILE" != "$DOTFILES_NVIM_CANONICAL_LOCKFILE" ] || exit 85
+  cmp "$DOTFILES_NVIM_SYNC_LOCKFILE" "$DOTFILES_NVIM_CANONICAL_LOCKFILE" || exit 86
+  printf 'nvim-lock:temporary-copy:%s\n' "$DOTFILES_NVIM_CANONICAL_LOCKFILE" >>"$TEST_LOG"
+fi
 EOF
 
 cat >"$test_tmp/bin/tmux-built-in" <<'EOF'
@@ -94,8 +100,28 @@ if [ "${1:-}" = -C ]; then
 fi
 
 case "${1:-}" in
+  init)
+    init_path=
+    for init_arg in "$@"; do
+      init_path=$init_arg
+    done
+    [ -n "$init_path" ] || exit 90
+    mkdir -p "$init_path/.git"
+    printf 'git:init:%s\n' "$*" >>"$TEST_LOG"
+    ;;
+  remote)
+    origin_url=
+    for remote_arg in "$@"; do
+      origin_url=$remote_arg
+    done
+    [ -n "$origin_url" ] || exit 94
+    printf '%s\n' "$origin_url" >"$checkout_path/.test-origin-url"
+    printf 'git:%s:remote:%s\n' "$checkout_path" "$*" >>"$TEST_LOG"
+    ;;
   rev-parse)
-    if [ -f "$checkout_path/.dotfiles-upgraded" ]; then
+    if [ -f "$checkout_path/.test-fetched-revision" ]; then
+      cat "$checkout_path/.test-fetched-revision"
+    elif [ -f "$checkout_path/.dotfiles-upgraded" ]; then
       case "$checkout_path" in
         */tpm) printf '%s\n' "$TEST_TPM_REV" ;;
         */zsh-autosuggestions) printf '%s\n' "$TEST_ZSH_AUTOSUGGESTIONS_REV" ;;
@@ -107,7 +133,20 @@ case "${1:-}" in
       printf '%s\n' old-revision
     fi
     ;;
+  status)
+    if [ -n "${TEST_GIT_DIRTY_PATH:-}" ] && \
+      [ "$checkout_path" = "$TEST_GIT_DIRTY_PATH" ]; then
+      printf '%s\n' ' M locally-modified-file'
+    fi
+    ;;
   fetch)
+    fetched_revision=
+    for fetch_arg in "$@"; do
+      fetched_revision=$fetch_arg
+    done
+    [ -n "$fetched_revision" ] || exit 93
+    printf '%s\n' "$fetched_revision" > \
+      "$checkout_path/.test-fetched-revision"
     printf 'git:%s:fetch:%s\n' "$checkout_path" "$*" >>"$TEST_LOG"
     ;;
   checkout)
@@ -176,6 +215,20 @@ run_bootstrap_home() {
     "$repo_root/bin/dotfiles-bootstrap" "$@"
 }
 
+run_packages_with_git_deps() {
+  packages_home=$1
+  shift
+  HOME="$packages_home" \
+    TEST_LOG="$test_log" \
+    DOTFILES_ROOT="$repo_root" \
+    DOTFILES_BREW_BIN="$test_tmp/bin/brew" \
+    DOTFILES_GIT_BIN="$test_tmp/bin/git-deps" \
+    TEST_GIT_DIRTY_PATH="${TEST_GIT_DIRTY_PATH:-}" \
+    DOTFILES_MACHINE_ARCH=arm64 \
+    DOTFILES_BOOTSTRAP_SKIP_GIT_DEPS=0 \
+    "$repo_root/bin/dotfiles-bootstrap" --only packages "$@"
+}
+
 builtin_plugin_home=$test_tmp/builtin-plugin-home
 builtin_plugin_root=$test_tmp/plugin-only-root
 mkdir -p \
@@ -187,6 +240,7 @@ mkdir -p \
   "$builtin_plugin_root/config/nvim/lua/config"
 printf '%s\n' '-- minimal Neovim configuration' > \
   "$builtin_plugin_home/.config/nvim/init.lua"
+printf '%s\n' '{}' >"$builtin_plugin_home/.config/nvim/lazy-lock.json"
 printf '%s\n' '# minimal tmux configuration' > \
   "$builtin_plugin_home/.tmux.conf"
 printf '%s\n' '-- executed only by real Neovim fixtures' > \
@@ -196,6 +250,7 @@ builtin_plugin_root=$(CDPATH= cd -P -- "$builtin_plugin_root" && pwd)
 cat >"$builtin_plugin_home/.tmux/plugins/tpm/bin/install_plugins" <<'EOF'
 #!/bin/sh
 printf 'tpm-built-in:install:%s\n' "$*" >>"$TEST_LOG"
+exit "${TEST_TPM_INSTALL_STATUS:-0}"
 EOF
 
 cat >"$builtin_plugin_home/.tmux/plugins/tpm/bin/update_plugins" <<'EOF'
@@ -219,6 +274,7 @@ run_builtin_plugins() {
     XDG_DATA_HOME="$builtin_plugin_home/.local/share" \
     XDG_STATE_HOME="$builtin_plugin_home/.local/state" \
     TEST_LOG="$test_log" \
+    TEST_TPM_INSTALL_STATUS="${TEST_TPM_INSTALL_STATUS:-0}" \
     TEST_TPM_UPDATE_OUTPUT="${TEST_TPM_UPDATE_OUTPUT:-}" \
     TEST_TPM_UPDATE_STATUS="${TEST_TPM_UPDATE_STATUS:-0}" \
     DOTFILES_ROOT="$builtin_plugin_root" \
@@ -355,6 +411,10 @@ actual_nvim_install=$(grep '^nvim-built-in:' "$test_log" || true)
   fail "built-in plugin install argv mismatch: ${actual_nvim_install:-not called}"
 grep -Fqx 'tpm-built-in:install:' "$test_log" ||
   fail 'built-in plugin install must run the TPM installer'
+grep -Fqx \
+  "nvim-lock:temporary-copy:$builtin_plugin_home/.config/nvim/lazy-lock.json" \
+  "$test_log" ||
+  fail 'default Neovim sync must protect the canonical lockfile with a temporary copy'
 if grep -q '^tpm-built-in:update:' "$test_log"; then
   fail 'default built-in plugin install must not update TPM plugins'
 fi
@@ -393,6 +453,54 @@ grep -Fqx 'tpm-built-in:update:all' "$test_log" || \
   fail 'the TPM failure fixture must exercise the built-in updater'
 pass 'TPM failure text cannot be mistaken for a successful update'
 
+: >"$test_log"
+tpm_install_failure_output=$test_tmp/tpm-install-failure.out
+if TEST_TPM_INSTALL_STATUS=17 \
+  run_builtin_plugins --only plugins \
+  >"$tpm_install_failure_output" 2>&1; then
+  fail 'a nonzero TPM installer must fail bootstrap'
+fi
+grep -Fqx 'tpm-built-in:install:' "$test_log" || \
+  fail 'the TPM install failure fixture must exercise the built-in installer'
+if grep -q '^tpm-built-in:update:' "$test_log"; then
+  fail 'TPM update must not run after its installer fails'
+fi
+unset TEST_TPM_INSTALL_STATUS
+pass 'TPM installer exit failures propagate'
+
+: >"$test_log"
+tpm_update_failure_output=$test_tmp/tpm-update-failure.out
+if TEST_TPM_INSTALL_STATUS=0 TEST_TPM_UPDATE_STATUS=18 \
+  run_builtin_plugins --only plugins --upgrade \
+  >"$tpm_update_failure_output" 2>&1; then
+  fail 'a nonzero TPM updater must fail bootstrap'
+fi
+if ! grep -Fq 'TPM plugin update command failed' \
+  "$tpm_update_failure_output"; then
+  tpm_update_diagnostic=$(tr '\n' ' ' <"$tpm_update_failure_output")
+  fail "a nonzero TPM updater must produce a diagnostic error: $tpm_update_diagnostic"
+fi
+grep -Fqx 'tpm-built-in:update:all' "$test_log" || \
+  fail 'the TPM update failure fixture must exercise the built-in updater'
+unset TEST_TPM_UPDATE_STATUS
+pass 'TPM updater exit failures propagate'
+
+: >"$test_log"
+tpm_not_installed_output=$test_tmp/tpm-not-installed.out
+if TEST_TPM_INSTALL_STATUS=0 TEST_TPM_UPDATE_STATUS=0 \
+  TEST_TPM_UPDATE_OUTPUT='example plugin not installed!' \
+  run_builtin_plugins --only plugins --upgrade \
+  >"$tpm_not_installed_output" 2>&1; then
+  fail 'TPM not-installed output must fail bootstrap even with exit status 0'
+fi
+grep -Fq 'example plugin not installed!' "$tpm_not_installed_output" || \
+  fail 'bootstrap must preserve TPM not-installed output for diagnosis'
+grep -Fq 'one or more TPM plugin updates failed' \
+  "$tpm_not_installed_output" || \
+  fail 'bootstrap must explain a zero-status TPM not-installed failure'
+unset TEST_TPM_UPDATE_OUTPUT
+pass 'TPM not-installed text cannot be mistaken for success'
+
 real_nvim_bin=$(command -v nvim || true)
 if [ -n "$real_nvim_bin" ]; then
   missing_lazy_home=$test_tmp/missing-lazy-home
@@ -403,6 +511,7 @@ if [ -n "$real_nvim_bin" ]; then
     "$missing_lazy_home/.local/state"
   printf '%s\n' '-- intentionally has no Lazy.nvim module' > \
     "$missing_lazy_home/.config/nvim/init.lua"
+  printf '%s\n' '{}' >"$missing_lazy_home/.config/nvim/lazy-lock.json"
   : >"$test_log"
   missing_lazy_output=$test_tmp/missing-lazy.out
   if run_real_nvim_plugins "$missing_lazy_home" \
@@ -420,10 +529,12 @@ if [ -n "$real_nvim_bin" ]; then
   mkdir -p \
     "$task_error_home/.cache" \
     "$task_error_home/.config/nvim/lua/lazy/core" \
+    "$task_error_home/.config/nvim/lua/lazy/manage" \
     "$task_error_home/.local/share" \
     "$task_error_home/.local/state"
   printf '%s\n' '-- fake Lazy.nvim modules live below this config' > \
     "$task_error_home/.config/nvim/init.lua"
+  printf '%s\n' '{}' >"$task_error_home/.config/nvim/lazy-lock.json"
   cat >"$task_error_home/.config/nvim/lua/lazy/init.lua" <<'EOF'
 local M = {}
 
@@ -445,10 +556,15 @@ function task:output(_)
 end
 
 return {
+  options = { lockfile = "temporary" },
+  spec = { notifs = {} },
   plugins = {
     broken = { _ = { tasks = { task } } },
   },
 }
+EOF
+  cat >"$task_error_home/.config/nvim/lua/lazy/manage/lock.lua" <<'EOF'
+return { _loaded = true, lock = { stale = true } }
 EOF
   : >"$test_log"
   task_error_output=$test_tmp/task-error.out
@@ -456,7 +572,7 @@ EOF
     >"$task_error_output" 2>&1; then
     fail 'real Neovim must fail when Lazy reports task errors'
   fi
-  grep -Fq 'Lazy restore reported plugin task errors' \
+  grep -Fq 'Lazy restore reported plugin errors' \
     "$task_error_output" || \
     fail 'Lazy task failure must identify the failed operation'
   grep -Fq 'broken:install: boom' "$task_error_output" || \
@@ -465,8 +581,101 @@ EOF
     fail 'TPM must not run after Lazy reports a plugin task error'
   fi
   pass 'real Neovim propagates Lazy plugin task errors'
+
+  spec_error_home=$test_tmp/spec-error-home
+  mkdir -p \
+    "$spec_error_home/.cache" \
+    "$spec_error_home/.config/nvim/lua/lazy/core" \
+    "$spec_error_home/.config/nvim/lua/lazy/manage" \
+    "$spec_error_home/.local/share" \
+    "$spec_error_home/.local/state"
+  printf '%s\n' '-- fake Lazy.nvim modules live below this config' > \
+    "$spec_error_home/.config/nvim/init.lua"
+  printf '%s\n' '{}' >"$spec_error_home/.config/nvim/lazy-lock.json"
+  cat >"$spec_error_home/.config/nvim/lua/lazy/init.lua" <<'EOF'
+local M = {}
+
+function M.restore(_) end
+function M.sync(_) end
+
+return M
+EOF
+  cat >"$spec_error_home/.config/nvim/lua/lazy/core/config.lua" <<'EOF'
+return {
+  options = { lockfile = "temporary" },
+  plugins = {},
+  spec = {
+    notifs = {
+      { msg = "invalid plugin import", level = vim.log.levels.ERROR, file = "plugins.example" },
+    },
+  },
+}
+EOF
+  cat >"$spec_error_home/.config/nvim/lua/lazy/manage/lock.lua" <<'EOF'
+return { _loaded = true, lock = { stale = true } }
+EOF
+  : >"$test_log"
+  spec_error_output=$test_tmp/spec-error.out
+  if run_real_nvim_plugins "$spec_error_home" \
+    >"$spec_error_output" 2>&1; then
+    fail 'real Neovim must fail when Lazy reports plugin specification errors'
+  fi
+  grep -Fq 'plugins.example: invalid plugin import' \
+    "$spec_error_output" || \
+    fail 'Lazy specification failure must retain its module and diagnostic'
+  if grep -q '^plugin:tpm:' "$test_log"; then
+    fail 'TPM must not run after Lazy reports a plugin specification error'
+  fi
+  pass 'real Neovim propagates Lazy plugin specification errors'
+
+  atomic_lazy_home=$test_tmp/atomic-lazy-home
+  atomic_lazy_bin=$atomic_lazy_home/bin
+  atomic_lazy_log=$atomic_lazy_home/git.log
+  mkdir -p \
+    "$atomic_lazy_bin" \
+    "$atomic_lazy_home/.cache" \
+    "$atomic_lazy_home/.config" \
+    "$atomic_lazy_home/.local/share" \
+    "$atomic_lazy_home/.local/state"
+  cat >"$atomic_lazy_bin/git" <<'EOF'
+#!/bin/sh
+clone_target=
+for clone_arg in "$@"; do
+  clone_target=$clone_arg
+done
+printf '%s\n' "$clone_target" >>"$ATOMIC_LAZY_LOG"
+mkdir -p "$clone_target/lua/lazy"
+printf '%s\n' \
+  'local M = {}' \
+  'function M.setup(_) end' \
+  'return M' >"$clone_target/lua/lazy/init.lua"
+EOF
+  chmod +x "$atomic_lazy_bin/git"
+  HOME="$atomic_lazy_home" \
+    XDG_CACHE_HOME="$atomic_lazy_home/.cache" \
+    XDG_CONFIG_HOME="$atomic_lazy_home/.config" \
+    XDG_DATA_HOME="$atomic_lazy_home/.local/share" \
+    XDG_STATE_HOME="$atomic_lazy_home/.local/state" \
+    ATOMIC_LAZY_LOG="$atomic_lazy_log" \
+    PATH="$atomic_lazy_bin:/usr/bin:/bin" \
+    "$real_nvim_bin" --headless -n -u NONE \
+    -l "$repo_root/config/nvim/lua/config/lazy.lua" >/dev/null 2>&1 ||
+    fail 'Lazy.nvim atomic bootstrap fixture must complete successfully'
+  atomic_lazy_path=$atomic_lazy_home/.local/share/nvim/lazy/lazy.nvim
+  [ -f "$atomic_lazy_path/lua/lazy/init.lua" ] ||
+    fail 'Lazy.nvim bootstrap must activate the completed checkout'
+  grep -Fq '/lazy.nvim.tmp.' "$atomic_lazy_log" ||
+    fail 'Lazy.nvim must clone into a unique temporary checkout'
+  if grep -Fqx "$atomic_lazy_path" "$atomic_lazy_log"; then
+    fail 'Lazy.nvim must never clone directly into its final checkout path'
+  fi
+  if find "$(dirname -- "$atomic_lazy_path")" -name 'lazy.nvim.tmp.*' -print -quit |
+    grep -q .; then
+    fail 'Lazy.nvim bootstrap must not leave temporary checkouts behind'
+  fi
+  pass 'Lazy.nvim first installation is activated atomically'
 else
-  skip 'real Neovim missing-Lazy and task-error propagation tests'
+  skip 'real Neovim plugin failure and atomic-install tests'
 fi
 
 : >"$test_log"
@@ -488,6 +697,125 @@ if grep -Eq '^(rcup|mise|plugin:|doctor:)' "$test_log"; then
   fail 'optional packages must not expand the selected component set'
 fi
 pass '--optional changes package scope without changing component scope'
+
+fresh_pins_home=$test_tmp/fresh-pins-home
+mkdir -p "$fresh_pins_home"
+: >"$test_log"
+run_packages_with_git_deps "$fresh_pins_home" >/dev/null
+
+assert_fresh_pin() {
+  pin_name=$1
+  pin_path=$2
+  pin_url=$3
+  pin_revision=$4
+
+  [ -d "$pin_path/.git" ] || \
+    fail "$pin_name was not installed at its exact target"
+  grep -Fqx "$pin_url" "$pin_path/.test-origin-url" || \
+    fail "$pin_name target does not retain its pinned upstream URL"
+  grep -Fqx "$pin_revision" "$pin_path/.test-fetched-revision" || \
+    fail "$pin_name was not verified at its pinned revision"
+  grep -Fq ":remote:remote add origin $pin_url" "$test_log" || \
+    fail "$pin_name did not configure its pinned upstream URL"
+  grep -Fq ":fetch:fetch --depth 1 origin $pin_revision" "$test_log" || \
+    fail "$pin_name did not fetch its pinned revision"
+}
+
+assert_fresh_pin \
+  'Oh My Zsh' \
+  "$fresh_pins_home/.oh-my-zsh" \
+  'https://github.com/ohmyzsh/ohmyzsh.git' \
+  "$TEST_OMZ_REV"
+assert_fresh_pin \
+  'zsh-autosuggestions' \
+  "$fresh_pins_home/.oh-my-zsh/custom/plugins/zsh-autosuggestions" \
+  'https://github.com/zsh-users/zsh-autosuggestions.git' \
+  "$TEST_ZSH_AUTOSUGGESTIONS_REV"
+assert_fresh_pin \
+  'zsh-syntax-highlighting' \
+  "$fresh_pins_home/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" \
+  'https://github.com/zsh-users/zsh-syntax-highlighting.git' \
+  "$TEST_ZSH_SYNTAX_HIGHLIGHTING_REV"
+assert_fresh_pin \
+  'tmux plugin manager' \
+  "$fresh_pins_home/.tmux/plugins/tpm" \
+  'https://github.com/tmux-plugins/tpm.git' \
+  "$TEST_TPM_REV"
+[ "$(grep -c '^git:init:' "$test_log")" -eq 4 ] || \
+  fail 'fresh package setup must initialize exactly four pinned checkouts'
+pass 'fresh Git dependencies use exact targets, upstreams, and revisions'
+
+old_pins_home=$test_tmp/old-pins-home
+mkdir -p \
+  "$old_pins_home/.oh-my-zsh/.git" \
+  "$old_pins_home/.oh-my-zsh/custom/plugins/zsh-autosuggestions/.git" \
+  "$old_pins_home/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/.git" \
+  "$old_pins_home/.tmux/plugins/tpm/.git"
+for old_pin_path in \
+  "$old_pins_home/.oh-my-zsh" \
+  "$old_pins_home/.oh-my-zsh/custom/plugins/zsh-autosuggestions" \
+  "$old_pins_home/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" \
+  "$old_pins_home/.tmux/plugins/tpm"; do
+  printf '%s\n' 'keep old checkout' >"$old_pin_path/.test-sentinel"
+done
+: >"$test_log"
+old_pins_output=$test_tmp/old-pins.out
+run_packages_with_git_deps "$old_pins_home" \
+  >"$old_pins_output" 2>&1
+if grep -Eq '^git:(init:|.*:(fetch|checkout|remote):)' "$test_log"; then
+  fail 'default package setup must not mutate existing old checkouts'
+fi
+
+assert_old_pin_unchanged() {
+  pin_name=$1
+  pin_path=$2
+  pin_revision=$3
+
+  grep -Fq \
+    "warning: $pin_name is at old-revision; expected $pin_revision (left unchanged; use --upgrade)" \
+    "$old_pins_output" || \
+    fail "$pin_name did not report its old revision without upgrading"
+  grep -Fqx 'keep old checkout' "$pin_path/.test-sentinel" || \
+    fail "$pin_name was changed during default package setup"
+  [ ! -e "$pin_path/.dotfiles-upgraded" ] || \
+    fail "$pin_name was unexpectedly checked out during default setup"
+}
+
+assert_old_pin_unchanged \
+  'Oh My Zsh' "$old_pins_home/.oh-my-zsh" "$TEST_OMZ_REV"
+assert_old_pin_unchanged \
+  'zsh-autosuggestions' \
+  "$old_pins_home/.oh-my-zsh/custom/plugins/zsh-autosuggestions" \
+  "$TEST_ZSH_AUTOSUGGESTIONS_REV"
+assert_old_pin_unchanged \
+  'zsh-syntax-highlighting' \
+  "$old_pins_home/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" \
+  "$TEST_ZSH_SYNTAX_HIGHLIGHTING_REV"
+assert_old_pin_unchanged \
+  'tmux plugin manager' \
+  "$old_pins_home/.tmux/plugins/tpm" \
+  "$TEST_TPM_REV"
+pass 'default package setup warns and preserves old pinned checkouts'
+
+dirty_pins_home=$test_tmp/dirty-pins-home
+mkdir -p \
+  "$dirty_pins_home/.oh-my-zsh/.git" \
+  "$dirty_pins_home/.oh-my-zsh/custom/plugins/zsh-autosuggestions/.git" \
+  "$dirty_pins_home/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/.git" \
+  "$dirty_pins_home/.tmux/plugins/tpm/.git"
+: >"$test_log"
+dirty_pins_output=$test_tmp/dirty-pins.out
+if TEST_GIT_DIRTY_PATH="$dirty_pins_home/.oh-my-zsh" \
+  run_packages_with_git_deps "$dirty_pins_home" --upgrade \
+  >"$dirty_pins_output" 2>&1; then
+  fail 'bootstrap must refuse to overwrite local pinned-checkout changes'
+fi
+grep -Fq 'Oh My Zsh contains local changes' "$dirty_pins_output" ||
+  fail 'dirty pinned checkout failure must identify the affected dependency'
+if grep -Eq '^git:.*:(fetch|checkout):' "$test_log"; then
+  fail 'dirty pinned checkouts must fail before any Git update'
+fi
+pass 'local changes in pinned Git dependencies are never overwritten'
 
 : >"$test_log"
 run_bootstrap --upgrade >/dev/null
@@ -742,6 +1070,27 @@ printf '%s\n' "$doctor_output" | grep -Fq \
   '[ok]   standalone Mise path delegates to the Homebrew-owned command' ||
   fail 'doctor must accept a standalone path delegating to Homebrew Mise'
 pass 'standalone Mise migration leaves Homebrew as the single owner'
+
+# rcm never reclaims a link whose source was deleted, so doctor has to notice.
+stale_link_home=$test_tmp/stale-link-home
+mkdir -p "$stale_link_home/.config/ghostty"
+ln -s "$repo_root/config/ghostty/config" "$stale_link_home/.config/ghostty/config"
+doctor_output=$(HOME="$stale_link_home" PATH=/usr/bin:/bin \
+  DOTFILES_ROOT="$repo_root" "$repo_root/bin/dotfiles-doctor" 2>&1 || true)
+printf '%s\n' "$doctor_output" | grep -Fq \
+  '[ok]   no dangling links point into this checkout' ||
+  fail 'doctor must accept a checkout whose links all resolve'
+ln -s "$repo_root/config/ghostty/deleted-theme" \
+  "$stale_link_home/.config/ghostty/deleted-theme"
+doctor_output=$(HOME="$stale_link_home" PATH=/usr/bin:/bin \
+  DOTFILES_ROOT="$repo_root" "$repo_root/bin/dotfiles-doctor" 2>&1 || true)
+printf '%s\n' "$doctor_output" | grep -Fq \
+  'dangling links into this checkout: .config/ghostty/deleted-theme' ||
+  fail 'doctor must report a dangling link into the checkout'
+if printf '%s\n' "$doctor_output" | grep -F '[fail]' | grep -Fq dangling; then
+  fail 'a dangling link must be reported as a warning, not a failure'
+fi
+pass 'doctor reports dangling links left behind by deleted tracked files'
 
 retired_home=$test_tmp/retired-home
 mkdir -p "$retired_home"

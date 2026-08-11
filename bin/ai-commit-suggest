@@ -1,9 +1,9 @@
 #!/bin/sh
 
-# Default provider: copilot; remaining fallback order: claude > codex > antigravity
+# Default provider: copilot; remaining fallback order: claude > codex
 # Override with: AI_COMMIT_PROVIDER=codex ai-commit-suggest
 DEFAULT_PROVIDER="copilot"
-PROVIDERS="claude codex copilot antigravity"
+PROVIDERS="claude codex copilot"
 
 DETAILED=""
 for arg in "$@"; do
@@ -20,7 +20,7 @@ done
 PROVIDER="${AI_COMMIT_PROVIDER:-$DEFAULT_PROVIDER}"
 
 case "$PROVIDER" in
-  claude | codex | copilot | antigravity) ;;
+  claude | codex | copilot) ;;
   *)
     echo "Unknown provider: $PROVIDER (use one of: $PROVIDERS)" >&2
     exit 1
@@ -34,12 +34,6 @@ case "$TIMEOUT_SECS" in
     exit 1
     ;;
 esac
-
-ANTIGRAVITY_MODEL="${AI_COMMIT_ANTIGRAVITY_MODEL:-Gemini 3.5 Flash}"
-if [ -z "$ANTIGRAVITY_MODEL" ]; then
-  echo "AI_COMMIT_ANTIGRAVITY_MODEL must not be empty." >&2
-  exit 1
-fi
 
 if ! command -v jq >/dev/null 2>&1; then
   echo "jq is required to validate structured provider output." >&2
@@ -419,25 +413,6 @@ run_codex() {
   emit_provider_result "OpenAI Codex" "$rc" "$PROVIDER_STDOUT"
 }
 
-run_antigravity() {
-  prepare_provider_files
-  (
-    cd "$PRIVATE_TMPDIR" || exit 1
-    exec_grouped agy --print "$PROMPT" \
-      --sandbox \
-      --disable-slash-commands \
-      --model "$ANTIGRAVITY_MODEL" \
-      --effort low \
-      --output-format json \
-      --json-schema "$SCHEMA_FILE" \
-      --print-timeout "${TIMEOUT_SECS}s"
-  ) >"$PROVIDER_OUT" 2>"$PROVIDER_ERR" &
-  CHILD_PID=$!
-  wait_with_timer "$CHILD_PID" "Google Antigravity"
-  rc=$?
-  emit_provider_result "Google Antigravity" "$rc" "$PROVIDER_OUT"
-}
-
 run_claude() {
   prepare_provider_files
   # --safe-mode preserves authentication while disabling project/user hooks,
@@ -523,7 +498,6 @@ normalize_output() {
 
 provider_label() {
   case "$1" in
-    antigravity) echo "Google Antigravity" ;;
     codex)       echo "OpenAI Codex"        ;;
     copilot)     echo "GitHub Copilot"      ;;
     claude)      echo "Anthropic Claude Code" ;;
@@ -536,7 +510,6 @@ fallback_to() {
 
 run_provider() {
   case "$1" in
-    antigravity) run_antigravity ;;
     codex)       run_codex       ;;
     copilot)     run_copilot     ;;
     claude)      run_claude      ;;

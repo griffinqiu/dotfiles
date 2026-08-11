@@ -56,6 +56,13 @@ set complete+=kspell complete-=u complete-=i complete-=t
 set background=dark
 colorscheme retrobox
 
+" MacVim: mirror config/ghostty/config so Nerd Font glyphs render the same here
+" as they do for Neovim in the terminal. guifontwide covers CJK.
+if has("gui_running")
+  set guifont=Hack\ Nerd\ Font\ Mono:h18
+  set guifontwide=Source\ Han\ Sans\ SC:h18
+endif
+
 augroup vimrcEx
   autocmd!
   " Jump to the last known cursor position, except in commit messages.

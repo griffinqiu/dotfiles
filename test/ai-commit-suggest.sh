@@ -83,7 +83,6 @@ case "$command_name" in
     ;;
   claude) provider=claude ;;
   codex) provider=codex ;;
-  agy) provider=antigravity ;;
   *) exit 90 ;;
 esac
 
@@ -99,7 +98,7 @@ prompt_file="$STUB_LOG_DIR/$provider.prompt"
 output_file=""
 
 case "$provider" in
-  copilot | antigravity)
+  copilot)
     while [ "$#" -gt 0 ]; do
       case "$1" in
         -p | --print)
@@ -131,7 +130,6 @@ case "$provider" in
   copilot) mode=${STUB_COPILOT_MODE:-valid} ;;
   claude) mode=${STUB_CLAUDE_MODE:-valid} ;;
   codex) mode=${STUB_CODEX_MODE:-valid} ;;
-  antigravity) mode=${STUB_ANTIGRAVITY_MODE:-valid} ;;
 esac
 
 case "$mode" in
@@ -197,7 +195,6 @@ chmod +x "$STUB_BIN/stub-provider"
 ln -s stub-provider "$STUB_BIN/gh"
 ln -s stub-provider "$STUB_BIN/claude"
 ln -s stub-provider "$STUB_BIN/codex"
-ln -s stub-provider "$STUB_BIN/agy"
 
 PATH="$STUB_BIN:$PATH"
 export PATH STUB_LOG_DIR
@@ -257,19 +254,6 @@ fi
 ok "Codex uses read-only ephemeral structured execution over stdin"
 
 reset_logs
-(cd "$WORK_REPO" && AI_COMMIT_PROVIDER=antigravity "$SCRIPT" --short) >"$OUT" 2>"$ERR"
-[ "$(cat "$STUB_LOG_DIR/calls")" = "antigravity" ] || fail "Antigravity was not selected first"
-for flag in --sandbox --disable-slash-commands --effort low --output-format json \
-  --json-schema --print-timeout 120s --model "Gemini 3.5 Flash"; do
-  assert_line "$STUB_LOG_DIR/antigravity.args" "$flag"
-done
-reset_logs
-(cd "$WORK_REPO" && AI_COMMIT_PROVIDER=antigravity \
-  AI_COMMIT_ANTIGRAVITY_MODEL="Test Gemini Model" "$SCRIPT" --short) >"$OUT" 2>"$ERR"
-assert_line "$STUB_LOG_DIR/antigravity.args" "Test Gemini Model"
-ok "Antigravity uses sandboxed structured output and a configurable model"
-
-reset_logs
 (cd "$WORK_REPO" && STUB_COPILOT_MODE=nine "$SCRIPT" --short) >"$OUT" 2>"$ERR"
 expected_calls=$(printf 'copilot\nclaude')
 [ "$(cat "$STUB_LOG_DIR/calls")" = "$expected_calls" ] || fail "wrong default fallback order"
@@ -300,11 +284,10 @@ if (cd "$WORK_REPO" && \
   STUB_COPILOT_MODE=duplicate \
   STUB_CLAUDE_MODE=nine \
   STUB_CODEX_MODE=malformed \
-  STUB_ANTIGRAVITY_MODE=nine \
   "$SCRIPT" --short) >"$OUT" 2>"$ERR"; then
   fail "all-invalid provider outputs unexpectedly succeeded"
 fi
-expected_calls=$(printf 'copilot\nclaude\ncodex\nantigravity')
+expected_calls=$(printf 'copilot\nclaude\ncodex')
 [ "$(cat "$STUB_LOG_DIR/calls")" = "$expected_calls" ] || fail "all-provider fallback order changed"
 grep -Fq "All providers failed." "$ERR" || fail "terminal failure diagnostic missing"
 ok "malformed, duplicate, and wrong-count results cannot pass validation"

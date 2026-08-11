@@ -1,8 +1,25 @@
+local uv = vim.uv or vim.loop
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
+if not uv.fs_stat(lazypath) then
   local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-  if vim.v.shell_error ~= 0 then
+  local lazy_parent = vim.fn.fnamemodify(lazypath, ":h")
+  local lazy_tmp = lazypath .. ".tmp." .. tostring(uv.os_getpid()) .. "." .. tostring(uv.hrtime())
+  vim.fn.mkdir(lazy_parent, "p")
+  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazy_tmp })
+  local clone_error = vim.v.shell_error ~= 0
+  if not clone_error then
+    local renamed, rename_error = uv.fs_rename(lazy_tmp, lazypath)
+    if not renamed then
+      if uv.fs_stat(lazypath .. "/lua/lazy/init.lua") then
+        vim.fn.delete(lazy_tmp, "rf")
+      else
+        out = out .. "\nFailed to activate lazy.nvim: " .. tostring(rename_error)
+        clone_error = true
+      end
+    end
+  end
+  if clone_error then
+    vim.fn.delete(lazy_tmp, "rf")
     if #vim.api.nvim_list_uis() == 0 then
       io.stderr:write("Failed to clone lazy.nvim:\n", out, "\n")
       os.exit(1)
@@ -19,6 +36,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
+  lockfile = vim.env.DOTFILES_NVIM_SYNC_LOCKFILE or (vim.fn.stdpath("config") .. "/lazy-lock.json"),
   rocks = {
     enabled = false,
   },
