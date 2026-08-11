@@ -1294,10 +1294,19 @@ fi
 pass 'mise tools use exact pins'
 
 if command -v mise >/dev/null 2>&1; then
+  # Resolving zero tools would make the dry-run below pass vacuously, which is
+  # exactly what ignoring the rcm-linked home config used to cause.
+  resolved_tools=$(HOME="$test_tmp/home" \
+    MISE_GLOBAL_CONFIG_FILE="$repo_root/config/mise/config.toml" \
+    MISE_GLOBAL_CONFIG_ROOT="$repo_root/config/mise" \
+    mise ls --current 2>/dev/null | grep -c .)
+  expected_tools=$(grep -cE '^[a-z]+ = "' "$repo_root/config/mise/config.toml")
+  [ "$resolved_tools" -eq "$expected_tools" ] ||
+    fail "mise resolved $resolved_tools of $expected_tools pinned tools"
+
   HOME="$test_tmp/home" \
     MISE_GLOBAL_CONFIG_FILE="$repo_root/config/mise/config.toml" \
     MISE_GLOBAL_CONFIG_ROOT="$repo_root/config/mise" \
-    MISE_IGNORED_CONFIG_PATHS="$original_home/.config/mise/config.toml" \
     MISE_DATA_DIR="$test_tmp/mise-data" \
     MISE_CACHE_DIR="$test_tmp/mise-cache" \
     MISE_STATE_DIR="$test_tmp/mise-state" \
@@ -1306,7 +1315,7 @@ if command -v mise >/dev/null 2>&1; then
     CARGO_HOME="$test_tmp/cargo" \
     mise install --locked -y --dry-run >/dev/null ||
     fail 'mise lock must resolve completely in locked mode'
-  pass 'mise lock resolves in locked dry-run mode'
+  pass 'mise resolves every pinned tool and the lock is complete'
 fi
 
 sh -n "$repo_root/bin/dotfiles-bootstrap"

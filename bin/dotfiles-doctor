@@ -187,9 +187,17 @@ check_retired_path \
 for required_command in \
   brew git git-lfs rcup lsrc bash bun diff-so-fancy fd fzf gawk gh glab \
   herdr jq lazygit mise mvim nvim rg shellcheck shfmt stylua tmux ctags uv \
-  bootmux ghostty op; do
+  bootmux op; do
   check_command "$required_command"
 done
+
+# Ghostty ships as a GUI cask with no `binary` artifact, so its CLI reaches PATH
+# only through a symlink nothing manages. Check the bundle the cask installs.
+if [ -d /Applications/Ghostty.app ]; then
+  ok 'application: Ghostty'
+else
+  fail 'missing application: /Applications/Ghostty.app'
+fi
 
 if symlink_points_to_path "$HOME/.local/bin/mise" /opt/homebrew/bin/mise; then
   ok 'standalone Mise path delegates to the Homebrew-owned command'

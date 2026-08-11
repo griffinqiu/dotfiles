@@ -575,9 +575,11 @@ fi
 if $run_runtimes; then
   printf 'Installing locked mise runtimes ...\n'
   mise_home_config=${XDG_CONFIG_HOME:-$HOME/.config}/mise/config.toml
+  # Deliberately not ignoring $mise_home_config: rcm links it to the file named
+  # by MISE_GLOBAL_CONFIG_FILE, so ignoring it discarded the global config too
+  # and mise silently resolved zero tools.
   MISE_GLOBAL_CONFIG_FILE="$repo_root/config/mise/config.toml" \
     MISE_GLOBAL_CONFIG_ROOT="$repo_root/config/mise" \
-    MISE_IGNORED_CONFIG_PATHS="$mise_home_config" \
     "$mise_bin" install --locked -y
 fi
 
