@@ -1,62 +1,31 @@
-#!/usr/bin/ruby
-#
-# Put this on your $PATH (~/bin is recommended).
-#
-# Show churn for the files changed in the branch:
-#
-#   $ git-churn
-#
+#!/usr/bin/env ruby
 
-class GitChurn
-  attr_accessor :all_files_with_churn_count, :changed_files, :result
+require "open3"
 
-  def calculate
-    get_all_files_with_churn_count
-    get_changed_files
-    filter_into_result
-    print_result
-  end
+def capture!(*command)
+  stdout, stderr, status = Open3.capture3(*command)
+  return stdout if status.success?
 
-  private
-
-  def get_all_files_with_churn_count
-    self.all_files_with_churn_count =
-      `git log --all #{format_logs} | #{remove_blank_lines} | #{sort_by_ascending_churn_count}`.split("\n")
-  end
-
-  def format_logs
-    "--name-only --format='format:'"
-  end
-
-  def remove_blank_lines
-    "grep -v '^$'"
-  end
-
-  def sort_by_ascending_churn_count
-    'sort | uniq -c | sort'
-  end
-
-  def get_changed_files
-    self.changed_files =
-      `git log origin/master..HEAD #{format_logs} | #{remove_blank_lines} | #{remove_duplicates}`.split("\n")
-  end
-
-  def remove_duplicates
-    'sort | uniq'
-  end
-
-  def filter_into_result
-    self.result = all_files_with_churn_count.select { |file| file_changed?(file) }.join("\n")
-  end
-
-  def file_changed?(file)
-    changed_files.any? { |changed_file| file.include?(changed_file) }
-  end
-
-  def print_result
-    puts result
-  end
+  warn stderr unless stderr.empty?
+  exit status.exitstatus || 1
 end
 
-git_churn = GitChurn.new
-git_churn.calculate
+remote = ENV.fetch("GIT_CHURN_REMOTE", "origin")
+helper = File.join(__dir__, "git-default-branch")
+branch = capture!(helper, remote).strip
+
+all_files = capture!("git", "log", "--all", "--name-only", "--format=format:")
+  .lines(chomp: true)
+  .reject(&:empty?)
+changed_files = capture!("git", "log", "#{remote}/#{branch}..HEAD", "--name-only", "--format=format:")
+  .lines(chomp: true)
+  .reject(&:empty?)
+  .uniq
+
+counts = Hash.new(0)
+all_files.each { |file| counts[file] += 1 }
+
+changed_files
+  .filter_map { |file| [counts[file], file] if counts.key?(file) }
+  .sort_by { |count, file| [count, file] }
+  .each { |count, file| printf("%7d %s\n", count, file) }

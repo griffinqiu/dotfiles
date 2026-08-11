@@ -1,6 +1,7 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This is the canonical personal instruction file for Claude Code. The dotfiles
+repository exposes the same content to Codex through `codex/AGENTS.md`.
 
 ## Code Style and Quality Standards
 

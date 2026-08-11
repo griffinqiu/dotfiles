@@ -1,0 +1,4 @@
+interface:
+  display_name: "Manage Agent Config"
+  short_description: "Keep Claude and Codex configuration in sync"
+  default_prompt: "Use $manage-agent-config to update shared Claude Code and Codex instructions or skills safely."

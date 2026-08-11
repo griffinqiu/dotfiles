@@ -1,5 +1,10 @@
 #!/bin/sh
 
-set -e
+set -eu
 
-hub pull-request
+command -v gh >/dev/null 2>&1 || {
+  echo "git-pr: GitHub CLI (gh) is required; install the core Brewfile first" >&2
+  exit 127
+}
+
+exec gh pr create "$@"

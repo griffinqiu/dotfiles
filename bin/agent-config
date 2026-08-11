@@ -1,0 +1,308 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+  cat >&2 <<'EOF'
+usage: agent-config <init|sync|check> [--project DIR]
+
+  init   create CLAUDE.md and the AGENTS.md -> CLAUDE.md alias safely
+  sync   link project .claude/skills entries into .agents/skills
+  check  verify instructions and skill aliases in both directions
+
+The current Git repository is used by default. Pass --project to operate on an
+explicit directory, including a directory that is not a Git repository yet.
+EOF
+}
+
+resolve_project_root() {
+  local git_root
+
+  if [ -n "$project_option" ]; then
+    if [ ! -d "$project_option" ]; then
+      printf 'agent-config: project directory does not exist: %s\n' \
+        "$project_option" >&2
+      return 2
+    fi
+    cd -P "$project_option" && pwd
+  elif git_root="$(git rev-parse --show-toplevel 2>/dev/null)"; then
+    cd -P "$git_root" && pwd
+  else
+    printf '%s\n' \
+      'agent-config: not inside a Git repository; pass --project DIR explicitly.' \
+      >&2
+    return 2
+  fi
+}
+
+command_name="${1:-}"
+[ -n "$command_name" ] || { usage; exit 2; }
+shift
+
+project_option=''
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --project)
+      [ "$#" -ge 2 ] || { usage; exit 2; }
+      [ -z "$project_option" ] || {
+        printf 'agent-config: --project may be specified only once\n' >&2
+        exit 2
+      }
+      project_option="$2"
+      shift 2
+      ;;
+    *)
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+project_root="$(resolve_project_root)"
+claude_instructions="$project_root/CLAUDE.md"
+codex_instructions="$project_root/AGENTS.md"
+claude_skills="$project_root/.claude/skills"
+codex_skills="$project_root/.agents/skills"
+failures=0
+skill_sources=()
+skill_targets=()
+skill_link_values=()
+skill_states=()
+
+path_exists() {
+  [ -e "$1" ] || [ -L "$1" ]
+}
+
+record_failure() {
+  printf 'agent-config: %s\n' "$*" >&2
+  failures=$((failures + 1))
+}
+
+check_instructions() {
+  if [ ! -s "$claude_instructions" ]; then
+    record_failure "missing or empty Claude canonical instructions: $claude_instructions"
+  fi
+
+  if [ ! -L "$codex_instructions" ]; then
+    record_failure "Codex instructions must be a symlink: $codex_instructions -> CLAUDE.md"
+  elif [ "$(readlink "$codex_instructions")" != 'CLAUDE.md' ]; then
+    record_failure "wrong Codex instruction target: $codex_instructions -> $(readlink "$codex_instructions")"
+  elif [ ! -e "$codex_instructions" ]; then
+    record_failure "broken Codex instruction symlink: $codex_instructions"
+  elif [ ! "$codex_instructions" -ef "$claude_instructions" ]; then
+    record_failure "Codex instructions do not resolve to the Claude canonical file"
+  fi
+}
+
+build_skill_manifest() {
+  local source skill_name
+  skill_sources=()
+  skill_targets=()
+  skill_link_values=()
+
+  [ -d "$claude_skills" ] || return 0
+
+  for source in "$claude_skills"/*; do
+    [ -d "$source" ] || continue
+    [ -f "$source/SKILL.md" ] || continue
+    skill_name="$(basename "$source")"
+    skill_sources+=("$source")
+    skill_targets+=("$codex_skills/$skill_name")
+    skill_link_values+=("../../.claude/skills/$skill_name")
+  done
+}
+
+classify_skill_target() {
+  local source="$1" target="$2" expected="$3"
+
+  if [ -L "$target" ] && [ "$(readlink "$target")" = "$expected" ] && \
+      [ -e "$target" ] && [ "$target" -ef "$source" ]; then
+    printf 'linked\n'
+  elif ! path_exists "$target"; then
+    printf 'missing\n'
+  else
+    printf 'conflict\n'
+  fi
+}
+
+check_forward_skill_links() {
+  local index source target expected
+
+  for ((index = 0; index < ${#skill_sources[@]}; index++)); do
+    source="${skill_sources[$index]}"
+    target="${skill_targets[$index]}"
+    expected="${skill_link_values[$index]}"
+
+    if [ ! -L "$target" ]; then
+      record_failure "missing Codex skill symlink: $target -> $expected"
+    elif [ "$(readlink "$target")" != "$expected" ]; then
+      record_failure "wrong Codex skill target: $target -> $(readlink "$target")"
+    elif [ ! -e "$target" ]; then
+      record_failure "broken Codex skill symlink: $target"
+    elif [ ! "$target" -ef "$source" ]; then
+      record_failure "Codex skill does not resolve to its Claude canonical directory: $target"
+    fi
+  done
+}
+
+check_reverse_skill_links() {
+  local target skill_name source expected
+
+  [ -d "$codex_skills" ] || return 0
+
+  for target in "$codex_skills"/*; do
+    path_exists "$target" || continue
+    skill_name="$(basename "$target")"
+    source="$claude_skills/$skill_name"
+    expected="../../.claude/skills/$skill_name"
+
+    if [ ! -f "$source/SKILL.md" ]; then
+      record_failure "orphaned Codex skill entry without a Claude source: $target"
+    elif [ ! -L "$target" ]; then
+      record_failure "Codex skill entry must be a symlink: $target"
+    elif [ "$(readlink "$target")" != "$expected" ]; then
+      record_failure "Codex skill entry is not the expected relative link: $target"
+    fi
+  done
+}
+
+check_all() {
+  failures=0
+  check_instructions
+  build_skill_manifest
+  check_forward_skill_links
+  check_reverse_skill_links
+  [ "$failures" -eq 0 ]
+}
+
+init_project() {
+  local has_claude=false has_codex=false
+
+  path_exists "$claude_instructions" && has_claude=true
+  path_exists "$codex_instructions" && has_codex=true
+
+  if ! $has_claude && ! $has_codex; then
+    if ! printf '%s\n' \
+      '# CLAUDE.md' \
+      '' \
+      'This file is the canonical project guidance for Claude Code and Codex.' \
+      '' \
+      '## Project Commands' \
+      '' \
+      '- TODO: document build, test, lint, and format commands.' \
+      '' \
+      '## Project Conventions' \
+      '' \
+      '- TODO: document architecture and repository-specific constraints.' \
+      > "$claude_instructions"; then
+      rm -f "$claude_instructions"
+      return 1
+    fi
+
+    if ! ln -s CLAUDE.md "$codex_instructions"; then
+      rm -f "$claude_instructions"
+      return 1
+    fi
+
+    printf 'created %s\n' "$claude_instructions"
+    printf 'linked %s -> CLAUDE.md\n' "$codex_instructions"
+    return 0
+  fi
+
+  if $has_claude && ! $has_codex; then
+    if [ ! -f "$claude_instructions" ]; then
+      printf 'agent-config: refusing non-file Claude canonical path: %s\n' \
+        "$claude_instructions" >&2
+      return 1
+    fi
+    ln -s CLAUDE.md "$codex_instructions"
+    printf 'linked %s -> CLAUDE.md\n' "$codex_instructions"
+    return 0
+  fi
+
+  if ! $has_claude && $has_codex; then
+    cat >&2 <<EOF
+agent-config: AGENTS.md exists but CLAUDE.md does not; no files changed.
+Move the AGENTS.md content to CLAUDE.md, then replace AGENTS.md with:
+  ln -s CLAUDE.md "$codex_instructions"
+EOF
+    return 1
+  fi
+
+  failures=0
+  check_instructions
+  if [ "$failures" -ne 0 ]; then
+    printf 'agent-config: existing instruction paths conflict; no files changed.\n' >&2
+    return 1
+  fi
+
+  printf 'agent-config: instruction topology already initialized\n'
+}
+
+preflight_sync() {
+  local index state target expected
+  failures=0
+  skill_states=()
+
+  check_instructions
+  build_skill_manifest
+
+  for ((index = 0; index < ${#skill_sources[@]}; index++)); do
+    target="${skill_targets[$index]}"
+    expected="${skill_link_values[$index]}"
+    state="$(classify_skill_target \
+      "${skill_sources[$index]}" "$target" "$expected")"
+    skill_states+=("$state")
+    if [ "$state" = 'conflict' ]; then
+      record_failure "refusing conflicting Codex skill entry: $target"
+    fi
+  done
+
+  check_reverse_skill_links
+  [ "$failures" -eq 0 ]
+}
+
+sync_skills() {
+  local index target expected created=0
+
+  if ! preflight_sync; then
+    printf 'agent-config: sync preflight failed; no files changed.\n' >&2
+    return 1
+  fi
+
+  for ((index = 0; index < ${#skill_sources[@]}; index++)); do
+    [ "${skill_states[$index]}" = 'missing' ] || continue
+    target="${skill_targets[$index]}"
+    expected="${skill_link_values[$index]}"
+    mkdir -p "$(dirname "$target")"
+    ln -s "$expected" "$target"
+    printf 'linked %s -> %s\n' "$target" "$expected"
+    created=$((created + 1))
+  done
+
+  if [ "$created" -eq 0 ]; then
+    printf 'agent-config: skill aliases already synchronized\n'
+  fi
+
+  check_all
+}
+
+case "$command_name" in
+  init)
+    init_project
+    ;;
+  sync)
+    sync_skills
+    ;;
+  check)
+    if check_all; then
+      printf 'agent-config: project topology OK\n'
+    else
+      exit 1
+    fi
+    ;;
+  *)
+    usage
+    exit 2
+    ;;
+esac

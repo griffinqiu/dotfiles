@@ -1,0 +1,42 @@
+#!/bin/sh
+
+set -eu
+
+usage() {
+  echo "Usage: git-default-branch [REMOTE]" >&2
+  exit 2
+}
+
+[ "$#" -le 1 ] || usage
+
+remote=${1:-origin}
+case "$remote" in
+  ''|-*) usage ;;
+esac
+
+git rev-parse --git-dir >/dev/null 2>&1 || {
+  echo "git-default-branch: not inside a Git repository" >&2
+  exit 1
+}
+
+head_ref=$(git symbolic-ref --quiet --short "refs/remotes/$remote/HEAD" 2>/dev/null || true)
+case "$head_ref" in
+  "$remote/"*)
+    branch=${head_ref#"$remote/"}
+    if [ -n "$branch" ]; then
+      printf '%s\n' "$branch"
+      exit 0
+    fi
+    ;;
+esac
+
+for branch in main master; do
+  if git show-ref --verify --quiet "refs/remotes/$remote/$branch"; then
+    printf '%s\n' "$branch"
+    exit 0
+  fi
+done
+
+echo "git-default-branch: cannot determine the default branch for remote '$remote'" >&2
+echo "Fetch the remote or set refs/remotes/$remote/HEAD explicitly." >&2
+exit 1

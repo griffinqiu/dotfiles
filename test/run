@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set -uo pipefail
+
+test_dir=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+failures=0
+count=0
+
+for test_file in "$test_dir"/*.sh; do
+  [[ -f $test_file ]] || continue
+  count=$((count + 1))
+  echo "==> $(basename "$test_file")"
+  if ! bash "$test_file"; then
+    failures=$((failures + 1))
+  fi
+done
+
+if (( count == 0 )); then
+  echo "No test files found." >&2
+  exit 1
+fi
+
+if (( failures > 0 )); then
+  echo "$failures of $count test files failed." >&2
+  exit 1
+fi
+
+echo "All $count test files passed."

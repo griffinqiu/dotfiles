@@ -1,4 +1,9 @@
 .aider*
+.DS_Store
+
+# Machine-local state generated inside this checkout
+/*.log
+config/mcphub/servers.json
 
 # Override global .gitignore to commit Claude Code skills
 !.claude/

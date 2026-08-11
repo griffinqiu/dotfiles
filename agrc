@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# ag --list-file-types
---type-add=ruby=.haml,.rake,.builder
---type-add=html=.erb,.haml,.slim
---type-add=css=.scss,.sass,.less
---type-set=sass=.scss,.sass

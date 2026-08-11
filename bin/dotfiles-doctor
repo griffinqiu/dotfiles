@@ -1,0 +1,401 @@
+#!/bin/sh
+
+set -u
+
+OH_MY_ZSH_REV=59a9740721b734835812121322d6fe4827b0853a
+TPM_REV=99469c4a9b1ccf77fade25842dc7bafbc8ce9946
+
+usage() {
+  cat <<'EOF'
+Usage: dotfiles-doctor [--optional] [--quiet]
+
+  --optional  Also check Brewfile.optional.
+  --quiet     Print only warnings, failures, and the final summary.
+EOF
+}
+
+resolve_repo_root() {
+  if [ -n "${DOTFILES_ROOT:-}" ]; then
+    CDPATH= cd -P -- "$DOTFILES_ROOT" && pwd
+    return
+  fi
+
+  script_path=$0
+  while [ -L "$script_path" ]; do
+    script_dir=$(CDPATH= cd -P -- "$(dirname -- "$script_path")" && pwd)
+    script_path=$(readlink "$script_path")
+    case "$script_path" in
+      /*) ;;
+      *) script_path=$script_dir/$script_path ;;
+    esac
+  done
+  CDPATH= cd -P -- "$(dirname -- "$script_path")/.." && pwd
+}
+
+optional=false
+quiet=false
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --optional) optional=true ;;
+    --quiet) quiet=true ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'dotfiles-doctor: unknown option: %s\n' "$1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+  shift
+done
+
+ok_count=0
+warn_count=0
+fail_count=0
+
+ok() {
+  ok_count=$((ok_count + 1))
+  $quiet || printf '[ok]   %s\n' "$*"
+}
+
+warn() {
+  warn_count=$((warn_count + 1))
+  printf '[warn] %s\n' "$*" >&2
+}
+
+fail() {
+  fail_count=$((fail_count + 1))
+  printf '[fail] %s\n' "$*" >&2
+}
+
+check_command() {
+  if command -v "$1" >/dev/null 2>&1; then
+    ok "command: $1"
+  else
+    fail "missing command: $1"
+  fi
+}
+
+check_pinned_checkout() {
+  checkout_name=$1
+  checkout_path=$2
+  expected_revision=$3
+
+  if [ ! -d "$checkout_path/.git" ]; then
+    fail "$checkout_name checkout is missing: $checkout_path"
+    return
+  fi
+
+  current_revision=$(git -C "$checkout_path" rev-parse HEAD 2>/dev/null || true)
+  if [ "$current_revision" = "$expected_revision" ]; then
+    ok "$checkout_name revision"
+  else
+    warn "$checkout_name is at ${current_revision:-unknown}; bootstrap pin is $expected_revision"
+  fi
+}
+
+symlink_points_to_path() {
+  link_path=$1
+  expected_path=$2
+
+  [ -L "$link_path" ] || return 1
+  link_target=$(readlink "$link_path") || return 1
+  case "$link_target" in
+    /*) ;;
+    *) link_target=$(dirname -- "$link_path")/$link_target ;;
+  esac
+
+  link_parent=$(CDPATH= cd -P -- "$(dirname -- "$link_target")" 2>/dev/null && pwd) || \
+    return 1
+  expected_parent=$(CDPATH= cd -P -- "$(dirname -- "$expected_path")" 2>/dev/null && pwd) || \
+    return 1
+  [ "$link_parent/$(basename -- "$link_target")" = \
+    "$expected_parent/$(basename -- "$expected_path")" ]
+}
+
+check_retired_path() {
+  link_name=$1
+  link_path=$2
+  expected_path=$3
+  strict=$4
+
+  if symlink_points_to_path "$link_path" "$expected_path"; then
+    fail "retired $link_name symlink still exists: $link_path"
+  elif [ -L "$link_path" ] || [ -e "$link_path" ]; then
+    if $strict; then
+      fail "conflicting $link_name path: $link_path"
+    else
+      warn "unmanaged $link_name path left unchanged: $link_path"
+    fi
+  else
+    ok "retired path absent: $link_name"
+  fi
+}
+
+repo_root=$(resolve_repo_root) || {
+  printf '[fail] cannot resolve repository root\n' >&2
+  exit 1
+}
+
+if [ "$(uname -s)" = Darwin ]; then
+  ok 'platform: macOS'
+else
+  fail 'platform: this configuration currently supports macOS only'
+fi
+if [ "$(uname -m)" = arm64 ]; then
+  ok 'architecture: Apple silicon'
+else
+  fail 'architecture: mise lock currently supports macos-arm64 only'
+fi
+
+for required_file in \
+  Brewfile \
+  Brewfile.optional \
+  rcrc \
+  gitignore \
+  config/mise/config.toml \
+  config/mise/mise.lock; do
+  if [ -f "$repo_root/$required_file" ]; then
+    ok "repository file: $required_file"
+  else
+    fail "missing repository file: $required_file"
+  fi
+done
+
+check_retired_path \
+  'root Claude instructions' "$HOME/.CLAUDE.md" "$repo_root/CLAUDE.md" true
+check_retired_path \
+  'root Codex instructions' "$HOME/.AGENTS.md" "$repo_root/AGENTS.md" true
+check_retired_path \
+  'ag configuration' "$HOME/.agrc" "$repo_root/agrc" false
+check_retired_path \
+  'ag completion' "$HOME/.zsh/completion/_ag" \
+  "$repo_root/zsh/completion/_ag" false
+
+for required_command in \
+  brew git git-lfs rcup lsrc bash bun diff-so-fancy fd fzf gawk gh glab \
+  herdr jq lazygit mise mvim nvim rg shellcheck shfmt stylua tmux ctags uv \
+  bootmux ghostty op; do
+  check_command "$required_command"
+done
+
+if symlink_points_to_path "$HOME/.local/bin/mise" /opt/homebrew/bin/mise; then
+  ok 'standalone Mise path delegates to the Homebrew-owned command'
+elif [ -L "$HOME/.local/bin/mise" ] || [ -e "$HOME/.local/bin/mise" ]; then
+  fail 'standalone Mise still shadows the Homebrew-owned command: ~/.local/bin/mise'
+else
+  ok 'Mise has no stale standalone command'
+fi
+
+for helper in \
+  agent-config bundler-search git-churn git-default-branch git-pr git-up mux \
+  replace; do
+  if [ -x "$repo_root/bin/$helper" ]; then
+    ok "helper executable: bin/$helper"
+  else
+    fail "missing executable helper: bin/$helper"
+  fi
+done
+
+if command -v brew >/dev/null 2>&1; then
+  if HOMEBREW_NO_AUTO_UPDATE=1 \
+    brew bundle check --no-upgrade --file "$repo_root/Brewfile" >/dev/null 2>&1; then
+    ok 'core Brewfile is satisfied'
+  else
+    fail 'core Brewfile is not satisfied'
+  fi
+
+  if $optional; then
+    if HOMEBREW_NO_AUTO_UPDATE=1 brew bundle check --no-upgrade \
+      --file "$repo_root/Brewfile.optional" >/dev/null 2>&1; then
+      ok 'optional Brewfile is satisfied'
+    else
+      fail 'optional Brewfile is not satisfied'
+    fi
+  fi
+fi
+
+if command -v lsrc >/dev/null 2>&1 && command -v git >/dev/null 2>&1; then
+  if rcm_output=$(RCRC="$repo_root/rcrc" lsrc -d "$repo_root" 2>/dev/null); then
+    ignored_sources=
+    old_ifs=$IFS
+    IFS='
+'
+    for mapping in $rcm_output; do
+      source_path=${mapping#*:}
+      case "$source_path" in
+        "$repo_root"/*)
+          relative_path=${source_path#"$repo_root"/}
+          if git -C "$repo_root" \
+            -c core.excludesFile="$repo_root/gitignore" \
+            check-ignore -q -- "$relative_path" 2>/dev/null; then
+            ignored_sources="${ignored_sources}${ignored_sources:+, }$relative_path"
+          fi
+          ;;
+      esac
+    done
+    IFS=$old_ifs
+
+    if [ -z "$ignored_sources" ]; then
+      ok 'rcm link set contains no Git-ignored files'
+    else
+      fail "rcm would link Git-ignored files: $ignored_sources"
+    fi
+  else
+    fail 'lsrc could not calculate the rcm link set'
+  fi
+fi
+
+if grep -Eq '=[[:space:]]*"(latest|stable|lts)"' \
+  "$repo_root/config/mise/config.toml" 2>/dev/null; then
+  fail 'mise tool versions must be exact pins'
+else
+  ok 'mise tool versions are pinned'
+fi
+
+if grep -q 'cargo:bootmux' "$repo_root/config/mise/config.toml" 2>/dev/null; then
+  fail 'Bootmux must have one owner (Homebrew), not a duplicate mise install'
+else
+  ok 'Bootmux has a single package owner'
+fi
+
+mise_bin=$(command -v mise 2>/dev/null || true)
+if command -v brew >/dev/null 2>&1; then
+  mise_prefix=$(brew --prefix mise 2>/dev/null || true)
+  [ ! -x "$mise_prefix/bin/mise" ] || mise_bin=$mise_prefix/bin/mise
+fi
+if [ -n "$mise_bin" ]; then
+  mise_home_config=${XDG_CONFIG_HOME:-$HOME/.config}/mise/config.toml
+  if MISE_GLOBAL_CONFIG_FILE="$repo_root/config/mise/config.toml" \
+    MISE_GLOBAL_CONFIG_ROOT="$repo_root/config/mise" \
+    MISE_IGNORED_CONFIG_PATHS="$mise_home_config" \
+    "$mise_bin" config ls >/dev/null 2>&1; then
+    ok 'mise configuration parses'
+  else
+    fail 'mise configuration does not parse'
+  fi
+
+  if MISE_GLOBAL_CONFIG_FILE="$repo_root/config/mise/config.toml" \
+    MISE_GLOBAL_CONFIG_ROOT="$repo_root/config/mise" \
+    MISE_IGNORED_CONFIG_PATHS="$mise_home_config" \
+    "$mise_bin" install --locked -y --dry-run >/dev/null 2>&1; then
+    ok 'mise lock is complete for this platform'
+  else
+    fail 'mise lock is incomplete for this platform'
+  fi
+fi
+
+check_symlink() {
+  link_name=$1
+  link_path=$2
+  expected_path=$3
+
+  if [ -L "$link_path" ] && [ -e "$link_path" ] && \
+    [ "$link_path" -ef "$expected_path" ]; then
+    ok "rcm symlink: $link_name"
+  else
+    fail "missing or stale rcm symlink: $link_path -> $expected_path"
+  fi
+}
+
+check_symlink zshrc "$HOME/.zshrc" "$repo_root/zshrc"
+check_symlink gitconfig "$HOME/.gitconfig" "$repo_root/gitconfig"
+check_symlink tmux "$HOME/.tmux.conf" "$repo_root/tmux.conf"
+check_symlink Ghostty "$HOME/.config/ghostty/config" "$repo_root/config/ghostty/config"
+check_symlink Herdr "$HOME/.config/herdr/config.toml" "$repo_root/config/herdr/config.toml"
+check_symlink Bootmux "$HOME/.config/bootmux/config.toml" "$repo_root/config/bootmux/config.toml"
+check_symlink mise-config "$HOME/.config/mise/config.toml" "$repo_root/config/mise/config.toml"
+check_symlink mise-lock "$HOME/.config/mise/mise.lock" "$repo_root/config/mise/mise.lock"
+check_symlink Claude-global "$HOME/.claude/CLAUDE.md" "$repo_root/claude/CLAUDE.md"
+check_symlink Codex-global "$HOME/.codex/AGENTS.md" "$repo_root/codex/AGENTS.md"
+check_symlink Claude-Nvim "$HOME/.config/nvim/CLAUDE.md" "$repo_root/config/nvim/CLAUDE.md"
+check_symlink Codex-Nvim "$HOME/.config/nvim/AGENTS.md" "$repo_root/config/nvim/AGENTS.md"
+check_symlink agent-config "$HOME/.bin/agent-config" "$repo_root/bin/agent-config"
+check_symlink git-default-branch "$HOME/.bin/git-default-branch" "$repo_root/bin/git-default-branch"
+check_symlink mux "$HOME/.bin/mux" "$repo_root/bin/mux"
+
+portable_skill_count=0
+for skill_alias in "$repo_root/agents/skills"/*; do
+  [ -L "$skill_alias" ] || continue
+  if [ -f "$skill_alias/SKILL.md" ]; then
+    portable_skill_count=$((portable_skill_count + 1))
+    skill_name=$(basename "$skill_alias")
+    check_symlink "Codex-skill-$skill_name" \
+      "$HOME/.agents/skills/$skill_name/SKILL.md" \
+      "$skill_alias/SKILL.md"
+  else
+    fail "broken portable Codex skill alias: $skill_alias"
+  fi
+done
+if [ "$portable_skill_count" -gt 0 ]; then
+  ok "portable Codex skill aliases: $portable_skill_count"
+else
+  fail 'no portable Codex skill aliases are discoverable'
+fi
+
+if command -v ghostty >/dev/null 2>&1; then
+  if ghostty +validate-config \
+    --config-file="$repo_root/config/ghostty/config" >/dev/null 2>&1; then
+    ok 'Ghostty configuration validates'
+  else
+    fail 'Ghostty configuration validation failed'
+  fi
+fi
+
+if command -v herdr >/dev/null 2>&1; then
+  if herdr config check >/dev/null 2>&1; then
+    ok 'Herdr configuration validates'
+  else
+    fail 'Herdr configuration validation failed'
+  fi
+fi
+
+if command -v bootmux >/dev/null 2>&1; then
+  if bootmux doctor >/dev/null 2>&1; then
+    ok 'Bootmux doctor passes'
+  else
+    fail 'Bootmux doctor failed'
+  fi
+fi
+
+if command -v git >/dev/null 2>&1; then
+  check_pinned_checkout 'Oh My Zsh' "$HOME/.oh-my-zsh" "$OH_MY_ZSH_REV"
+  check_pinned_checkout 'tmux plugin manager' "$HOME/.tmux/plugins/tpm" "$TPM_REV"
+fi
+
+for shell_file in \
+  "$repo_root/bin/dotfiles-bootstrap" \
+  "$repo_root/bin/dotfiles-doctor" \
+  "$repo_root/bin/ai-commit-suggest" \
+  "$repo_root/bin/git-default-branch" \
+  "$repo_root/bin/git-pr" \
+  "$repo_root/bin/git-up" \
+  "$repo_root/bin/mux" \
+  "$repo_root/hooks/post-up" \
+  "$repo_root/test/bootstrap.sh"; do
+  if sh -n "$shell_file" >/dev/null 2>&1; then
+    ok "shell syntax: ${shell_file#"$repo_root"/}"
+  else
+    fail "shell syntax: ${shell_file#"$repo_root"/}"
+  fi
+done
+
+for bash_file in \
+  "$repo_root/bin/agent-config" \
+  "$repo_root/bin/bundler-search" \
+  "$repo_root/bin/git-ctags" \
+  "$repo_root/bin/replace"; do
+  if bash -n "$bash_file" >/dev/null 2>&1; then
+    ok "bash syntax: ${bash_file#"$repo_root"/}"
+  else
+    fail "bash syntax: ${bash_file#"$repo_root"/}"
+  fi
+done
+
+printf 'Doctor summary: %d ok, %d warning(s), %d failure(s)\n' \
+  "$ok_count" "$warn_count" "$fail_count"
+
+[ "$fail_count" -eq 0 ]

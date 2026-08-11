@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Search your bundle for the provided pattern
 #   Requires bundler 1.8+ for execution as a bundler subcommand.
@@ -11,5 +11,31 @@
 #  1. What to search for
 #  2. Which gem names to search (defaults to all gems)
 
-pattern="$1"; shift
-ag "$pattern" $(bundle show --paths "$@")
+set -euo pipefail
+
+if (( $# == 0 )); then
+  echo "Usage: bundler-search PATTERN [GEM ...]" >&2
+  exit 2
+fi
+
+pattern=$1
+shift
+paths=()
+
+if (( $# == 0 )); then
+  while IFS= read -r path; do
+    [[ -n $path ]] && paths+=("$path")
+  done < <(bundle list --paths)
+else
+  for gem_name in "$@"; do
+    path=$(bundle show "$gem_name")
+    [[ -n $path ]] && paths+=("$path")
+  done
+fi
+
+if (( ${#paths[@]} == 0 )); then
+  echo "bundler-search: Bundler returned no gem paths" >&2
+  exit 1
+fi
+
+exec rg -- "$pattern" "${paths[@]}"

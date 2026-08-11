@@ -1,0 +1,46 @@
+#!/bin/sh
+
+set -eu
+
+command -v bootmux >/dev/null 2>&1 || {
+  echo "mux: bootmux is required; install the core Brewfile first" >&2
+  exit 127
+}
+
+is_bootmux_command() {
+  case "$1" in
+    start|s|stop|st|stop-all|stop_all|local|.|debug|new|n|open|o|edit|e|copy|c|cp|delete|d|rm|implode|i|list|l|ls|picker|doctor|bindings|config|completions|commands|help|version)
+      return 0
+      ;;
+  esac
+  return 1
+}
+
+if [ "$#" -eq 0 ]; then
+  exec bootmux picker
+fi
+
+if [ "$1" = --backend ]; then
+  [ "$#" -ge 2 ] || exec bootmux "$@"
+  backend=$2
+  shift 2
+  if [ "$#" -eq 0 ]; then
+    exec bootmux --backend "$backend" picker
+  elif is_bootmux_command "$1"; then
+    exec bootmux --backend "$backend" "$@"
+  else
+    exec bootmux --backend "$backend" start "$@"
+  fi
+fi
+
+case "$1" in
+  --help|-h|--version|-V)
+    exec bootmux "$@"
+    ;;
+esac
+
+if is_bootmux_command "$1"; then
+  exec bootmux "$@"
+fi
+
+exec bootmux start "$@"

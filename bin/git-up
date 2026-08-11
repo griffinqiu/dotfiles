@@ -1,6 +1,10 @@
 #!/bin/sh
 
-set -e
+set -eu
 
-git fetch origin
-git rebase origin/master "$@"
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+remote=${GIT_UP_REMOTE:-origin}
+
+git fetch "$remote"
+branch=$("$script_dir/git-default-branch" "$remote")
+git rebase "$remote/$branch" "$@"

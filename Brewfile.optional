@@ -1,0 +1,16 @@
+# Useful but non-essential tools. Install these explicitly with:
+#   ./bin/dotfiles-bootstrap --optional
+brew "gnupg"
+brew "lazydocker"
+brew "ncdu"
+brew "pipx"
+brew "reattach-to-user-namespace"
+brew "stress"
+brew "sysbench"
+brew "tig"
+brew "watch"
+brew "wget"
+brew "yarn"
+brew "zellij"
+
+cask "kitty"

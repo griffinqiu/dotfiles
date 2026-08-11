@@ -1,0 +1,366 @@
+#!/bin/sh
+
+set -eu
+
+OH_MY_ZSH_REV=59a9740721b734835812121322d6fe4827b0853a
+TPM_REV=99469c4a9b1ccf77fade25842dc7bafbc8ce9946
+
+usage() {
+  cat <<'EOF'
+Usage: dotfiles-bootstrap [--check] [--upgrade] [--optional]
+
+  --check     Run the read-only doctor without installing or linking anything.
+  --upgrade   Explicitly allow Homebrew Bundle to upgrade managed packages.
+  --optional  Include Brewfile.optional.
+EOF
+}
+
+die() {
+  printf 'dotfiles-bootstrap: %s\n' "$*" >&2
+  exit 2
+}
+
+symlink_points_to_path() {
+  link_path=$1
+  expected_path=$2
+
+  [ -L "$link_path" ] || return 1
+  link_target=$(readlink "$link_path") || return 1
+  case "$link_target" in
+    /*) ;;
+    *) link_target=$(dirname -- "$link_path")/$link_target ;;
+  esac
+
+  link_parent=$(CDPATH= cd -P -- "$(dirname -- "$link_target")" 2>/dev/null && pwd) || \
+    return 1
+  expected_parent=$(CDPATH= cd -P -- "$(dirname -- "$expected_path")" 2>/dev/null && pwd) || \
+    return 1
+  [ "$link_parent/$(basename -- "$link_target")" = \
+    "$expected_parent/$(basename -- "$expected_path")" ]
+}
+
+symlink_resolves_to() {
+  link_path=$1
+  expected_path=$2
+  [ -L "$link_path" ] && [ -e "$link_path" ] && \
+    [ -e "$expected_path" ] && [ "$link_path" -ef "$expected_path" ]
+}
+
+retired_link_is_owned() {
+  link_name=$1
+  link_path=$2
+  expected_path=$3
+  strict=$4
+
+  if symlink_points_to_path "$link_path" "$expected_path"; then
+    return 0
+  fi
+  if [ -L "$link_path" ] || [ -e "$link_path" ]; then
+    $strict && die "refusing foreign $link_name path: $link_path"
+  fi
+  return 1
+}
+
+remove_retired_link() {
+  link_name=$1
+  link_path=$2
+  expected_path=$3
+
+  symlink_points_to_path "$link_path" "$expected_path" || \
+    die "$link_name changed after preflight: $link_path"
+  rm -- "$link_path"
+  printf 'Removed retired %s symlink: %s\n' "$link_name" "$link_path"
+}
+
+resolve_repo_root() {
+  if [ -n "${DOTFILES_ROOT:-}" ]; then
+    CDPATH= cd -P -- "$DOTFILES_ROOT" && pwd
+    return
+  fi
+
+  script_path=$0
+  while [ -L "$script_path" ]; do
+    script_dir=$(CDPATH= cd -P -- "$(dirname -- "$script_path")" && pwd)
+    script_path=$(readlink "$script_path")
+    case "$script_path" in
+      /*) ;;
+      *) script_path=$script_dir/$script_path ;;
+    esac
+  done
+  CDPATH= cd -P -- "$(dirname -- "$script_path")/.." && pwd
+}
+
+check_only=false
+upgrade=false
+optional=false
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --check) check_only=true ;;
+    --upgrade) upgrade=true ;;
+    --optional) optional=true ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *) die "unknown option: $1" ;;
+  esac
+  shift
+done
+
+$check_only && $upgrade && die '--check and --upgrade cannot be combined'
+
+repo_root=$(resolve_repo_root) || die 'cannot resolve repository root'
+[ -f "$repo_root/Brewfile" ] || die "missing $repo_root/Brewfile"
+[ -f "$repo_root/rcrc" ] || die "missing $repo_root/rcrc"
+
+doctor=${DOTFILES_DOCTOR_BIN:-$repo_root/bin/dotfiles-doctor}
+[ -x "$doctor" ] || die "doctor is not executable: $doctor"
+
+doctor_args=
+$optional && doctor_args=--optional
+
+if $check_only; then
+  exec "$doctor" $doctor_args
+fi
+
+[ "$(uname -s)" = Darwin ] || die 'bootstrap currently supports macOS only'
+machine_arch=${DOTFILES_MACHINE_ARCH:-$(uname -m)}
+[ "$machine_arch" = arm64 ] || \
+  die 'bootstrap currently supports Apple-silicon macOS only (macos-arm64 lockfile)'
+
+codex_instructions=$HOME/.codex/AGENTS.md
+codex_instructions_backup=$codex_instructions.pre-dotfiles
+codex_instructions_expected=$repo_root/codex/AGENTS.md
+migrate_codex_instructions=false
+if [ -L "$codex_instructions" ]; then
+  symlink_resolves_to "$codex_instructions" "$codex_instructions_expected" || \
+    die "refusing foreign or dangling Codex instructions symlink: $codex_instructions"
+elif [ -e "$codex_instructions" ]; then
+  [ -f "$codex_instructions" ] && [ ! -s "$codex_instructions" ] || \
+    die "refusing conflicting Codex instructions path: $codex_instructions"
+  if [ -e "$codex_instructions_backup" ] || [ -L "$codex_instructions_backup" ]; then
+    die "cannot preserve empty Codex instructions; backup already exists: $codex_instructions_backup"
+  fi
+  migrate_codex_instructions=true
+fi
+
+mise_home_config=$HOME/.config/mise/config.toml
+mise_home_config_backup=$mise_home_config.pre-dotfiles
+mise_home_config_expected=$repo_root/config/mise/config.toml
+migrate_mise_config=false
+if [ -L "$mise_home_config" ]; then
+  symlink_resolves_to "$mise_home_config" "$mise_home_config_expected" || \
+    die "refusing foreign or dangling Mise config symlink: $mise_home_config"
+elif [ -e "$mise_home_config" ]; then
+  [ -f "$mise_home_config" ] || \
+    die "refusing conflicting Mise config path: $mise_home_config"
+  if [ -e "$mise_home_config_backup" ] || [ -L "$mise_home_config_backup" ]; then
+    die "cannot preserve Mise config; backup already exists: $mise_home_config_backup"
+  fi
+  migrate_mise_config=true
+fi
+
+standalone_mise=$HOME/.local/bin/mise
+standalone_mise_backup=$standalone_mise.pre-dotfiles
+homebrew_mise=/opt/homebrew/bin/mise
+migrate_standalone_mise=false
+if [ -L "$standalone_mise" ]; then
+  symlink_points_to_path "$standalone_mise" "$homebrew_mise" || \
+    die "refusing foreign or dangling standalone Mise symlink: $standalone_mise"
+elif [ -e "$standalone_mise" ]; then
+  [ -f "$standalone_mise" ] || \
+    die "refusing conflicting standalone Mise path: $standalone_mise"
+  if [ -e "$standalone_mise_backup" ] || [ -L "$standalone_mise_backup" ]; then
+    die "cannot preserve standalone Mise; backup already exists: $standalone_mise_backup"
+  fi
+  migrate_standalone_mise=true
+fi
+
+cleanup_root_claude=false
+cleanup_root_agents=false
+cleanup_agrc=false
+cleanup_ag_completion=false
+if retired_link_is_owned 'root Claude instructions' \
+  "$HOME/.CLAUDE.md" "$repo_root/CLAUDE.md" true; then
+  cleanup_root_claude=true
+fi
+if retired_link_is_owned 'root Codex instructions' \
+  "$HOME/.AGENTS.md" "$repo_root/AGENTS.md" true; then
+  cleanup_root_agents=true
+fi
+if retired_link_is_owned 'ag configuration' \
+  "$HOME/.agrc" "$repo_root/agrc" false; then
+  cleanup_agrc=true
+fi
+if retired_link_is_owned 'ag completion' \
+  "$HOME/.zsh/completion/_ag" "$repo_root/zsh/completion/_ag" false; then
+  cleanup_ag_completion=true
+fi
+
+if [ -n "${DOTFILES_BREW_BIN:-}" ]; then
+  brew_bin=$DOTFILES_BREW_BIN
+else
+  brew_bin=$(command -v brew || true)
+fi
+[ -n "$brew_bin" ] && [ -x "$brew_bin" ] || {
+  printf '%s\n' 'Homebrew is required. Install it from https://brew.sh/ and rerun.' >&2
+  exit 1
+}
+
+bundle_mode=--no-upgrade
+$upgrade && bundle_mode=--upgrade
+
+printf 'Installing core Homebrew dependencies (%s) ...\n' "$bundle_mode"
+"$brew_bin" bundle install "$bundle_mode" --file "$repo_root/Brewfile"
+
+if $optional; then
+  printf 'Installing optional Homebrew dependencies (%s) ...\n' "$bundle_mode"
+  "$brew_bin" bundle install "$bundle_mode" --file "$repo_root/Brewfile.optional"
+fi
+
+if [ -n "${DOTFILES_RCUP_BIN:-}" ]; then
+  rcup_bin=$DOTFILES_RCUP_BIN
+else
+  # rcm may have been installed by the Brewfile immediately above.
+  rcup_bin=$(command -v rcup || true)
+fi
+
+[ -n "$rcup_bin" ] && [ -x "$rcup_bin" ] || {
+  printf '%s\n' 'rcup is still unavailable after Brewfile installation.' >&2
+  exit 1
+}
+
+if [ -n "${DOTFILES_MISE_BIN:-}" ]; then
+  mise_bin=$DOTFILES_MISE_BIN
+else
+  mise_prefix=$("$brew_bin" --prefix mise 2>/dev/null || true)
+  mise_bin=$mise_prefix/bin/mise
+  if [ ! -x "$mise_bin" ]; then
+    mise_bin=$(command -v mise || true)
+  fi
+fi
+[ -n "$mise_bin" ] && [ -x "$mise_bin" ] || {
+  printf '%s\n' 'mise is still unavailable after Brewfile installation.' >&2
+  exit 1
+}
+
+bootstrap_tmp=
+cleanup() {
+  if [ -n "$bootstrap_tmp" ] && [ -d "$bootstrap_tmp" ]; then
+    rm -rf -- "$bootstrap_tmp"
+  fi
+}
+trap cleanup EXIT HUP INT TERM
+
+install_pinned_checkout() {
+  checkout_name=$1
+  checkout_url=$2
+  checkout_revision=$3
+  checkout_path=$4
+
+  if [ -d "$checkout_path/.git" ]; then
+    current_revision=$("$git_bin" -C "$checkout_path" rev-parse HEAD 2>/dev/null || true)
+    if [ "$current_revision" != "$checkout_revision" ]; then
+      if $upgrade; then
+        printf 'Updating %s to pinned revision %s ...\n' \
+          "$checkout_name" "$checkout_revision"
+        "$git_bin" -C "$checkout_path" fetch --depth 1 \
+          "$checkout_url" "$checkout_revision"
+        "$git_bin" -C "$checkout_path" checkout --detach -q FETCH_HEAD
+        current_revision=$("$git_bin" -C "$checkout_path" rev-parse HEAD)
+        [ "$current_revision" = "$checkout_revision" ] || {
+          printf 'failed to verify %s revision after upgrade\n' \
+            "$checkout_name" >&2
+          exit 1
+        }
+      else
+        printf 'warning: %s is at %s; expected %s (left unchanged; use --upgrade)\n' \
+          "$checkout_name" "${current_revision:-unknown}" \
+          "$checkout_revision" >&2
+      fi
+    fi
+    return
+  fi
+
+  if [ -e "$checkout_path" ]; then
+    printf 'warning: %s exists but is not a Git checkout; left unchanged\n' \
+      "$checkout_path" >&2
+    return
+  fi
+
+  bootstrap_tmp=$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-bootstrap.XXXXXX")
+  "$git_bin" init -q "$bootstrap_tmp/repo"
+  "$git_bin" -C "$bootstrap_tmp/repo" remote add origin "$checkout_url"
+  "$git_bin" -C "$bootstrap_tmp/repo" fetch --depth 1 origin "$checkout_revision"
+  "$git_bin" -C "$bootstrap_tmp/repo" checkout --detach -q FETCH_HEAD
+  [ "$("$git_bin" -C "$bootstrap_tmp/repo" rev-parse HEAD)" = "$checkout_revision" ] || {
+    printf 'failed to verify %s revision\n' "$checkout_name" >&2
+    exit 1
+  }
+  mkdir -p "$(dirname -- "$checkout_path")"
+  mv "$bootstrap_tmp/repo" "$checkout_path"
+  rm -rf -- "$bootstrap_tmp"
+  bootstrap_tmp=
+  printf 'Installed %s at %s\n' "$checkout_name" "$checkout_revision"
+}
+
+if [ "${DOTFILES_BOOTSTRAP_SKIP_GIT_DEPS:-0}" != 1 ]; then
+  if [ -n "${DOTFILES_GIT_BIN:-}" ]; then
+    git_bin=$DOTFILES_GIT_BIN
+  else
+    git_bin=$(command -v git || true)
+  fi
+  [ -n "$git_bin" ] && [ -x "$git_bin" ] || {
+    printf '%s\n' 'git is still unavailable after Brewfile installation.' >&2
+    exit 1
+  }
+
+  install_pinned_checkout \
+    'Oh My Zsh' \
+    'https://github.com/ohmyzsh/ohmyzsh.git' \
+    "$OH_MY_ZSH_REV" \
+    "$HOME/.oh-my-zsh"
+  install_pinned_checkout \
+    'tmux plugin manager' \
+    'https://github.com/tmux-plugins/tpm.git' \
+    "$TPM_REV" \
+    "$HOME/.tmux/plugins/tpm"
+fi
+
+if $migrate_codex_instructions; then
+  mv "$codex_instructions" "$codex_instructions_backup"
+  printf 'Preserved empty Codex instructions at %s\n' \
+    "$codex_instructions_backup"
+fi
+if $migrate_mise_config; then
+  mv "$mise_home_config" "$mise_home_config_backup"
+  printf 'Preserved previous Mise config at %s\n' "$mise_home_config_backup"
+fi
+if $migrate_standalone_mise; then
+  mv "$standalone_mise" "$standalone_mise_backup"
+  printf 'Preserved previous standalone Mise at %s\n' \
+    "$standalone_mise_backup"
+fi
+
+$cleanup_root_claude && remove_retired_link \
+  'root Claude instructions' "$HOME/.CLAUDE.md" "$repo_root/CLAUDE.md"
+$cleanup_root_agents && remove_retired_link \
+  'root Codex instructions' "$HOME/.AGENTS.md" "$repo_root/AGENTS.md"
+$cleanup_agrc && remove_retired_link \
+  'ag configuration' "$HOME/.agrc" "$repo_root/agrc"
+$cleanup_ag_completion && remove_retired_link \
+  'ag completion' "$HOME/.zsh/completion/_ag" "$repo_root/zsh/completion/_ag"
+
+printf 'Linking dotfiles with rcm ...\n'
+RCRC="$repo_root/rcrc" "$rcup_bin" -d "$repo_root"
+
+printf 'Installing locked mise runtimes ...\n'
+mise_home_config=${XDG_CONFIG_HOME:-$HOME/.config}/mise/config.toml
+MISE_GLOBAL_CONFIG_FILE="$repo_root/config/mise/config.toml" \
+MISE_GLOBAL_CONFIG_ROOT="$repo_root/config/mise" \
+MISE_IGNORED_CONFIG_PATHS="$mise_home_config" \
+  "$mise_bin" install --locked -y
+
+printf 'Running post-bootstrap checks ...\n'
+"$doctor" $doctor_args

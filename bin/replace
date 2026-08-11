@@ -1,17 +1,62 @@
-#!/bin/sh
-#
-# Find and replace by a given list of files.
-#
-# replace foo bar **/*.rb
+#!/usr/bin/env bash
 
-find_this="$1"
-shift
-replace_with="$1"
-shift
+set -euo pipefail
 
-items=$(ag -l --nocolor "$find_this" "$@")
-temp="${TMPDIR:-/tmp}/replace_temp_file.$$"
-IFS=$'\n'
-for item in $items; do
-  sed "s/$find_this/$replace_with/g" "$item" > "$temp" && mv "$temp" "$item"
-done
+usage() {
+  echo "Usage: replace [--literal] FIND REPLACEMENT [PATH ...]" >&2
+  exit 2
+}
+
+literal=0
+if [[ ${1:-} == "--literal" ]]; then
+  literal=1
+  shift
+fi
+
+(( $# >= 2 )) || usage
+find_this=$1
+replace_with=$2
+shift 2
+
+[[ -n $find_this ]] || {
+  echo "replace: FIND must not be empty" >&2
+  exit 2
+}
+
+umask 077
+work_dir=$(mktemp -d "${TMPDIR:-/tmp}/replace.XXXXXX")
+file_list=$work_dir/files
+cleanup() {
+  rm -f -- "$file_list"
+  rmdir -- "$work_dir" 2>/dev/null || true
+}
+trap cleanup EXIT HUP INT TERM
+
+rg_args=(-l -0)
+(( literal == 1 )) && rg_args+=(-F)
+rg_args+=(-- "$find_this")
+if (( $# == 0 )); then
+  rg_args+=(.)
+else
+  rg_args+=("$@")
+fi
+
+status=0
+rg "${rg_args[@]}" >"$file_list" || status=$?
+if (( status != 0 )); then
+  # ripgrep returns 1 when there are simply no matches.
+  (( status == 1 )) && exit 0
+  exit "$status"
+fi
+
+while IFS= read -r -d '' file; do
+  REPLACE_FIND=$find_this \
+    REPLACE_WITH=$replace_with \
+    REPLACE_LITERAL=$literal \
+    perl -0pi -e '
+      my $pattern = $ENV{REPLACE_FIND};
+      $pattern = quotemeta($pattern) if $ENV{REPLACE_LITERAL};
+      my $replacement = $ENV{REPLACE_WITH};
+      s/$pattern/$replacement/g;
+    ' -- "$file"
+done <"$file_list"
