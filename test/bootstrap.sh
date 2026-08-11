@@ -1202,6 +1202,10 @@ if command -v lsrc >/dev/null 2>&1; then
     grep -Eq ":$repo_root/(AGENTS\.md|CLAUDE\.md)$"; then
     fail 'rcm must exclude repository instruction files'
   fi
+  if printf '%s\n' "$rcm_output" |
+    grep -Eq ":$repo_root/README(\.zh-CN)?\.md$"; then
+    fail 'rcm must exclude repository documentation'
+  fi
   for nested_instruction in \
     claude/CLAUDE.md \
     codex/AGENTS.md \

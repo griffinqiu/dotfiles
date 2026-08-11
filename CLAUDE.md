@@ -45,7 +45,7 @@ Package installation, downloads, and upgrades belong in
 
 Do not hardcode `main` or `master` in Git helpers. Use
 `bin/git-default-branch [REMOTE]`, which checks the remote HEAD and then known
-fallback refs. `git-up` and `git-churn` are expected to use this helper.
+fallback refs.
 
 ## Main Layout
 

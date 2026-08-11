@@ -200,7 +200,7 @@ else
 fi
 
 for helper in \
-  agent-config bundler-search git-churn git-default-branch git-pr git-up mux \
+  agent-config bundler-search git-default-branch mux \
   replace; do
   if [ -x "$repo_root/bin/$helper" ]; then
     ok "helper executable: bin/$helper"
@@ -409,8 +409,6 @@ for shell_file in \
   "$repo_root/bin/dotfiles-doctor" \
   "$repo_root/bin/ai-commit-suggest" \
   "$repo_root/bin/git-default-branch" \
-  "$repo_root/bin/git-pr" \
-  "$repo_root/bin/git-up" \
   "$repo_root/bin/mux" \
   "$repo_root/hooks/post-up" \
   "$repo_root/test/bootstrap.sh"; do

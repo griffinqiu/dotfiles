@@ -17,6 +17,9 @@ plugins=(
   dirhistory
   colored-man-pages
   command-not-found
+  dotenv
+  sudo
+  fancy-ctrl-z
   zsh-autosuggestions
   zsh-syntax-highlighting
   history-substring-search

@@ -1,2 +1,2 @@
-EXCLUDES="README.md ./AGENTS.md ./CLAUDE.md Brewfile Brewfile.optional test/* *.log .aider* config/mcphub/servers.json config/.claude/settings.local.json .DS_Store"
+EXCLUDES="README.md README.zh-CN.md ./AGENTS.md ./CLAUDE.md Brewfile Brewfile.optional test/* *.log .aider* config/mcphub/servers.json config/.claude/settings.local.json .DS_Store"
 DOTFILES_DIRS="$HOME/dotfiles-local $HOME/dotfiles"

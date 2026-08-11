@@ -76,7 +76,6 @@ stty -ixon
 bindkey "^V" vi-cmd-mode
 
 [[ -f ~/.aliases ]] && source ~/.aliases
-[[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
 [[ -f ~/.local/bin/env ]] && source ~/.local/bin/env
 [[ -f ~/.openclaw/completions/openclaw.zsh ]] && source ~/.openclaw/completions/openclaw.zsh
 

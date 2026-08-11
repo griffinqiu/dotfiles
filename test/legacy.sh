@@ -65,38 +65,8 @@ if (cd "$git_repo" && "$repo_dir/bin/git-default-branch" >/dev/null 2>&1); then
 fi
 pass "git-default-branch fails instead of guessing"
 
-printf 'feature\n' >>"$git_repo/file"
-git -C "$git_repo" commit -qam feature
-output=$(cd "$git_repo" && GIT_CHURN_REMOTE=upstream "$repo_dir/bin/git-churn")
-[[ $output == *' file' ]] || fail "git-churn should compare with the detected custom default branch"
-pass "git-churn uses the shared default-branch detector"
-
 fake_bin=$tmp_dir/bin
 mkdir -p "$fake_bin"
-printf '%s\n' \
-  '#!/usr/bin/env bash' \
-  'printf "%s\\n" "$*" >>"$GIT_CALL_LOG"' \
-  'case "$1" in' \
-  '  rev-parse) exit 0 ;;' \
-  '  symbolic-ref) printf "origin/main\\n" ;;' \
-  '  fetch|rebase) exit 0 ;;' \
-  '  *) exit 1 ;;' \
-  'esac' >"$fake_bin/git"
-chmod +x "$fake_bin/git"
-GIT_CALL_LOG=$tmp_dir/git.log PATH="$fake_bin:$PATH" "$repo_dir/bin/git-up" --autostash
-rg -Fxq 'fetch origin' "$tmp_dir/git.log" || fail "git-up should fetch origin"
-rg -Fxq 'rebase origin/main --autostash' "$tmp_dir/git.log" || fail "git-up should rebase the detected branch and preserve args"
-pass "git-up fetches and rebases the detected default branch"
-
-printf '%s\n' \
-  '#!/usr/bin/env bash' \
-  'printf "%s\\n" "$@" >"$CALL_LOG"' >"$fake_bin/gh"
-chmod +x "$fake_bin/gh"
-CALL_LOG=$tmp_dir/gh.log PATH="$fake_bin:$PATH" "$repo_dir/bin/git-pr" --title "two words" --draft
-actual=$(tr '\n' '|' <"$tmp_dir/gh.log")
-assert_eq 'pr|create|--title|two words|--draft|' "$actual" "git-pr should preserve every argument"
-pass "git-pr delegates safely to gh"
-
 printf '%s\n' \
   '#!/usr/bin/env bash' \
   'printf "%s\\n" "$@" >"$CALL_LOG"' >"$fake_bin/bootmux"
