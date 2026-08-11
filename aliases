@@ -20,9 +20,6 @@ alias lld="ls -lF ${colorflag} | grep --color=never '^d'"
 # Always use color output for `ls`
 alias ls="command ls -F ${colorflag}"
 
-alias rm='rm -i'
-alias cp='cp -i'
-alias mv='mv -i'
 # Always enable colored `grep` output
 # Note: `GREP_OPTIONS="--color=auto"` is deprecated, hence the alias usage.
 alias egrep='egrep --color=auto'
@@ -36,7 +33,9 @@ alias e="$EDITOR"
 alias v="$VISUAL"
 
 # IP addresses
-alias ip="dig +short myip.opendns.com @resolver1.opendns.com"
+# OpenDNS retired its myip resolver; Cloudflare's TXT record is the DNS
+# equivalent and stays faster than an HTTPS round trip.
+alias ip='dig +short txt ch whoami.cloudflare @1.0.0.1 | tr -d "\""'
 alias localip="ipconfig getifaddr en0"
 alias ips="ifconfig -a | grep -o 'inet6\? \(addr:\)\?\s\?\(\(\([0-9]\+\.\)\{3\}[0-9]\+\)\|[a-fA-F0-9:]\+\)' | awk '{ sub(/inet6? (addr:)? ?/, \"\"); print }'"
 
@@ -54,9 +53,6 @@ alias tmux_plugins_update="~/.tmux/plugins/tpm/bin/update_plugins all"
 command -v md5sum >/dev/null || alias md5sum="md5"
 # macOS has no `sha1sum`, so use `shasum` as a fallback
 command -v sha1sum >/dev/null || alias sha1sum="shasum"
-
-# Recursively delete `.DS_Store` files
-alias cleanup="find . -type f -name '*.DS_Store' -ls -delete"
 
 # Include custom aliases
 [[ -f ~/Documents/Sync/aliases.sync ]] && source ~/Documents/Sync/aliases.sync

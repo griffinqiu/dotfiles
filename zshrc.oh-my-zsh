@@ -16,7 +16,6 @@ plugins=(
   extract
   dirhistory
   colored-man-pages
-  command-not-found
   dotenv
   sudo
   fancy-ctrl-z
