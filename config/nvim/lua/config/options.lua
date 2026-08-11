@@ -71,3 +71,23 @@ opt.complete = ".,w,b,t,i,u"
 opt.completeopt = { "menuone", "noselect", "noinsert" }
 opt.spell = false
 
+-- On a remote host (ssh, herdr --remote) pbcopy/xclip would write to that host's
+-- clipboard instead of the one in front of the user. OSC 52 hands the text to the
+-- attached terminal client, which puts it on the local machine's clipboard.
+-- Reading back over OSC 52 blocks for seconds on terminals that refuse it, so
+-- paste falls back to the last yank.
+if vim.env.SSH_TTY or vim.env.SSH_CONNECTION then
+  -- Both registers target the "c" selection: "*" would otherwise emit the X11
+  -- primary selection, which macOS has no notion of and terminals rarely honor.
+  local copy_to_clipboard = require("vim.ui.clipboard.osc52").copy("+")
+  local paste_last_yank = function()
+    return { vim.split(vim.fn.getreg(""), "\n"), vim.fn.getregtype("") }
+  end
+
+  vim.g.clipboard = {
+    name = "osc52",
+    copy = { ["+"] = copy_to_clipboard, ["*"] = copy_to_clipboard },
+    paste = { ["+"] = paste_last_yank, ["*"] = paste_last_yank },
+  }
+end
+
