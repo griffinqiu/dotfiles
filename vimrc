@@ -1,261 +1,117 @@
-" .vimrc
+" .vimrc — MacVim as a scratch editor. No plugin manager: Vim 9.2 already ships
+" the only pieces worth having. Real editing happens in Neovim (config/nvim).
 
-" Vim Settings {{{
+set nocompatible
+syntax on
+filetype plugin indent on
+
+" Built-in packages that replace the plugins this file used to load.
+packadd! comment
+packadd! editorconfig
+packadd! matchit
+
 map <space> <nop>
 let mapleader = " "
-" let g:mapleader = " "
 
-syntax on
 set encoding=utf-8
 set fileencodings=utf-8,chinese,latin-1
 set fileformats=unix,dos,mac
-
 set nobomb
-set nobackup
-set nowritebackup
-set noswapfile
-set history=1024
-set ruler
-set showcmd
-set showmode
-set wrap
-set linebreak
-set autoread
-" set autowrite
-" set autochdir
-set hidden
-set belloff=all
-set nojoinspaces
+
+" A scratch editor should leave nothing behind.
+set nobackup nowritebackup noswapfile noundofile
+
+set hidden autoread belloff=all nojoinspaces
 set backspace=indent,eol,start
+set history=1024 undoreload=1024
 set foldmethod=marker
 set nospell spelllang=en_us,cjk
+" Spellfile lives outside this repository so it can be synced separately.
+set spellfile=$HOME/Sync/vim-spell-en.utf-8.add
 
-set shiftwidth=2
-set softtabstop=2
-set tabstop=2
-set expandtab
-set scrolloff=5
-set sidescroll=1 " zh zl
-set sidescrolloff=10
-" set nolist
-" set list listchars=tab:»·,trail:·,nbsp:·
+set shiftwidth=2 softtabstop=2 tabstop=2 expandtab autoindent
+set wrap linebreak
+set scrolloff=5 sidescroll=1 sidescrolloff=10
+set splitbelow splitright equalalways
+set colorcolumn=81 nonumber norelativenumber numberwidth=4
+set linespace=3 lazyredraw
+set timeoutlen=500 ttimeoutlen=10 updatetime=100
+set mouse= ttymouse=
+set shortmess=atIc nrformats=
 
-if filereadable(expand("~/.vimrc.bundles"))
-  source ~/.vimrc.bundles
-endif
+set ignorecase smartcase magic hlsearch incsearch showmatch matchtime=2
+set wildmenu wildmode=longest:full,full
+set wildignore+=.hg,.git,.svn,*.o,*.obj,*.pyc,*.sw?,*.orig,*.DS_Store
+set wildignore+=*.jpg,*.bmp,*.gif,*.png,*.jpeg
 
-set nocompatible
-filetype plugin indent on
+set ruler showcmd showmode cmdheight=2 laststatus=2
+highlight StatusLine term=bold,reverse cterm=bold,reverse
+set statusline=%<\ [%F]
+set statusline+=\ [%{&encoding},
+set statusline+=%{&fileformat}%{\"\".((exists(\"+bomb\")\ &&\ &bomb)?\",BOM\":\"\").\"\"}]%m
+set statusline+=%=\ %y\ %l,\ %c\ \<%P\>
+set complete+=kspell complete-=u complete-=i complete-=t
+
+" retrobox is Vim's built-in port of gruvbox, which this file used as a plugin.
+set background=dark
+colorscheme retrobox
+
 augroup vimrcEx
   autocmd!
-
-  " When editing a file, always jump to the last known cursor position.
-  " Don't do it for commit messages, when the position is invalid, or when
-  " inside an event handler (happens when dropping a file on gvim).
+  " Jump to the last known cursor position, except in commit messages.
   autocmd BufReadPost *
     \ if &ft != 'gitcommit' && line("'\"") > 0 && line("'\"") <= line("$") |
     \     exe "normal g`\"" |
     \ endif
-
-  " Set syntax highlighting for specific file types
-  autocmd BufRead,BufNewFile Appraisals set filetype=ruby
   autocmd BufRead,BufNewFile *.{md,mdown,mkd,mkdn,markdown,mdwn} set filetype=markdown
-  autocmd FileType c set omnifunc=ccomplete#Complete
-  autocmd FileType python set omnifunc=pythoncomplete#Complete
-  " autocmd FileType javascript set omnifunc=javascriptcomplete#CompleteJS
-  autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
-  autocmd FileType css set omnifunc=csscomplete#CompleteCSS
-  autocmd FileType php set omnifunc=phpcomplete#CompletePHP
-  autocmd FileType sql set omnifunc=sqlcomplete#Completesql
   autocmd FileType css,scss,less,html setl iskeyword+=-
 augroup END
 
-" When the type of shell script is /bin/sh, assume a POSIX-compatible
-" shell for syntax highlighting purposes.
 let g:is_posix = 1
 
-if v:version >= 703
-  set undofile
-  set undodir=~/.cache/vim/undoes
-endif
-if v:version >= 800
-  set tagcase=match
-endif
-set backupdir=~/.cache/vim/backups
-" set directory=~/tmp/
-set colorcolumn=81
+" Mappings below mirror Neovim. Keys Neovim leaves at their default are left
+" alone here too, so the same key never means two things across the editors.
+map <silent> , <Nop>
 
-set nonumber
-set norelativenumber
-set numberwidth=4
+" Move by display line unless a count is given (LazyVim's j/k behavior).
+nnoremap <expr> <silent> j v:count == 0 ? 'gj' : 'j'
+xnoremap <expr> <silent> j v:count == 0 ? 'gj' : 'j'
+nnoremap <expr> <silent> k v:count == 0 ? 'gk' : 'k'
+xnoremap <expr> <silent> k v:count == 0 ? 'gk' : 'k'
 
-set sidescroll=1
-set sidescrolloff=10
+" Search results keep their direction and open folds, as in Neovim.
+nnoremap <expr> n 'Nn'[v:searchforward] . 'zv'
+nnoremap <expr> N 'nN'[v:searchforward] . 'zv'
+nnoremap <silent> <Esc> :nohlsearch<CR><Esc>
 
-set splitbelow
-set splitright
-set equalalways
-
-set autoindent
-set linespace=3
-
-set history=1024
-set undoreload=1024
-
-set timeoutlen=500
-set ttimeoutlen=10
-set updatetime=100
-
-" Always use vertical diffs
-" set diffopt+=vertical
-" set whichwrap=b,s
-
-set wildmenu
-" set wildmode=list:longest,list:full
-set wildmode=longest:full,full
-set wildignore+=.hg,.git,.svn                    " Version control
-set wildignore+=*.jpg,*.bmp,*.gif,*.png,*.jpeg   " binary images
-set wildignore+=*.o,*.obj,*.exe,*.dll,*.manifest " compiled object files
-set wildignore+=*.sw?                            " Vim swap files
-set wildignore+=*.DS_Store                       " OSX bullshit
-set wildignore+=*.pyc                            " Python byte code
-set wildignore+=*.orig                           " Merge resolution files
-set ofu=syntaxcomplete#Complete
-
-set ruler
-set matchtime=2
-
-set magic
-set ignorecase
-set smartcase
-set hlsearch
-set incsearch
-set showmatch
-
-set cmdheight=2
-set laststatus=2
-highlight StatusLine term=bold,reverse cterm=bold,reverse
-set statusline=%<\ [%F]
-set statusline+=\ [%{&encoding}, " encoding
-set statusline+=%{&fileformat}%{\"\".((exists(\"+bomb\")\ &&\ &bomb)?\",BOM\":\"\").\"\"}]%m
-set statusline+=%=\ %y\ %l,\ %c\ \<%P\>
-set complete+=kspell
-set complete-=u
-set complete-=i
-set complete-=t
-
-" Set spellfile to location that is guaranteed to exist, can be symlinked to
-" Dropbox or kept in Git and managed outside of thoughtbot/dotfiles using rcm.
-set spellfile=$HOME/Sync/vim-spell-en.utf-8.add
-
-" set sessionoptions=
-  " \blank,buffers,curdir,folds,globals,help,localoptions,
-  " \options,tabpages,winsize,resize,winpos,winsize
-
-set formatoptions+=mM
-set mouse=
-set ttymouse=
-
-set shortmess=atIc
-set nrformats=
-" set tags=tags
-set tags+=gems.tags
-
-" Speed up for macros
-set lazyredraw
-
-" }}}
-
-" Theme {{{
-" set background=light
-set background=dark
-let g:gruvbox_invert_selection=0
-let g:gruvbox_contrast_dark='soft'
-let g:gruvbox_contrast_light='soft'
-colorscheme gruvbox
-" }}}
-
-" Mapping {{{
-nnoremap k gk
-nnoremap gk k
-nnoremap j gj
-nnoremap gj j
-
-nnoremap B ^
-nnoremap E $
-
-" highlight last inserted text
-nnoremap gV `[v`]
-
-" Copy filename to clipboard
+" Copy the current file name in various forms
 nmap ,cn :let @*=expand("%:."). ':' . line(".")<CR>
 nmap ,cs :let @*=expand("%:.")<CR>
 nmap ,cf :let @*=expand("%:t")<CR>
 nmap ,cl :let @*=expand("%:p")<CR>
 
-" Move to prev/next buffer
-nnoremap [l :lprevious<CR>
-nnoremap ]l :lnext<CR>
-nnoremap [t :tabprevious<CR>
-nnoremap ]t :tabnext<CR>
+nnoremap [b :bprevious<CR>
+nnoremap ]b :bnext<CR>
 nnoremap [q :cprevious<CR>
 nnoremap ]q :cnext<CR>
+nnoremap [l :lprevious<CR>
+nnoremap ]l :lnext<CR>
 
 noremap <silent> <C-s> :update!<CR>
 vnoremap <silent> <C-s> <C-c>:update!<CR>
 inoremap <silent> <C-s> <C-o>:update!<CR>
 
-nnoremap n nzzzv
-nnoremap N Nzzzv
+" netrw replaces the NERDTree mapping this file used to define; <leader>e opens
+" the file explorer in Neovim too.
+nnoremap <silent> <leader>e :Explore<CR>
 
-nnoremap g; g;zz
-nnoremap g, g,zz
-
-nmap <leader><c-g> <c-g>
-nmap <leader><c-l> <c-l>
-
-nnoremap t<C-]> :tabnew %<CR>g<C-]>
-nnoremap <leader>ct :silent ! ctags -R --languages=ruby --exclude=.git --exclude=log -f tags<cr>
-" map <C-j> <C-w>j
-" map <C-k> <C-w>k
-" map <C-h> <C-w>h
-" map <C-l> <C-w>l
-" map <C-w>; <C-w>p
-noremap <right> gt
-noremap <left>  gT
-noremap <up> :lprevious<CR>
-noremap <down>  :lnext<CR>
-
-imap <C-]> <C-x><C-]>
-
-" Convert all tabs to spaces
-" map <leader>ct :retab<cr>
-
+" MacVim-only helpers: Neovim binds nothing on these keys.
 map <leader>co :botright copen<cr>
-
-" When pressing <leader>cd switch to the directory of the open buffer
-map <leader>cd :cd %:p:h<cr>
-map <silent> <leader><cr> :nohlsearch<cr>
-
-" Smart file search: GitFiles in git repo, Files otherwise
-function! SmartFileSearch()
-  if system('git rev-parse --is-inside-work-tree 2>/dev/null') =~ 'true'
-    execute 'GitFiles'
-  else
-    execute 'Files'
-  endif
-endfunction
-nnoremap <silent> <leader><leader> :call SmartFileSearch()<CR>
-
-" Spell
 map <leader>ss :setlocal spell!<cr>
 map <leader>sn ]s
 map <leader>sp [s
 map <leader>sa zg
 map <leader>s? z=
-
-" Remove the Windows ^M - when the encodings gets messed up
-noremap <leader><leader>m mmHmt:%s/<C-V><cr>//ge<cr>'tzt'm
 
 " Visual mode search with proper escaping (aligned with nvim)
 function! s:VSetSearch(cmdtype)
@@ -264,32 +120,16 @@ function! s:VSetSearch(cmdtype)
   let @/ = '\V' . substitute(escape(@s, a:cmdtype.'\'), '\n', '\\n', 'g')
   let @s = temp
 endfunction
-
 xnoremap * :<C-u>call <SID>VSetSearch('/')<CR>/<C-R>=@/<CR><CR>
 xnoremap # :<C-u>call <SID>VSetSearch('?')<CR>?<C-R>=@/<CR><CR>
 
 " Command-mode navigation (Emacs-style, aligned with nvim)
-" start of line
 cnoremap <C-a> <Home>
-" end of line
 cnoremap <C-e> <End>
-
-" back one character
 cnoremap <C-b> <Left>
-" forward one character
 cnoremap <C-f> <Right>
-
-" delete character
 cnoremap <C-d> <Delete>
-" backspace
 cnoremap <C-h> <BS>
-
-" command-line window
 cnoremap <C-g> <C-f>
-
-" back one word
 cnoremap <Esc><C-b> <S-Left>
-" forward one word
 cnoremap <Esc><C-f> <S-Right>
-
-" }}}

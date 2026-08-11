@@ -1,8 +1,0 @@
-gitlog () {
-	if [ -n "$1" ]
-	then
-		lazygit log -f "$1"
-	else
-		lazygit log
-	fi
-}

@@ -27,6 +27,7 @@ brew "stylua"
 brew "tmux"
 brew "universal-ctags"
 brew "uv"
+brew "zoxide"
 brew "griffinqiu/tap/bootmux"
 
 cask "1password-cli"

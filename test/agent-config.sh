@@ -142,8 +142,13 @@ assert_relative_link "$repo_root/config/nvim/AGENTS.md" \
 assert_relative_link "$repo_root/agents/skills/manage-agent-config" \
   '../../claude/skills/manage-agent-config' \
   "$repo_root/claude/skills/manage-agent-config"
-assert_relative_link "$repo_root/agents/skills/dotfiles-theme" \
+# dotfiles-theme only styles this repository, so it stays project-scoped on both
+# sides. Publishing it through agents/skills would put it in Codex's global
+# namespace while Claude only ever saw the project copy.
+assert_relative_link "$repo_root/.agents/skills/dotfiles-theme" \
   '../../.claude/skills/dotfiles-theme' \
   "$repo_root/.claude/skills/dotfiles-theme"
+[ ! -e "$repo_root/agents/skills/dotfiles-theme" ] ||
+  fail 'dotfiles-theme is project-scoped and must not be published globally'
 
 printf 'ok - agent-config init, sync, check, idempotence, and conflicts\n'

@@ -47,9 +47,6 @@ zsh_files=(
   "$repo_root/zshrc"
   "$repo_root/zshrc.oh-my-zsh"
 )
-while IFS= read -r -d '' zsh_file; do
-  zsh_files+=("$zsh_file")
-done < <(find "$repo_root/zsh" -type f -print0)
 
 for zsh_file in "${zsh_files[@]}"; do
   if ! zsh -n "$zsh_file"; then
@@ -107,13 +104,25 @@ if command -v nvim >/dev/null 2>&1; then
     XDG_STATE_HOME="$test_root/state" \
     DOTFILES_NVIM_CONFIG_ROOT="$repo_root/config/nvim" \
     nvim --headless --clean -n -u NONE -i NONE \
-      '+lua for _, file in ipairs(vim.fn.glob(vim.env.DOTFILES_NVIM_CONFIG_ROOT .. "/**/*.lua", false, true)) do assert(loadfile(file)) end' \
-      '+qa'; then
+    '+lua for _, file in ipairs(vim.fn.glob(vim.env.DOTFILES_NVIM_CONFIG_ROOT .. "/**/*.lua", false, true)) do assert(loadfile(file)) end' \
+    '+qa'; then
     fail 'Neovim could not parse the Lua configuration'
   fi
   pass 'Neovim parses the Lua configuration headlessly'
 else
   skip 'nvim is not installed'
+fi
+
+if command -v mvim >/dev/null 2>&1; then
+  mkdir -p "$test_root/vim-home"
+  if ! HOME="$test_root/vim-home" \
+    mvim -v -Nu "$repo_root/vimrc" -U NONE \
+    -n -es -i NONE '+qa!'; then
+    fail 'MacVim could not load the Vim configuration'
+  fi
+  pass 'MacVim loads the Vim configuration headlessly'
+else
+  skip 'mvim is not installed'
 fi
 
 printf '1..%d # %d skipped\n' "$tests" "$skips"

@@ -45,7 +45,6 @@ alias b="bundle"
 alias be="bundle exec"
 alias s="rspec"
 alias regem="gem ripper_tags --reindex"
-alias rmgemtags="find ~/.rbenv -type f -name 'tags' -exec rm -rf {} \;"
 
 # Pretty print the path
 alias path='echo $PATH | tr -s ":" "\n"'
@@ -64,8 +63,6 @@ command -v sha1sum >/dev/null || alias sha1sum="shasum"
 
 # Recursively delete `.DS_Store` files
 alias cleanup="find . -type f -name '*.DS_Store' -ls -delete"
-alias ??="ghcs"
-alias ?e='function _ghce() { ghce "$1"; }; _ghce'
 
 # Include custom aliases
 [[ -f ~/Documents/Sync/aliases.sync ]] && source ~/Documents/Sync/aliases.sync

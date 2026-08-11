@@ -144,9 +144,27 @@ assert_eq 'value done value' "$(tr -d '\n' <"$replace_file")" "literal replaceme
 pass "replace is NUL-safe and supports regex, literal, and zero-match cases"
 
 [[ ! -e "$repo_dir/agrc" ]] || fail "legacy agrc should be removed"
-[[ ! -e "$repo_dir/zsh/completion/_ag" ]] || fail "legacy ag completion should be removed"
-! rg -q 'tmuxinator' "$repo_dir/zshrc.oh-my-zsh" || fail "tmuxinator plugin should be removed"
+[[ ! -e "$repo_dir/vimrc.bundles" ]] || fail "vim-plug bundle file should be removed"
+[[ ! -e "$repo_dir/nvim.lsp" ]] || fail "obsolete vim-plug Neovim LSP config should be removed"
+! rg -q 'VIM_PLUG_(REV|SHA256)|install_vim_plug|run_vim_plugins' \
+  "$repo_dir/bin/dotfiles-bootstrap" "$repo_dir/bin/dotfiles-doctor" ||
+  fail "vim-plug provisioning should be removed"
 ! rg -q 'alias mux=' "$repo_dir/aliases" || fail "mux alias should be removed"
-pass "dead ag and tmuxinator entry points are gone"
+pass "retired ag and vim-plug entry points are gone"
+
+# Oh My Zsh owns compinit, the prompt, and `g`; duplicating any of them was a bug.
+[[ ! -d "$repo_dir/zsh" ]] ||
+  fail "zsh configuration is inlined in zshrc; the zsh directory should be gone"
+! rg -q '^\s*compinit|_load_settings' "$repo_dir/zshrc" ||
+  fail "compinit must run once, from Oh My Zsh"
+! rg -q '^\s*(z|mise|docker|docker-compose)$' "$repo_dir/zshrc.oh-my-zsh" ||
+  fail "plugins duplicated by mise activation, OrbStack, or zoxide should stay disabled"
+pass "Oh My Zsh integration has no duplicated compinit, prompt, or plugin"
+
+# PATH has to be built before anything resolved through it.
+rg -n '^(PATH=|command -v mise|fpath=|\[\[ -f ~/\.zshrc\.oh-my-zsh)' "$repo_dir/zshrc" |
+  cut -d: -f1 | sort -cn ||
+  fail "zshrc must order PATH, mise activation, fpath, then Oh My Zsh"
+pass "zshrc loads PATH, mise, completions, and Oh My Zsh in dependency order"
 
 echo "1..$tests"

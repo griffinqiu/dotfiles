@@ -19,9 +19,8 @@ description: 管理 dotfiles 中所有工具的配色方案。当用户需要切
 | Kitty | `config/kitty/colors.conf` | 单一颜色文件，切换时更新内容 |
 | Zellij | `config/zellij/themes/colors.kdl` | 单一颜色文件，切换时更新内容 |
 | Sidekick NES diff | `config/nvim/lua/plugins/colorscheme.lua` | 主题插件 `on_highlights` 回调，覆盖 `SidekickDiff*` highlight group |
-| interestingwords | `config/nvim/lua/plugins/misc.lua` 和 `vimrc.bundles` | 硬编码 hex，从当前主题 bright 色取最易辨认的亮色 |
+| interestingwords | `config/nvim/lua/plugins/misc.lua` | 硬编码 hex，从当前主题 bright 色取最易辨认的亮色 |
 | fzf | `zshrc` | 硬编码 hex，注释标注主题名 |
-| aider | `aider.conf.yml` | 硬编码 hex，注释标注主题名 |
 | lazygit | `config/lazygit/config.yml` | 硬编码 hex，注释标注主题名 |
 | Claude 状态栏 | `claude/statusline-command.sh` | 硬编码 hex，注释标注主题名 |
 
@@ -84,7 +83,7 @@ Sidekick 的 NES（Next Edit Suggestion）功能用自己独立的 diff 渲染�
 
 ### 硬编码 hex 的工具
 
-**fzf（zshrc）、aider（aider.conf.yml）、lazygit（config/lazygit/config.yml）、Claude 状态栏（claude/statusline-command.sh）** 直接写 hex 颜色值：
+**fzf（zshrc）、lazygit（config/lazygit/config.yml）、Claude 状态栏（claude/statusline-command.sh）** 直接写 hex 颜色值：
 
 - 颜色值上方必须有注释，注明当前使用的主题名及来源链接
 - 切换主题时，注释和所有颜色值一起更新
@@ -104,7 +103,7 @@ Sidekick 的 NES（Next Edit Suggestion）功能用自己独立的 diff 渲染�
 ~/.local/share/nvim/lazy/<theme-plugin>/extras/
 ```
 
-里面通常包含针对 fzf、ghostty、kitty、aider 等工具的完整配色文件，**优先从这里复制**，这是主题作者的官方适配。
+里面通常包含针对 fzf、ghostty、kitty 等工具的完整配色文件，**优先从这里复制**，这是主题作者的官方适配。
 
 ### 2. 主题插件的颜色定义源文件
 
@@ -141,8 +140,6 @@ Sidekick 的 NES（Next Edit Suggestion）功能用自己独立的 diff 渲染�
 
 6. `config/nvim/lua/plugins/colorscheme.lua` — 当前主题插件的 `on_highlights` 回调：覆盖 `SidekickDiffAdd`、`SidekickDiffDelete`、`SidekickDiffContext`，取主题调色板的 `bg_green`、`bg_red`、`bg2`
 7. `config/nvim/lua/plugins/misc.lua` — `colors` 数组：从当前主题调色板的 bright 色（color9–color15）中取 7 个最易辨认的亮色，替换数组内容
-   `vimrc.bundles` — `g:interestingWordsGUIColors` 数组：同上，保持与 misc.lua 一致（`g:interestingWordsTermColors` 使用终端颜色索引，无需修改）
 8. `zshrc` — fzf 配色块：更新注释主题名，替换全部颜色值（从 extras/fzf 复制）
-9. `aider.conf.yml` — 更新注释主题名，替换全部颜色值（从颜色定义源文件取语义变量）
-10. `config/lazygit/config.yml` — 更新注释主题名，替换 `gui.theme` 下全部颜色值（从 extras/lazygit 或颜色定义源文件取值）
-11. `claude/statusline-command.sh` — 更新注释主题名，替换顶部的 hex 颜色变量
+9. `config/lazygit/config.yml` — 更新注释主题名，替换 `gui.theme` 下全部颜色值（从 extras/lazygit 或颜色定义源文件取值）
+10. `claude/statusline-command.sh` — 更新注释主题名，替换顶部的 hex 颜色变量

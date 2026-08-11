@@ -1,17 +1,24 @@
 #!/bin/sh
 
-set -eu
+set -efu
 
-OH_MY_ZSH_REV=59a9740721b734835812121322d6fe4827b0853a
+OH_MY_ZSH_REV=97b27bb2ec0701330b18c2d3e340b22e742b3fa8
+ZSH_AUTOSUGGESTIONS_REV=85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5
+ZSH_SYNTAX_HIGHLIGHTING_REV=c4d95591843d49838b7ad30081e7aba3135a6703
 TPM_REV=99469c4a9b1ccf77fade25842dc7bafbc8ce9946
 
 usage() {
   cat <<'EOF'
-Usage: dotfiles-bootstrap [--check] [--upgrade] [--optional]
+Usage: dotfiles-bootstrap [--only COMPONENTS] [--upgrade] [--optional]
+       dotfiles-bootstrap --check [--optional]
 
-  --check     Run the read-only doctor without installing or linking anything.
-  --upgrade   Explicitly allow Homebrew Bundle to upgrade managed packages.
-  --optional  Include Brewfile.optional.
+  --only      Run only comma-separated components:
+              packages, links, runtimes, plugins.
+  --upgrade   Upgrade managed packages and unlocked plugin sets explicitly.
+  --optional  Include Brewfile.optional with the packages component.
+  --check     Compatibility alias for the read-only dotfiles-doctor command.
+
+With no --only option, all four installation components run in order.
 EOF
 }
 
@@ -31,9 +38,9 @@ symlink_points_to_path() {
     *) link_target=$(dirname -- "$link_path")/$link_target ;;
   esac
 
-  link_parent=$(CDPATH= cd -P -- "$(dirname -- "$link_target")" 2>/dev/null && pwd) || \
+  link_parent=$(CDPATH='' cd -P -- "$(dirname -- "$link_target")" 2>/dev/null && pwd) ||
     return 1
-  expected_parent=$(CDPATH= cd -P -- "$(dirname -- "$expected_path")" 2>/dev/null && pwd) || \
+  expected_parent=$(CDPATH='' cd -P -- "$(dirname -- "$expected_path")" 2>/dev/null && pwd) ||
     return 1
   [ "$link_parent/$(basename -- "$link_target")" = \
     "$expected_parent/$(basename -- "$expected_path")" ]
@@ -42,7 +49,7 @@ symlink_points_to_path() {
 symlink_resolves_to() {
   link_path=$1
   expected_path=$2
-  [ -L "$link_path" ] && [ -e "$link_path" ] && \
+  [ -L "$link_path" ] && [ -e "$link_path" ] &&
     [ -e "$expected_path" ] && [ "$link_path" -ef "$expected_path" ]
 }
 
@@ -66,7 +73,7 @@ remove_retired_link() {
   link_path=$2
   expected_path=$3
 
-  symlink_points_to_path "$link_path" "$expected_path" || \
+  symlink_points_to_path "$link_path" "$expected_path" ||
     die "$link_name changed after preflight: $link_path"
   rm -- "$link_path"
   printf 'Removed retired %s symlink: %s\n' "$link_name" "$link_path"
@@ -74,32 +81,45 @@ remove_retired_link() {
 
 resolve_repo_root() {
   if [ -n "${DOTFILES_ROOT:-}" ]; then
-    CDPATH= cd -P -- "$DOTFILES_ROOT" && pwd
+    CDPATH='' cd -P -- "$DOTFILES_ROOT" && pwd
     return
   fi
 
   script_path=$0
   while [ -L "$script_path" ]; do
-    script_dir=$(CDPATH= cd -P -- "$(dirname -- "$script_path")" && pwd)
+    script_dir=$(CDPATH='' cd -P -- "$(dirname -- "$script_path")" && pwd)
     script_path=$(readlink "$script_path")
     case "$script_path" in
       /*) ;;
       *) script_path=$script_dir/$script_path ;;
     esac
   done
-  CDPATH= cd -P -- "$(dirname -- "$script_path")/.." && pwd
+  CDPATH='' cd -P -- "$(dirname -- "$script_path")/.." && pwd
 }
 
 check_only=false
 upgrade=false
 optional=false
+selection_requested=false
+selected_components=
+run_packages=false
+run_links=false
+run_runtimes=false
+run_plugins=false
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --check) check_only=true ;;
     --upgrade) upgrade=true ;;
     --optional) optional=true ;;
-    -h|--help)
+    --only)
+      [ "$#" -ge 2 ] || die '--only requires a component list'
+      [ -n "$2" ] || die '--only requires a non-empty component list'
+      selection_requested=true
+      selected_components="${selected_components}${selected_components:+,}$2"
+      shift
+      ;;
+    -h | --help)
       usage
       exit 0
       ;;
@@ -109,93 +129,130 @@ while [ "$#" -gt 0 ]; do
 done
 
 $check_only && $upgrade && die '--check and --upgrade cannot be combined'
+$check_only && $selection_requested &&
+  die '--check and --only cannot be combined'
+
+if $selection_requested; then
+  case "$selected_components" in
+    ,* | *, | *,,*) die 'invalid empty component in --only' ;;
+  esac
+
+  old_ifs=$IFS
+  IFS=,
+  for selected_component in $selected_components; do
+    case "$selected_component" in
+      packages) run_packages=true ;;
+      links) run_links=true ;;
+      runtimes) run_runtimes=true ;;
+      plugins) run_plugins=true ;;
+      *) die "unknown --only component: $selected_component" ;;
+    esac
+  done
+  IFS=$old_ifs
+else
+  run_packages=true
+  run_links=true
+  run_runtimes=true
+  run_plugins=true
+fi
+
+if $optional && ! $check_only && ! $run_packages; then
+  die '--optional requires the packages component'
+fi
+if $upgrade && ! $run_packages && ! $run_plugins; then
+  die '--upgrade requires the packages or plugins component'
+fi
 
 repo_root=$(resolve_repo_root) || die 'cannot resolve repository root'
-[ -f "$repo_root/Brewfile" ] || die "missing $repo_root/Brewfile"
-[ -f "$repo_root/rcrc" ] || die "missing $repo_root/rcrc"
-
-doctor=${DOTFILES_DOCTOR_BIN:-$repo_root/bin/dotfiles-doctor}
-[ -x "$doctor" ] || die "doctor is not executable: $doctor"
-
-doctor_args=
-$optional && doctor_args=--optional
 
 if $check_only; then
+  doctor=${DOTFILES_DOCTOR_BIN:-$repo_root/bin/dotfiles-doctor}
+  [ -x "$doctor" ] || die "doctor is not executable: $doctor"
+  doctor_args=
+  $optional && doctor_args=--optional
   exec "$doctor" $doctor_args
+fi
+
+if $run_packages; then
+  [ -f "$repo_root/Brewfile" ] || die "missing $repo_root/Brewfile"
+  if $optional; then
+    [ -f "$repo_root/Brewfile.optional" ] ||
+      die "missing $repo_root/Brewfile.optional"
+  fi
+fi
+if $run_links; then
+  [ -f "$repo_root/rcrc" ] || die "missing $repo_root/rcrc"
 fi
 
 [ "$(uname -s)" = Darwin ] || die 'bootstrap currently supports macOS only'
 machine_arch=${DOTFILES_MACHINE_ARCH:-$(uname -m)}
-[ "$machine_arch" = arm64 ] || \
+[ "$machine_arch" = arm64 ] ||
   die 'bootstrap currently supports Apple-silicon macOS only (macos-arm64 lockfile)'
 
-codex_instructions=$HOME/.codex/AGENTS.md
-codex_instructions_backup=$codex_instructions.pre-dotfiles
-codex_instructions_expected=$repo_root/codex/AGENTS.md
-migrate_codex_instructions=false
-if [ -L "$codex_instructions" ]; then
-  symlink_resolves_to "$codex_instructions" "$codex_instructions_expected" || \
-    die "refusing foreign or dangling Codex instructions symlink: $codex_instructions"
-elif [ -e "$codex_instructions" ]; then
-  [ -f "$codex_instructions" ] && [ ! -s "$codex_instructions" ] || \
-    die "refusing conflicting Codex instructions path: $codex_instructions"
-  if [ -e "$codex_instructions_backup" ] || [ -L "$codex_instructions_backup" ]; then
-    die "cannot preserve empty Codex instructions; backup already exists: $codex_instructions_backup"
+if $run_links; then
+  codex_instructions=$HOME/.codex/AGENTS.md
+  codex_instructions_backup=$codex_instructions.pre-dotfiles
+  codex_instructions_expected=$repo_root/codex/AGENTS.md
+  migrate_codex_instructions=false
+  if [ -L "$codex_instructions" ]; then
+    symlink_resolves_to "$codex_instructions" "$codex_instructions_expected" ||
+      die "refusing foreign or dangling Codex instructions symlink: $codex_instructions"
+  elif [ -e "$codex_instructions" ]; then
+    [ -f "$codex_instructions" ] && [ ! -s "$codex_instructions" ] ||
+      die "refusing conflicting Codex instructions path: $codex_instructions"
+    if [ -e "$codex_instructions_backup" ] || [ -L "$codex_instructions_backup" ]; then
+      die "cannot preserve empty Codex instructions; backup already exists: $codex_instructions_backup"
+    fi
+    migrate_codex_instructions=true
   fi
-  migrate_codex_instructions=true
-fi
 
-mise_home_config=$HOME/.config/mise/config.toml
-mise_home_config_backup=$mise_home_config.pre-dotfiles
-mise_home_config_expected=$repo_root/config/mise/config.toml
-migrate_mise_config=false
-if [ -L "$mise_home_config" ]; then
-  symlink_resolves_to "$mise_home_config" "$mise_home_config_expected" || \
-    die "refusing foreign or dangling Mise config symlink: $mise_home_config"
-elif [ -e "$mise_home_config" ]; then
-  [ -f "$mise_home_config" ] || \
-    die "refusing conflicting Mise config path: $mise_home_config"
-  if [ -e "$mise_home_config_backup" ] || [ -L "$mise_home_config_backup" ]; then
-    die "cannot preserve Mise config; backup already exists: $mise_home_config_backup"
+  mise_home_config=$HOME/.config/mise/config.toml
+  mise_home_config_backup=$mise_home_config.pre-dotfiles
+  mise_home_config_expected=$repo_root/config/mise/config.toml
+  migrate_mise_config=false
+  if [ -L "$mise_home_config" ]; then
+    symlink_resolves_to "$mise_home_config" "$mise_home_config_expected" ||
+      die "refusing foreign or dangling Mise config symlink: $mise_home_config"
+  elif [ -e "$mise_home_config" ]; then
+    [ -f "$mise_home_config" ] ||
+      die "refusing conflicting Mise config path: $mise_home_config"
+    if [ -e "$mise_home_config_backup" ] || [ -L "$mise_home_config_backup" ]; then
+      die "cannot preserve Mise config; backup already exists: $mise_home_config_backup"
+    fi
+    migrate_mise_config=true
   fi
-  migrate_mise_config=true
-fi
 
-standalone_mise=$HOME/.local/bin/mise
-standalone_mise_backup=$standalone_mise.pre-dotfiles
-homebrew_mise=/opt/homebrew/bin/mise
-migrate_standalone_mise=false
-if [ -L "$standalone_mise" ]; then
-  symlink_points_to_path "$standalone_mise" "$homebrew_mise" || \
-    die "refusing foreign or dangling standalone Mise symlink: $standalone_mise"
-elif [ -e "$standalone_mise" ]; then
-  [ -f "$standalone_mise" ] || \
-    die "refusing conflicting standalone Mise path: $standalone_mise"
-  if [ -e "$standalone_mise_backup" ] || [ -L "$standalone_mise_backup" ]; then
-    die "cannot preserve standalone Mise; backup already exists: $standalone_mise_backup"
+  standalone_mise=$HOME/.local/bin/mise
+  standalone_mise_backup=$standalone_mise.pre-dotfiles
+  homebrew_mise=/opt/homebrew/bin/mise
+  migrate_standalone_mise=false
+  if [ -L "$standalone_mise" ]; then
+    symlink_points_to_path "$standalone_mise" "$homebrew_mise" ||
+      die "refusing foreign or dangling standalone Mise symlink: $standalone_mise"
+  elif [ -e "$standalone_mise" ]; then
+    [ -f "$standalone_mise" ] ||
+      die "refusing conflicting standalone Mise path: $standalone_mise"
+    if [ -e "$standalone_mise_backup" ] || [ -L "$standalone_mise_backup" ]; then
+      die "cannot preserve standalone Mise; backup already exists: $standalone_mise_backup"
+    fi
+    migrate_standalone_mise=true
   fi
-  migrate_standalone_mise=true
-fi
 
-cleanup_root_claude=false
-cleanup_root_agents=false
-cleanup_agrc=false
-cleanup_ag_completion=false
-if retired_link_is_owned 'root Claude instructions' \
-  "$HOME/.CLAUDE.md" "$repo_root/CLAUDE.md" true; then
-  cleanup_root_claude=true
-fi
-if retired_link_is_owned 'root Codex instructions' \
-  "$HOME/.AGENTS.md" "$repo_root/AGENTS.md" true; then
-  cleanup_root_agents=true
-fi
-if retired_link_is_owned 'ag configuration' \
-  "$HOME/.agrc" "$repo_root/agrc" false; then
-  cleanup_agrc=true
-fi
-if retired_link_is_owned 'ag completion' \
-  "$HOME/.zsh/completion/_ag" "$repo_root/zsh/completion/_ag" false; then
-  cleanup_ag_completion=true
+  cleanup_root_claude=false
+  cleanup_root_agents=false
+  cleanup_agrc=false
+  if retired_link_is_owned 'root Claude instructions' \
+    "$HOME/.CLAUDE.md" "$repo_root/CLAUDE.md" true; then
+    cleanup_root_claude=true
+  fi
+  if retired_link_is_owned 'root Codex instructions' \
+    "$HOME/.AGENTS.md" "$repo_root/AGENTS.md" true; then
+    cleanup_root_agents=true
+  fi
+  if retired_link_is_owned 'ag configuration' \
+    "$HOME/.agrc" "$repo_root/agrc" false; then
+    cleanup_agrc=true
+  fi
 fi
 
 if [ -n "${DOTFILES_BREW_BIN:-}" ]; then
@@ -203,47 +260,60 @@ if [ -n "${DOTFILES_BREW_BIN:-}" ]; then
 else
   brew_bin=$(command -v brew || true)
 fi
-[ -n "$brew_bin" ] && [ -x "$brew_bin" ] || {
-  printf '%s\n' 'Homebrew is required. Install it from https://brew.sh/ and rerun.' >&2
-  exit 1
-}
+if $run_packages; then
+  [ -n "$brew_bin" ] && [ -x "$brew_bin" ] || {
+    printf '%s\n' 'Homebrew is required. Install it from https://brew.sh/ and rerun.' >&2
+    exit 1
+  }
 
-bundle_mode=--no-upgrade
-$upgrade && bundle_mode=--upgrade
+  bundle_mode=--no-upgrade
+  $upgrade && bundle_mode=--upgrade
 
-printf 'Installing core Homebrew dependencies (%s) ...\n' "$bundle_mode"
-"$brew_bin" bundle install "$bundle_mode" --file "$repo_root/Brewfile"
+  printf 'Installing core Homebrew dependencies (%s) ...\n' "$bundle_mode"
+  "$brew_bin" bundle install "$bundle_mode" --file "$repo_root/Brewfile"
 
-if $optional; then
-  printf 'Installing optional Homebrew dependencies (%s) ...\n' "$bundle_mode"
-  "$brew_bin" bundle install "$bundle_mode" --file "$repo_root/Brewfile.optional"
-fi
-
-if [ -n "${DOTFILES_RCUP_BIN:-}" ]; then
-  rcup_bin=$DOTFILES_RCUP_BIN
-else
-  # rcm may have been installed by the Brewfile immediately above.
-  rcup_bin=$(command -v rcup || true)
-fi
-
-[ -n "$rcup_bin" ] && [ -x "$rcup_bin" ] || {
-  printf '%s\n' 'rcup is still unavailable after Brewfile installation.' >&2
-  exit 1
-}
-
-if [ -n "${DOTFILES_MISE_BIN:-}" ]; then
-  mise_bin=$DOTFILES_MISE_BIN
-else
-  mise_prefix=$("$brew_bin" --prefix mise 2>/dev/null || true)
-  mise_bin=$mise_prefix/bin/mise
-  if [ ! -x "$mise_bin" ]; then
-    mise_bin=$(command -v mise || true)
+  if $optional; then
+    printf 'Installing optional Homebrew dependencies (%s) ...\n' "$bundle_mode"
+    "$brew_bin" bundle install "$bundle_mode" --file "$repo_root/Brewfile.optional"
   fi
 fi
-[ -n "$mise_bin" ] && [ -x "$mise_bin" ] || {
-  printf '%s\n' 'mise is still unavailable after Brewfile installation.' >&2
-  exit 1
-}
+
+if $run_links; then
+  if [ -n "${DOTFILES_RCUP_BIN:-}" ]; then
+    rcup_bin=$DOTFILES_RCUP_BIN
+  else
+    # rcm may have been installed by the packages component immediately above.
+    rcup_bin=$(command -v rcup || true)
+    if [ ! -x "$rcup_bin" ] && [ -n "$brew_bin" ] && [ -x "$brew_bin" ]; then
+      rcm_prefix=$("$brew_bin" --prefix rcm 2>/dev/null || true)
+      [ -z "$rcm_prefix" ] || rcup_bin=$rcm_prefix/bin/rcup
+    fi
+  fi
+
+  [ -n "$rcup_bin" ] && [ -x "$rcup_bin" ] || {
+    printf '%s\n' 'rcup is unavailable; run the packages component first.' >&2
+    exit 1
+  }
+fi
+
+if $run_runtimes; then
+  if [ -n "${DOTFILES_MISE_BIN:-}" ]; then
+    mise_bin=$DOTFILES_MISE_BIN
+  else
+    mise_bin=
+    if [ -n "$brew_bin" ] && [ -x "$brew_bin" ]; then
+      mise_prefix=$("$brew_bin" --prefix mise 2>/dev/null || true)
+      [ -z "$mise_prefix" ] || mise_bin=$mise_prefix/bin/mise
+    fi
+    if [ ! -x "$mise_bin" ]; then
+      mise_bin=$(command -v mise || true)
+    fi
+  fi
+  [ -n "$mise_bin" ] && [ -x "$mise_bin" ] || {
+    printf '%s\n' 'mise is unavailable; run the packages component first.' >&2
+    exit 1
+  }
+fi
 
 bootstrap_tmp=
 cleanup() {
@@ -305,14 +375,106 @@ install_pinned_checkout() {
   printf 'Installed %s at %s\n' "$checkout_name" "$checkout_revision"
 }
 
-if [ "${DOTFILES_BOOTSTRAP_SKIP_GIT_DEPS:-0}" != 1 ]; then
+preflight_plugins() {
+  plugin_mode=$1
+
+  nvim_plugin_runner=${DOTFILES_NVIM_PLUGIN_RUNNER:-}
+  if [ -n "$nvim_plugin_runner" ]; then
+    [ -x "$nvim_plugin_runner" ] ||
+      die "Neovim plugin runner is not executable: $nvim_plugin_runner"
+  else
+    nvim_config_dir=${XDG_CONFIG_HOME:-$HOME/.config}/nvim
+    [ -f "$nvim_config_dir/init.lua" ] ||
+      die 'Neovim configuration is not linked; run the links component first'
+    if [ -n "${DOTFILES_NVIM_BIN:-}" ]; then
+      nvim_bin=$DOTFILES_NVIM_BIN
+    else
+      nvim_bin=$(command -v nvim || true)
+    fi
+    [ -n "$nvim_bin" ] && [ -x "$nvim_bin" ] ||
+      die 'Neovim is unavailable; run the packages component first'
+    command -v git >/dev/null 2>&1 ||
+      die 'git is required to install or update Neovim plugins'
+    nvim_plugin_script=$repo_root/config/nvim/lua/config/plugin-sync.lua
+    [ -f "$nvim_plugin_script" ] ||
+      die "missing Neovim plugin runner: $nvim_plugin_script"
+  fi
+
+  tpm_plugin_runner=${DOTFILES_TPM_PLUGIN_RUNNER:-}
+  if [ -n "$tpm_plugin_runner" ]; then
+    [ -x "$tpm_plugin_runner" ] ||
+      die "TPM plugin runner is not executable: $tpm_plugin_runner"
+  else
+    tpm_install=$HOME/.tmux/plugins/tpm/bin/install_plugins
+    tpm_update=$HOME/.tmux/plugins/tpm/bin/update_plugins
+    [ -x "$tpm_install" ] ||
+      die 'TPM is unavailable; run the packages component first'
+    if [ "$plugin_mode" = update ]; then
+      [ -x "$tpm_update" ] || die "missing TPM updater: $tpm_update"
+    fi
+    tmux_config=${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf
+    [ -f "$tmux_config" ] || tmux_config=$HOME/.tmux.conf
+    [ -f "$tmux_config" ] ||
+      die 'tmux configuration is not linked; run the links component first'
+    if [ -n "${DOTFILES_TMUX_BIN:-}" ]; then
+      tmux_bin=$DOTFILES_TMUX_BIN
+    else
+      tmux_bin=$(command -v tmux || true)
+    fi
+    [ -n "$tmux_bin" ] && [ -x "$tmux_bin" ] ||
+      die 'tmux is unavailable; run the packages component first'
+  fi
+}
+
+run_nvim_plugins() {
+  plugin_mode=$1
+  if [ -n "$nvim_plugin_runner" ]; then
+    "$nvim_plugin_runner" "$plugin_mode"
+    return
+  fi
+
+  "$nvim_bin" --headless -n -u "$nvim_config_dir/init.lua" \
+    -l "$nvim_plugin_script" "$plugin_mode"
+}
+
+run_tpm_plugins() {
+  plugin_mode=$1
+  if [ -n "$tpm_plugin_runner" ]; then
+    "$tpm_plugin_runner" "$plugin_mode"
+    return
+  fi
+
+  "$tpm_install"
+  if [ "$plugin_mode" = update ]; then
+    if ! tpm_update_output=$("$tpm_update" all 2>&1); then
+      printf '%s\n' "$tpm_update_output" >&2
+      die 'TPM plugin update command failed'
+    fi
+    [ -z "$tpm_update_output" ] || printf '%s\n' "$tpm_update_output"
+    if printf '%s\n' "$tpm_update_output" |
+      grep -Eq 'update fail|not installed!'; then
+      die 'one or more TPM plugin updates failed'
+    fi
+  fi
+}
+
+install_plugins() {
+  plugin_mode=install
+  $upgrade && plugin_mode=update
+  preflight_plugins "$plugin_mode"
+  printf 'Installing Neovim and tmux plugins (%s) ...\n' "$plugin_mode"
+  run_nvim_plugins "$plugin_mode"
+  run_tpm_plugins "$plugin_mode"
+}
+
+if $run_packages && [ "${DOTFILES_BOOTSTRAP_SKIP_GIT_DEPS:-0}" != 1 ]; then
   if [ -n "${DOTFILES_GIT_BIN:-}" ]; then
     git_bin=$DOTFILES_GIT_BIN
   else
     git_bin=$(command -v git || true)
   fi
   [ -n "$git_bin" ] && [ -x "$git_bin" ] || {
-    printf '%s\n' 'git is still unavailable after Brewfile installation.' >&2
+    printf '%s\n' 'git is unavailable after the packages component.' >&2
     exit 1
   }
 
@@ -322,45 +484,63 @@ if [ "${DOTFILES_BOOTSTRAP_SKIP_GIT_DEPS:-0}" != 1 ]; then
     "$OH_MY_ZSH_REV" \
     "$HOME/.oh-my-zsh"
   install_pinned_checkout \
+    'zsh-autosuggestions' \
+    'https://github.com/zsh-users/zsh-autosuggestions.git' \
+    "$ZSH_AUTOSUGGESTIONS_REV" \
+    "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+  install_pinned_checkout \
+    'zsh-syntax-highlighting' \
+    'https://github.com/zsh-users/zsh-syntax-highlighting.git' \
+    "$ZSH_SYNTAX_HIGHLIGHTING_REV" \
+    "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+  install_pinned_checkout \
     'tmux plugin manager' \
     'https://github.com/tmux-plugins/tpm.git' \
     "$TPM_REV" \
     "$HOME/.tmux/plugins/tpm"
 fi
 
-if $migrate_codex_instructions; then
-  mv "$codex_instructions" "$codex_instructions_backup"
-  printf 'Preserved empty Codex instructions at %s\n' \
-    "$codex_instructions_backup"
+if $run_links; then
+  if $migrate_codex_instructions; then
+    mv "$codex_instructions" "$codex_instructions_backup"
+    printf 'Preserved empty Codex instructions at %s\n' \
+      "$codex_instructions_backup"
+  fi
+  if $migrate_mise_config; then
+    mv "$mise_home_config" "$mise_home_config_backup"
+    printf 'Preserved previous Mise config at %s\n' "$mise_home_config_backup"
+  fi
+  if $migrate_standalone_mise; then
+    mv "$standalone_mise" "$standalone_mise_backup"
+    printf 'Preserved previous standalone Mise at %s\n' \
+      "$standalone_mise_backup"
+  fi
+
+  $cleanup_root_claude && remove_retired_link \
+    'root Claude instructions' "$HOME/.CLAUDE.md" "$repo_root/CLAUDE.md"
+  $cleanup_root_agents && remove_retired_link \
+    'root Codex instructions' "$HOME/.AGENTS.md" "$repo_root/AGENTS.md"
+  $cleanup_agrc && remove_retired_link \
+    'ag configuration' "$HOME/.agrc" "$repo_root/agrc"
+
+  printf 'Linking dotfiles with rcm ...\n'
+  if [ -d "$HOME/dotfiles-local" ]; then
+    RCRC="$repo_root/rcrc" "$rcup_bin" \
+      -d "$HOME/dotfiles-local" -d "$repo_root"
+  else
+    RCRC="$repo_root/rcrc" "$rcup_bin" -d "$repo_root"
+  fi
 fi
-if $migrate_mise_config; then
-  mv "$mise_home_config" "$mise_home_config_backup"
-  printf 'Preserved previous Mise config at %s\n' "$mise_home_config_backup"
+
+if $run_runtimes; then
+  printf 'Installing locked mise runtimes ...\n'
+  mise_home_config=${XDG_CONFIG_HOME:-$HOME/.config}/mise/config.toml
+  MISE_GLOBAL_CONFIG_FILE="$repo_root/config/mise/config.toml" \
+    MISE_GLOBAL_CONFIG_ROOT="$repo_root/config/mise" \
+    MISE_IGNORED_CONFIG_PATHS="$mise_home_config" \
+    "$mise_bin" install --locked -y
 fi
-if $migrate_standalone_mise; then
-  mv "$standalone_mise" "$standalone_mise_backup"
-  printf 'Preserved previous standalone Mise at %s\n' \
-    "$standalone_mise_backup"
-fi
 
-$cleanup_root_claude && remove_retired_link \
-  'root Claude instructions' "$HOME/.CLAUDE.md" "$repo_root/CLAUDE.md"
-$cleanup_root_agents && remove_retired_link \
-  'root Codex instructions' "$HOME/.AGENTS.md" "$repo_root/AGENTS.md"
-$cleanup_agrc && remove_retired_link \
-  'ag configuration' "$HOME/.agrc" "$repo_root/agrc"
-$cleanup_ag_completion && remove_retired_link \
-  'ag completion' "$HOME/.zsh/completion/_ag" "$repo_root/zsh/completion/_ag"
+$run_plugins && install_plugins
 
-printf 'Linking dotfiles with rcm ...\n'
-RCRC="$repo_root/rcrc" "$rcup_bin" -d "$repo_root"
-
-printf 'Installing locked mise runtimes ...\n'
-mise_home_config=${XDG_CONFIG_HOME:-$HOME/.config}/mise/config.toml
-MISE_GLOBAL_CONFIG_FILE="$repo_root/config/mise/config.toml" \
-MISE_GLOBAL_CONFIG_ROOT="$repo_root/config/mise" \
-MISE_IGNORED_CONFIG_PATHS="$mise_home_config" \
-  "$mise_bin" install --locked -y
-
-printf 'Running post-bootstrap checks ...\n'
-"$doctor" $doctor_args
+printf '%s\n' 'Bootstrap components completed. Run dotfiles-doctor for health checks.'

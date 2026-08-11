@@ -1,41 +1,47 @@
-# load custom executable functions
-for function in ~/.zsh/functions/*; do
-  source $function
-done
+# Load order matters and is explicit here: PATH first, then anything resolved
+# through it, then Oh My Zsh, then what has to override Oh My Zsh.
 
-# extra files in ~/.zsh/configs/pre , ~/.zsh/configs , and ~/.zsh/configs/post
-# these are loaded first, second, and third, respectively.
-_load_settings() {
-  _dir="$1"
-  if [ -d "$_dir" ]; then
-    if [ -d "$_dir/pre" ]; then
-      for config in "$_dir"/pre/**/*~*.zwc(N-.); do
-        . $config
-      done
-    fi
+PATH="/usr/local/sbin:$PATH"
+PATH="$HOME/.bun/bin:$PATH"
+PATH="$HOME/.local/bin:$PATH"
+PATH="/opt/homebrew/bin:$PATH"
+PATH="$HOME/.bin:$PATH"
+PATH=".git/safe/../../bin:$PATH"
+export -U PATH
 
-    for config in "$_dir"/**/*(N-.); do
-      case "$config" in
-        "$_dir"/(pre|post)/*|*.zwc)
-          :
-          ;;
-        *)
-          . $config
-          ;;
-      esac
-    done
+# Runs after PATH so Homebrew's mise wins without hardcoding its location.
+# Exact versions and resolved assets live in ~/.config/mise/config.toml.
+export MISE_RUBY_COMPILE=false
+export MISE_PYTHON_GITHUB_ATTESTATIONS=false
+command -v mise >/dev/null && eval "$(mise activate zsh)"
 
-    if [ -d "$_dir/post" ]; then
-      for config in "$_dir"/post/**/*~*.zwc(N-.); do
-        . $config
-      done
-    fi
-  fi
-}
-_load_settings "$HOME/.zsh/configs"
+# Must precede Oh My Zsh, which is what actually runs compinit. The Homebrew
+# prefix differs between Apple silicon and Intel.
+brew_site_functions=/opt/homebrew/share/zsh/site-functions
+[[ -d $brew_site_functions ]] || brew_site_functions=/usr/local/share/zsh/site-functions
+fpath=($brew_site_functions $fpath)
+unset brew_site_functions
 
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
+export XDG_CONFIG_HOME="$HOME/.config"
+export CLICOLOR=1
+export VISUAL=nvim
+export EDITOR=$VISUAL
+export ERL_AFLAGS="-kernel shell_history enabled"
+
+# Stays on this machine: shell history routinely captures tokens and paths that
+# should not reach a synced folder. Oh My Zsh only fills HISTFILE when unset,
+# and raises HISTSIZE to its own floor of 50000.
+setopt hist_ignore_all_dups inc_append_history
+HISTFILE=$HOME/.zsh_history
+SAVEHIST=40960
+
+# Oh My Zsh already sets auto_cd, auto_pushd, and pushdminus.
+setopt pushdsilent pushdtohome cdablevars
+setopt extendedglob
+unsetopt nomatch
+DIRSTACKSIZE=5
 
 # fzf colors: everforest dark medium (https://github.com/neanias/everforest-nvim)
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
@@ -63,21 +69,20 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
 "
 
 [[ -f ~/.zshrc.oh-my-zsh ]] && source ~/.zshrc.oh-my-zsh
+
+# After Oh My Zsh, which selects the emacs keymap with its own `bindkey -e`.
+# `stty -ixon` frees ^Q at the terminal layer, which zsh options cannot do.
+stty -ixon
+bindkey "^V" vi-cmd-mode
+
 [[ -f ~/.aliases ]] && source ~/.aliases
 [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
-[[ -f ~/Documents/Sync/zshrc.sync ]] && source ~/Documents/Sync/zshrc.sync
-[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
-
 [[ -f ~/.local/bin/env ]] && source ~/.local/bin/env
-export XDG_CONFIG_HOME="$HOME/.config"
-
-# OpenClaw Completion
-source "/Users/griffin/.openclaw/completions/openclaw.zsh"
+[[ -f ~/.openclaw/completions/openclaw.zsh ]] && source ~/.openclaw/completions/openclaw.zsh
 
 ocagent() {
   openclaw tui --session "agent:$1:main"
 }
 
-
-# Added by Antigravity CLI installer
-export PATH="/Users/griffin/.local/bin:$PATH"
+[[ -f ~/Documents/Sync/zshrc.sync ]] && source ~/Documents/Sync/zshrc.sync
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

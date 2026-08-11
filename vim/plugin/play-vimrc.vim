@@ -27,4 +27,3 @@ function! SwitchToBuf(filename)
   endif
 endfunction
 map <silent> <leader><leader>e :call SwitchToBuf("~/.vimrc")<cr>
-map <silent> <leader><leader>b :call SwitchToBuf("~/.vimrc.bundles")<cr>

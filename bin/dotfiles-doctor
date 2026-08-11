@@ -2,7 +2,9 @@
 
 set -u
 
-OH_MY_ZSH_REV=59a9740721b734835812121322d6fe4827b0853a
+OH_MY_ZSH_REV=97b27bb2ec0701330b18c2d3e340b22e742b3fa8
+ZSH_AUTOSUGGESTIONS_REV=85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5
+ZSH_SYNTAX_HIGHLIGHTING_REV=c4d95591843d49838b7ad30081e7aba3135a6703
 TPM_REV=99469c4a9b1ccf77fade25842dc7bafbc8ce9946
 
 usage() {
@@ -171,9 +173,6 @@ check_retired_path \
   'root Codex instructions' "$HOME/.AGENTS.md" "$repo_root/AGENTS.md" true
 check_retired_path \
   'ag configuration' "$HOME/.agrc" "$repo_root/agrc" false
-check_retired_path \
-  'ag completion' "$HOME/.zsh/completion/_ag" \
-  "$repo_root/zsh/completion/_ag" false
 
 for required_command in \
   brew git git-lfs rcup lsrc bash bun diff-so-fancy fd fzf gawk gh glab \
@@ -363,6 +362,12 @@ fi
 
 if command -v git >/dev/null 2>&1; then
   check_pinned_checkout 'Oh My Zsh' "$HOME/.oh-my-zsh" "$OH_MY_ZSH_REV"
+  check_pinned_checkout 'zsh-autosuggestions' \
+    "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" \
+    "$ZSH_AUTOSUGGESTIONS_REV"
+  check_pinned_checkout 'zsh-syntax-highlighting' \
+    "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" \
+    "$ZSH_SYNTAX_HIGHLIGHTING_REV"
   check_pinned_checkout 'tmux plugin manager' "$HOME/.tmux/plugins/tpm" "$TPM_REV"
 fi
 

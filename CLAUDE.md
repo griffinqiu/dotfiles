@@ -16,8 +16,13 @@ configuration into this repository without an explicit request.
   copied file.
 - Keep global personal instructions in `claude/CLAUDE.md`; expose them through
   `codex/AGENTS.md -> ../claude/CLAUDE.md`.
-- Keep portable skill bodies in Claude discovery paths. Codex entries under
-  `agents/skills/` or a project's `.agents/skills/` are relative symlinks.
+- Keep skill bodies in Claude discovery paths; every Codex entry is a relative
+  symlink to one. Which Claude path decides the scope:
+  - `claude/skills/` with an `agents/skills/` alias is published by RCM into
+    `$HOME`, so every project sees it.
+  - `.claude/skills/` with an `.agents/skills/` alias stays in this repository.
+    A skill that only acts on this repository, such as `dotfiles-theme`,
+    belongs here and must not be given an `agents/skills/` alias.
 - Keep `claude/skills/gitlab-mr*` Claude-only.
 - Use `bin/agent-config init|sync|check [--project DIR]` for the same topology in
   other projects. Run `test/agent-config.sh` after changing this workflow.
