@@ -50,7 +50,7 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --ansi \
   --layout=reverse \
   --border=none \
-  --color=bg+:#543a48 \
+  --color=bg+:#686e72 \
   --color=bg:#2d353b \
   --color=border:#3d484d \
   --color=fg:#d3c6aa \

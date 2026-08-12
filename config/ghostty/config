@@ -9,6 +9,10 @@ font-size = 18
 # Theme
 theme = /Users/griffin/.config/ghostty/colors
 
+# Selection
+copy-on-select = clipboard
+mouse-shift-capture = never
+
 # macOS
 macos-option-as-alt = true
 keybind = shift+enter=text:\x1b\r

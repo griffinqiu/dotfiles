@@ -22,12 +22,16 @@ return {
   { "ellisonleao/gruvbox.nvim", opts = { contrast = "soft" } },
   { "maxmx03/solarized.nvim" },
   { "rebelot/kanagawa.nvim" },
-  { "neanias/everforest-nvim",
+  {
+    "neanias/everforest-nvim",
     config = function()
+      local herdr_selection_background = "#686e72"
+
       require("everforest").setup({
         on_highlights = function(hl, palette)
-          hl.SidekickDiffAdd     = { bg = palette.bg_green }
-          hl.SidekickDiffDelete  = { bg = palette.bg_red }
+          hl.Visual = { bg = herdr_selection_background }
+          hl.SidekickDiffAdd = { bg = palette.bg_green }
+          hl.SidekickDiffDelete = { bg = palette.bg_red }
           hl.SidekickDiffContext = { bg = palette.bg2 }
         end,
       })
