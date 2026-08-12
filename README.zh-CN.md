@@ -94,9 +94,7 @@ RCM把全局层发布到`~/.claude`、`~/.codex`和`~/.agents`；点号目录层
 当前仓库。`dotfiles-theme`属于仓库本地skill，`claude/skills/gitlab-mr*`则
 刻意保持Claude-only。
 
-在其他项目中先运行`bin/agent-config init`，再运行`bin/agent-config sync`；使用
-`bin/agent-config check`验证最终拓扑。每个命令也接受`--project DIR`。
-遇到冲突路径时会拒绝操作。
+`bin/agentsync [--project DIR]`在其他项目中重建同样的拓扑，遇到冲突路径时拒绝操作。
 
 ## 安全与验证
 

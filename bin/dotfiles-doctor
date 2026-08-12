@@ -208,7 +208,7 @@ else
 fi
 
 for helper in \
-  agent-config bundler-search dotfiles-prune-links git-default-branch mux \
+  agentsync bundler-search dotfiles-prune-links git-default-branch mux \
   replace; do
   if [ -x "$repo_root/bin/$helper" ]; then
     ok "helper executable: bin/$helper"
@@ -347,7 +347,7 @@ check_symlink Claude-global "$HOME/.claude/CLAUDE.md" "$repo_root/claude/CLAUDE.
 check_symlink Codex-global "$HOME/.codex/AGENTS.md" "$repo_root/codex/AGENTS.md"
 check_symlink Claude-Nvim "$HOME/.config/nvim/CLAUDE.md" "$repo_root/config/nvim/CLAUDE.md"
 check_symlink Codex-Nvim "$HOME/.config/nvim/AGENTS.md" "$repo_root/config/nvim/AGENTS.md"
-check_symlink agent-config "$HOME/.bin/agent-config" "$repo_root/bin/agent-config"
+check_symlink agentsync "$HOME/.bin/agentsync" "$repo_root/bin/agentsync"
 check_symlink git-default-branch "$HOME/.bin/git-default-branch" "$repo_root/bin/git-default-branch"
 check_symlink mux "$HOME/.bin/mux" "$repo_root/bin/mux"
 
@@ -423,7 +423,7 @@ for shell_file in \
 done
 
 for bash_file in \
-  "$repo_root/bin/agent-config" \
+  "$repo_root/bin/agentsync" \
   "$repo_root/bin/bundler-search" \
   "$repo_root/bin/git-ctags" \
   "$repo_root/bin/replace"; do

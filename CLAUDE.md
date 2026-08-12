@@ -24,8 +24,8 @@ configuration into this repository without an explicit request.
     A skill that only acts on this repository, such as `dotfiles-theme`,
     belongs here and must not be given an `agents/skills/` alias.
 - Keep `claude/skills/gitlab-mr*` Claude-only.
-- Use `bin/agent-config init|sync|check [--project DIR]` for the same topology in
-  other projects. Run `test/agent-config.sh` after changing this workflow.
+- Use `bin/agentsync [--project DIR]` for the same topology in other projects.
+  Run `test/agentsync.sh` after changing this workflow.
 
 ## Setup and Validation
 
@@ -35,7 +35,7 @@ configuration into this repository without an explicit request.
 - `./bin/dotfiles-bootstrap --check` and `./bin/dotfiles-doctor` are read-only
   environment checks; add `--optional` to include optional dependencies.
 - `./test/run` runs the repository shell test suite.
-- Run a focused test file, such as `./test/agent-config.sh`, while iterating.
+- Run a focused test file, such as `./test/agentsync.sh`, while iterating.
 
 The `hooks/post-up` hook must remain fast, local, idempotent, and network-free.
 Package installation, downloads, and upgrades belong in

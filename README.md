@@ -101,9 +101,8 @@ the dotted layer remains repository-local. `dotfiles-theme` is
 repository-local, while `claude/skills/gitlab-mr*` intentionally remains
 Claude-only.
 
-In another project, run `bin/agent-config init`, then `bin/agent-config sync`;
-use `bin/agent-config check` to validate the resulting topology. Each command
-also accepts `--project DIR` and refuses conflicting paths.
+`bin/agentsync [--project DIR]` reproduces this topology in another project and
+refuses conflicting paths.
 
 ## Safety and verification
 

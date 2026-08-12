@@ -4,14 +4,17 @@ set -euo pipefail
 
 usage() {
   cat >&2 <<'EOF'
-usage: agent-config <init|sync|check> [--project DIR]
+usage: agentsync [--project DIR]
 
-  init   create CLAUDE.md and the AGENTS.md -> CLAUDE.md alias safely
-  sync   link project .claude/skills entries into .agents/skills
-  check  verify instructions and skill aliases in both directions
+Synchronize the Claude-canonical sources with their Codex symlink aliases:
+
+  CLAUDE.md               canonical instructions, created when absent
+  AGENTS.md               -> CLAUDE.md
+  .agents/skills/<name>   -> ../../.claude/skills/<name>
 
 The current Git repository is used by default. Pass --project to operate on an
 explicit directory, including a directory that is not a Git repository yet.
+Conflicting paths are reported and nothing is written.
 EOF
 }
 
@@ -20,7 +23,7 @@ resolve_project_root() {
 
   if [ -n "$project_option" ]; then
     if [ ! -d "$project_option" ]; then
-      printf 'agent-config: project directory does not exist: %s\n' \
+      printf 'agentsync: project directory does not exist: %s\n' \
         "$project_option" >&2
       return 2
     fi
@@ -29,15 +32,11 @@ resolve_project_root() {
     cd -P "$git_root" && pwd
   else
     printf '%s\n' \
-      'agent-config: not inside a Git repository; pass --project DIR explicitly.' \
+      'agentsync: not inside a Git repository; pass --project DIR explicitly.' \
       >&2
     return 2
   fi
 }
-
-command_name="${1:-}"
-[ -n "$command_name" ] || { usage; exit 2; }
-shift
 
 project_option=''
 while [ "$#" -gt 0 ]; do
@@ -45,11 +44,15 @@ while [ "$#" -gt 0 ]; do
     --project)
       [ "$#" -ge 2 ] || { usage; exit 2; }
       [ -z "$project_option" ] || {
-        printf 'agent-config: --project may be specified only once\n' >&2
+        printf 'agentsync: --project may be specified only once\n' >&2
         exit 2
       }
       project_option="$2"
       shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
       ;;
     *)
       usage
@@ -64,6 +67,8 @@ codex_instructions="$project_root/AGENTS.md"
 claude_skills="$project_root/.claude/skills"
 codex_skills="$project_root/.agents/skills"
 failures=0
+changes=0
+instructions_action='none'
 skill_sources=()
 skill_targets=()
 skill_link_values=()
@@ -74,7 +79,7 @@ path_exists() {
 }
 
 record_failure() {
-  printf 'agent-config: %s\n' "$*" >&2
+  printf 'agentsync: %s\n' "$*" >&2
   failures=$((failures + 1))
 }
 
@@ -166,7 +171,7 @@ check_reverse_skill_links() {
   done
 }
 
-check_all() {
+verify_result() {
   failures=0
   check_instructions
   build_skill_manifest
@@ -175,100 +180,88 @@ check_all() {
   [ "$failures" -eq 0 ]
 }
 
-init_project() {
+plan_instructions() {
   local has_claude=false has_codex=false
 
   path_exists "$claude_instructions" && has_claude=true
   path_exists "$codex_instructions" && has_codex=true
 
   if ! $has_claude && ! $has_codex; then
-    if ! printf '%s\n' \
-      '# CLAUDE.md' \
-      '' \
-      'This file is the canonical project guidance for Claude Code and Codex.' \
-      '' \
-      '## Project Commands' \
-      '' \
-      '- TODO: document build, test, lint, and format commands.' \
-      '' \
-      '## Project Conventions' \
-      '' \
-      '- TODO: document architecture and repository-specific constraints.' \
-      > "$claude_instructions"; then
-      rm -f "$claude_instructions"
-      return 1
-    fi
-
-    if ! ln -s CLAUDE.md "$codex_instructions"; then
-      rm -f "$claude_instructions"
-      return 1
-    fi
-
-    printf 'created %s\n' "$claude_instructions"
-    printf 'linked %s -> CLAUDE.md\n' "$codex_instructions"
-    return 0
-  fi
-
-  if $has_claude && ! $has_codex; then
+    instructions_action=create
+  elif $has_claude && ! $has_codex; then
     if [ ! -f "$claude_instructions" ]; then
-      printf 'agent-config: refusing non-file Claude canonical path: %s\n' \
-        "$claude_instructions" >&2
-      return 1
+      record_failure "refusing non-file Claude canonical path: $claude_instructions"
+      return 0
     fi
-    ln -s CLAUDE.md "$codex_instructions"
-    printf 'linked %s -> CLAUDE.md\n' "$codex_instructions"
-    return 0
-  fi
-
-  if ! $has_claude && $has_codex; then
+    instructions_action=link
+  elif ! $has_claude && $has_codex; then
+    record_failure "AGENTS.md exists without CLAUDE.md: $codex_instructions"
     cat >&2 <<EOF
-agent-config: AGENTS.md exists but CLAUDE.md does not; no files changed.
 Move the AGENTS.md content to CLAUDE.md, then replace AGENTS.md with:
   ln -s CLAUDE.md "$codex_instructions"
 EOF
-    return 1
+  else
+    check_instructions
   fi
-
-  failures=0
-  check_instructions
-  if [ "$failures" -ne 0 ]; then
-    printf 'agent-config: existing instruction paths conflict; no files changed.\n' >&2
-    return 1
-  fi
-
-  printf 'agent-config: instruction topology already initialized\n'
 }
 
-preflight_sync() {
-  local index state target expected
-  failures=0
-  skill_states=()
+plan_skill_links() {
+  local index state
 
-  check_instructions
+  skill_states=()
   build_skill_manifest
 
   for ((index = 0; index < ${#skill_sources[@]}; index++)); do
-    target="${skill_targets[$index]}"
-    expected="${skill_link_values[$index]}"
     state="$(classify_skill_target \
-      "${skill_sources[$index]}" "$target" "$expected")"
+      "${skill_sources[$index]}" "${skill_targets[$index]}" \
+      "${skill_link_values[$index]}")"
     skill_states+=("$state")
-    if [ "$state" = 'conflict' ]; then
-      record_failure "refusing conflicting Codex skill entry: $target"
-    fi
+    [ "$state" != 'conflict' ] || \
+      record_failure "refusing conflicting Codex skill entry: ${skill_targets[$index]}"
   done
 
   check_reverse_skill_links
-  [ "$failures" -eq 0 ]
 }
 
-sync_skills() {
-  local index target expected created=0
+apply_instructions() {
+  case "$instructions_action" in
+    create)
+      if ! printf '%s\n' \
+        '# CLAUDE.md' \
+        '' \
+        'This file is the canonical project guidance for Claude Code and Codex.' \
+        '' \
+        '## Project Commands' \
+        '' \
+        '- TODO: document build, test, lint, and format commands.' \
+        '' \
+        '## Project Conventions' \
+        '' \
+        '- TODO: document architecture and repository-specific constraints.' \
+        > "$claude_instructions"; then
+        rm -f "$claude_instructions"
+        return 1
+      fi
 
-  if ! preflight_sync; then
-    printf 'agent-config: sync preflight failed; no files changed.\n' >&2
-    return 1
-  fi
+      if ! ln -s CLAUDE.md "$codex_instructions"; then
+        rm -f "$claude_instructions"
+        return 1
+      fi
+
+      printf 'created %s\n' "$claude_instructions"
+      printf 'linked %s -> CLAUDE.md\n' "$codex_instructions"
+      changes=$((changes + 2))
+      ;;
+    link)
+      ln -s CLAUDE.md "$codex_instructions"
+      printf 'linked %s -> CLAUDE.md\n' "$codex_instructions"
+      changes=$((changes + 1))
+      ;;
+  esac
+}
+
+apply_skill_links() {
+  local index target expected
 
   for ((index = 0; index < ${#skill_sources[@]}; index++)); do
     [ "${skill_states[$index]}" = 'missing' ] || continue
@@ -277,32 +270,26 @@ sync_skills() {
     mkdir -p "$(dirname "$target")"
     ln -s "$expected" "$target"
     printf 'linked %s -> %s\n' "$target" "$expected"
-    created=$((created + 1))
+    changes=$((changes + 1))
   done
-
-  if [ "$created" -eq 0 ]; then
-    printf 'agent-config: skill aliases already synchronized\n'
-  fi
-
-  check_all
 }
 
-case "$command_name" in
-  init)
-    init_project
-    ;;
-  sync)
-    sync_skills
-    ;;
-  check)
-    if check_all; then
-      printf 'agent-config: project topology OK\n'
-    else
-      exit 1
-    fi
-    ;;
-  *)
-    usage
-    exit 2
-    ;;
-esac
+plan_instructions
+plan_skill_links
+if [ "$failures" -ne 0 ]; then
+  printf 'agentsync: conflicts detected; no files changed.\n' >&2
+  exit 1
+fi
+
+if ! apply_instructions; then
+  printf 'agentsync: could not write the instruction pair.\n' >&2
+  exit 1
+fi
+apply_skill_links
+
+if ! verify_result; then
+  printf 'agentsync: verification failed after writing.\n' >&2
+  exit 1
+fi
+
+[ "$changes" -ne 0 ] || printf 'agentsync: already synchronized\n'

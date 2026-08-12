@@ -3,8 +3,8 @@
 set -euo pipefail
 
 repo_root="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-subject="$repo_root/bin/agent-config"
-test_root="$(mktemp -d "${TMPDIR:-/tmp}/agent-config-test.XXXXXX")"
+subject="$repo_root/bin/agentsync"
+test_root="$(mktemp -d "${TMPDIR:-/tmp}/agentsync-test.XXXXXX")"
 
 cleanup() {
   rm -rf "$test_root"
@@ -40,60 +40,61 @@ write_skill() {
 
 non_git="$test_root/non-git"
 mkdir -p "$non_git"
-if (cd "$non_git" && "$subject" check \
+if (cd "$non_git" && "$subject" \
     >"$test_root/non-git.out" 2>"$test_root/non-git.err"); then
-  fail 'check accepted a default directory outside a Git repository'
+  fail 'accepted a default directory outside a Git repository'
 fi
 grep -q 'not inside a Git repository' "$test_root/non-git.err" || \
   fail 'default non-Git failure did not explain --project'
 
 fresh_project="$test_root/fresh"
 mkdir -p "$fresh_project"
-"$subject" init --project "$fresh_project" >/dev/null
-[ -s "$fresh_project/CLAUDE.md" ] || fail 'init did not create CLAUDE.md'
+"$subject" --project "$fresh_project" >/dev/null
+[ -s "$fresh_project/CLAUDE.md" ] || fail 'did not create CLAUDE.md'
 assert_relative_link \
   "$fresh_project/AGENTS.md" 'CLAUDE.md' "$fresh_project/CLAUDE.md"
-"$subject" check --project "$fresh_project" >/dev/null
-"$subject" init --project "$fresh_project" >/dev/null
+"$subject" --project "$fresh_project" >"$test_root/fresh-idempotent.out"
+grep -q 'already synchronized' "$test_root/fresh-idempotent.out" || \
+  fail 'a no-op run did not report that it was already synchronized'
 
 existing_claude="$test_root/existing-claude"
 mkdir -p "$existing_claude"
 printf 'custom Claude instructions\n' > "$existing_claude/CLAUDE.md"
-"$subject" init --project "$existing_claude" >/dev/null
+"$subject" --project "$existing_claude" >/dev/null
 [ "$(cat "$existing_claude/CLAUDE.md")" = 'custom Claude instructions' ] || \
-  fail 'init changed an existing CLAUDE.md'
+  fail 'changed an existing CLAUDE.md'
 assert_relative_link \
   "$existing_claude/AGENTS.md" 'CLAUDE.md' "$existing_claude/CLAUDE.md"
 
 agents_only="$test_root/agents-only"
 mkdir -p "$agents_only"
 printf 'keep AGENTS content\n' > "$agents_only/AGENTS.md"
-if "$subject" init --project "$agents_only" \
+if "$subject" --project "$agents_only" \
     >"$test_root/agents-only.out" 2>"$test_root/agents-only.err"; then
-  fail 'init accepted AGENTS.md without CLAUDE.md'
+  fail 'accepted AGENTS.md without CLAUDE.md'
 fi
 [ "$(cat "$agents_only/AGENTS.md")" = 'keep AGENTS content' ] || \
-  fail 'init changed an AGENTS-only project'
+  fail 'changed an AGENTS-only project'
 [ ! -e "$agents_only/CLAUDE.md" ] || \
-  fail 'init partially migrated an AGENTS-only project'
+  fail 'partially migrated an AGENTS-only project'
 grep -q 'Move the AGENTS.md content to CLAUDE.md' "$test_root/agents-only.err" || \
-  fail 'init did not print AGENTS-to-CLAUDE migration guidance'
+  fail 'did not print AGENTS-to-CLAUDE migration guidance'
 
 conflicting_instructions="$test_root/conflicting-instructions"
 mkdir -p "$conflicting_instructions"
 printf 'Claude body\n' > "$conflicting_instructions/CLAUDE.md"
 printf 'Codex body\n' > "$conflicting_instructions/AGENTS.md"
-if "$subject" init --project "$conflicting_instructions" >/dev/null 2>&1; then
-  fail 'init accepted a conflicting AGENTS.md'
+if "$subject" --project "$conflicting_instructions" >/dev/null 2>&1; then
+  fail 'accepted a conflicting AGENTS.md'
 fi
 [ "$(cat "$conflicting_instructions/CLAUDE.md")" = 'Claude body' ] || \
-  fail 'init changed the Claude body during a conflict'
+  fail 'changed the Claude body during a conflict'
 [ "$(cat "$conflicting_instructions/AGENTS.md")" = 'Codex body' ] || \
-  fail 'init changed the Codex body during a conflict'
+  fail 'changed the Codex body during a conflict'
 
 write_skill "$fresh_project" alpha
 write_skill "$fresh_project" beta
-"$subject" sync --project "$fresh_project" >/dev/null
+"$subject" --project "$fresh_project" >/dev/null
 assert_relative_link \
   "$fresh_project/.agents/skills/alpha" \
   '../../.claude/skills/alpha' \
@@ -102,35 +103,48 @@ assert_relative_link \
   "$fresh_project/.agents/skills/beta" \
   '../../.claude/skills/beta' \
   "$fresh_project/.claude/skills/beta"
-"$subject" sync --project "$fresh_project" >/dev/null
-"$subject" check --project "$fresh_project" >/dev/null
+"$subject" --project "$fresh_project" >/dev/null
 
 conflicting_skills="$test_root/conflicting-skills"
 mkdir -p "$conflicting_skills"
-"$subject" init --project "$conflicting_skills" >/dev/null
+"$subject" --project "$conflicting_skills" >/dev/null
 write_skill "$conflicting_skills" alpha
 write_skill "$conflicting_skills" beta
 mkdir -p "$conflicting_skills/.agents/skills/alpha"
 printf 'keep directory\n' > "$conflicting_skills/.agents/skills/alpha/sentinel"
-if "$subject" sync --project "$conflicting_skills" \
+if "$subject" --project "$conflicting_skills" \
     >/dev/null 2>"$test_root/conflicting-skills.err"; then
-  fail 'sync accepted a conflicting real skill directory'
+  fail 'accepted a conflicting real skill directory'
 fi
-grep -q 'sync preflight failed; no files changed' \
+grep -q 'conflicts detected; no files changed' \
   "$test_root/conflicting-skills.err" || \
-  fail 'sync did not report its all-or-nothing conflict outcome'
+  fail 'did not report its all-or-nothing conflict outcome'
 [ "$(cat "$conflicting_skills/.agents/skills/alpha/sentinel")" = 'keep directory' ] || \
-  fail 'sync changed a conflicting skill directory'
+  fail 'changed a conflicting skill directory'
 [ ! -e "$conflicting_skills/.agents/skills/beta" ] || \
-  fail 'sync created a partial link before reporting a conflict'
+  fail 'created a partial link before reporting a conflict'
+
+# A skill conflict must also hold back the instruction pair: planning spans both
+# stages, so a single run either writes everything or nothing.
+skill_conflict_first="$test_root/skill-conflict-first"
+mkdir -p "$skill_conflict_first/.agents/skills/alpha"
+write_skill "$skill_conflict_first" alpha
+printf 'keep directory\n' > "$skill_conflict_first/.agents/skills/alpha/sentinel"
+if "$subject" --project "$skill_conflict_first" >/dev/null 2>&1; then
+  fail 'accepted a skill conflict while bootstrapping instructions'
+fi
+[ ! -e "$skill_conflict_first/CLAUDE.md" ] || \
+  fail 'created CLAUDE.md despite an unrelated skill conflict'
+[ ! -e "$skill_conflict_first/AGENTS.md" ] || \
+  fail 'created AGENTS.md despite an unrelated skill conflict'
 
 orphan_project="$test_root/orphan"
 mkdir -p "$orphan_project"
-"$subject" init --project "$orphan_project" >/dev/null
+"$subject" --project "$orphan_project" >/dev/null
 mkdir -p "$orphan_project/.agents/skills"
 ln -s '../../.claude/skills/orphan' "$orphan_project/.agents/skills/orphan"
-if "$subject" check --project "$orphan_project" >/dev/null 2>&1; then
-  fail 'check accepted an orphaned Codex skill alias'
+if "$subject" --project "$orphan_project" >/dev/null 2>&1; then
+  fail 'accepted an orphaned Codex skill alias'
 fi
 
 assert_relative_link "$repo_root/AGENTS.md" \
@@ -151,4 +165,4 @@ assert_relative_link "$repo_root/.agents/skills/dotfiles-theme" \
 [ ! -e "$repo_root/agents/skills/dotfiles-theme" ] ||
   fail 'dotfiles-theme is project-scoped and must not be published globally'
 
-printf 'ok - agent-config init, sync, check, idempotence, and conflicts\n'
+printf 'ok - agentsync bootstrap, aliasing, idempotence, and conflicts\n'

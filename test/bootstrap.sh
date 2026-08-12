@@ -1235,7 +1235,7 @@ if command -v lsrc >/dev/null 2>&1; then
   pass 'rcm excludes every Git-ignored source'
 fi
 
-if grep -Eq 'brew bundle|curl|git clone|Plug(Update|Clean)|agent-config|link-agent' \
+if grep -Eq 'brew bundle|curl|git clone|Plug(Update|Clean)|agentsync|link-agent' \
   "$repo_root/hooks/post-up"; then
   fail 'post-up must not install, download, or upgrade software'
 fi
