@@ -1,7 +1,0 @@
-{
-  "name": "Everforest",
-  "base": "dark-ansi",
-  "overrides": {
-    "selectionBg": "#686e72"
-  }
-}
