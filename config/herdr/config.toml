@@ -11,7 +11,8 @@ prefix = "ctrl+a"
 help = "prefix+?"
 # settings = "prefix+ctrl+t"
 detach = "prefix+shift+q"
-reload_config = "prefix+shift+r"
+# prefix+shift+r is rebound below to reload and then renumber tab labels.
+reload_config = ""
 open_notification_target = "prefix+shift+o"
 
 # Workspace/session navigation. prefix+w is reused below for the bootmux project
@@ -32,14 +33,15 @@ next_agent = "prefix+shift+n"
 focus_agent = "prefix+shift+1..9"
 remote_image_paste = "alt+v"
 
-# Keep c as Herdr's ordinary append-tab action. The four positional variants
-# below use herdr-smart-tab so they match the tmux bindings.
-new_tab = "prefix+c"
+# Tab creation goes exclusively through the herdr-smart-tab bindings below so
+# every created tab gets its positional "N." label prefix renumbered.
+new_tab = ""
 rename_tab = "prefix+comma"
 previous_tab = "prefix+p"
 next_tab = "prefix+n"
 switch_tab = "prefix+1..9"
-close_tab = "prefix+shift+x"
+# Closing goes through herdr-smart-tab below so labels renumber afterwards.
+close_tab = ""
 
 # Panes and copy mode
 rename_pane = ""
@@ -58,7 +60,7 @@ cycle_pane_previous = ""
 last_pane = "prefix+o"
 split_vertical = "prefix+v"
 split_horizontal = "prefix+s"
-close_pane = ["prefix+ctrl+q", "prefix+x"]
+close_pane = ""
 zoom = "prefix+z"
 
 resize_mode = "prefix+r"
@@ -71,9 +73,12 @@ navigate_pane_down = "j"
 navigate_pane_up = "k"
 navigate_pane_right = "l"
 
-# Match tmux window creation:
-# i/a insert before/after the active tab and maintain base-N/base/base+N names.
-# I/A create at the beginning/end without grouped renaming.
+# Grouped tab names stay ordered by position (base, base², base³):
+# a inserts after the active tab and joins its group.
+# i inserts before the active tab and joins the left neighbor's group; at the
+#   front it takes the front tab's name, as does I (insert at beginning).
+# A appends at the end and joins the last tab's group.
+# All four renumber every tab's "N." position prefix afterwards.
 [[keys.command]]
 key = "prefix+i"
 type = "shell"
@@ -97,6 +102,32 @@ key = "prefix+shift+a"
 type = "shell"
 command = '"${HOME}/dotfiles/bin/herdr-smart-tab" last'
 description = "new tab at end (tmux A)"
+
+[[keys.command]]
+key = "prefix+shift+x"
+type = "shell"
+command = '"${HOME}/dotfiles/bin/herdr-smart-tab" close-tab'
+description = "close tab and renumber"
+
+[[keys.command]]
+key = "prefix+x"
+type = "shell"
+command = '"${HOME}/dotfiles/bin/herdr-smart-tab" close-pane'
+description = "close pane and renumber"
+
+[[keys.command]]
+key = "prefix+ctrl+q"
+type = "shell"
+command = '"${HOME}/dotfiles/bin/herdr-smart-tab" close-pane'
+description = "close pane and renumber"
+
+# Reloading config doubles as the manual fixup for reorders the keybindings
+# cannot see, e.g. dragging tabs.
+[[keys.command]]
+key = "prefix+shift+r"
+type = "shell"
+command = '"${HERDR_BIN_PATH:-herdr}" server reload-config && "${HOME}/dotfiles/bin/herdr-smart-tab" renumber-all'
+description = "reload config and renumber tabs"
 
 # Herdr has no clear-scrollback API. Forwarding Ctrl-l preserves the visible
 # clear-screen behavior, but retained Herdr scrollback remains available.

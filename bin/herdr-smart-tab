@@ -1,19 +1,26 @@
 #!/usr/bin/env bash
 #
-# Reproduce the tmux a/A/i/I window-creation behavior for Herdr tabs.
+# Reproduce the tmux a/A window-creation behavior for Herdr tabs.
 #
 # Herdr 0.7.5 exposes tab.move through its public socket API, but does not
 # provide a matching CLI subcommand. The remaining operations use the CLI.
+#
+# Tabs inserted after a tab named "zsh" form a group renamed in display order
+# with small roman numerals: zsh, zshⅱ, zshⅲ. Inserting before a tab joins the
+# group of the tab to its left; inserting at the front takes over the front
+# tab's group name, with the whole group renumbered by position; appending at
+# the end joins the last tab's group. Every tab also carries a "N." position
+# prefix so prefix+1..9 switching stays predictable (Herdr shows no indices).
 
 set -euo pipefail
 
 usage() {
-  printf 'usage: herdr-smart-tab <before|after|first|last>\n' >&2
+  printf 'usage: herdr-smart-tab <before|after|first|last|close-tab|close-pane|renumber|renumber-all>\n' >&2
 }
 
 mode="${1:-}"
 case "$mode" in
-  before | after | first | last) ;;
+  before | after | first | last | close-tab | close-pane | renumber | renumber-all) ;;
   *)
     usage
     exit 2
@@ -23,6 +30,7 @@ esac
 socket_path="${HERDR_SOCKET_PATH:-}"
 workspace_id="${HERDR_ACTIVE_WORKSPACE_ID:-}"
 requested_tab_id="${HERDR_ACTIVE_TAB_ID:-}"
+requested_pane_id="${HERDR_ACTIVE_PANE_ID:-}"
 pane_cwd="${HERDR_ACTIVE_PANE_CWD:-${PWD:-}}"
 herdr_bin="${HERDR_BIN_PATH:-}"
 
@@ -46,10 +54,23 @@ die() {
 
 [ -n "$socket_path" ] || die "HERDR_SOCKET_PATH is unavailable"
 [ -S "$socket_path" ] || die "Herdr socket is unavailable"
-[ -n "$workspace_id" ] || die "active workspace is unavailable"
-[ -n "$requested_tab_id" ] || die "active tab is unavailable"
-[ -n "$pane_cwd" ] || die "active pane cwd is unavailable"
 [ -n "$herdr_bin" ] && [ -x "$herdr_bin" ] || die "herdr binary is unavailable"
+case "$mode" in
+  renumber-all) ;;
+  *)
+    [ -n "$workspace_id" ] || die "active workspace is unavailable"
+    [ -n "$requested_tab_id" ] || die "active tab is unavailable"
+    ;;
+esac
+case "$mode" in
+  close-tab | renumber | renumber-all) ;;
+  close-pane)
+    [ -n "$requested_pane_id" ] || die "active pane is unavailable"
+    ;;
+  *)
+    [ -n "$pane_cwd" ] || die "active pane cwd is unavailable"
+    ;;
+esac
 
 jq_bin="$(command -v jq || true)"
 nc_bin="$(command -v nc || true)"
@@ -66,12 +87,41 @@ if ! /usr/bin/lockf -s -t 5 9; then
   die "timed out waiting for another tab creation"
 fi
 
+# jq handles the multibyte suffix characters; the superscript and +N/-N
+# patterns strip legacy label formats so they migrate on the next keypress.
 strip_suffix() {
+  "$jq_bin" -rn --arg label "$1" \
+    '$label
+     | sub("[ⅰ-ⅿ]+$"; "")
+     | sub("\\([0-9]+\\)$"; "")
+     | sub("[⁰¹²³⁴-⁹]+$"; "")
+     | sub("([+-][0-9]+)+$"; "")'
+}
+
+strip_ordinal() {
   local label="$1"
-  while [[ "$label" =~ [+-][0-9]+$ ]]; do
-    label="${label%[+-][0-9]*}"
-  done
-  printf '%s' "$label"
+  if [[ "$label" =~ ^[0-9]+\.(.*)$ ]]; then
+    printf '%s' "${BASH_REMATCH[1]}"
+  else
+    printf '%s' "$label"
+  fi
+}
+
+group_suffix() {
+  case "$1" in
+    2) printf 'ⅱ' ;;
+    3) printf 'ⅲ' ;;
+    4) printf 'ⅳ' ;;
+    5) printf 'ⅴ' ;;
+    6) printf 'ⅵ' ;;
+    7) printf 'ⅶ' ;;
+    8) printf 'ⅷ' ;;
+    9) printf 'ⅸ' ;;
+    10) printf 'ⅹ' ;;
+    11) printf 'ⅺ' ;;
+    12) printf 'ⅻ' ;;
+    *) printf '(%s)' "$1" ;;
+  esac
 }
 
 list_tabs() {
@@ -123,53 +173,121 @@ rename_tab() {
   fi
 }
 
+# Rename all group members in display order: base, baseⅱ, baseⅲ, ...
 renumber_group() {
   local base="$1"
-  local tabs_json item item_id item_label item_base target_label
-  local base_group_index=-1
-  local index
-  local -a group_ids
+  local tabs_json item item_id item_label target_label index
+  local -a group_ids group_labels
 
   group_ids=()
+  group_labels=()
   tabs_json="$(list_tabs)"
 
   while IFS= read -r item; do
     item_id="$("$jq_bin" -r '.tab_id' <<<"$item")"
-    item_label="$("$jq_bin" -r '.label' <<<"$item")"
-    item_base="$(strip_suffix "$item_label")"
-    if [ "$item_base" = "$base" ]; then
+    item_label="$(strip_ordinal "$("$jq_bin" -r '.label' <<<"$item")")"
+    if [ "$(strip_suffix "$item_label")" = "$base" ]; then
       group_ids[${#group_ids[@]}]="$item_id"
-      if [ "$item_label" = "$base" ]; then
-        base_group_index=$((${#group_ids[@]} - 1))
-      fi
+      group_labels[${#group_labels[@]}]="$item_label"
     fi
   done < <("$jq_bin" -c '.result.tabs[]' <<<"$tabs_json")
 
-  [ "${#group_ids[@]}" -ge 2 ] || return 0
-
-  if [ "$base_group_index" -lt 0 ]; then
-    base_group_index=0
-    rename_tab "${group_ids[0]}" "$base"
-  fi
-
   for ((index = 0; index < ${#group_ids[@]}; index++)); do
-    if [ "$index" -lt "$base_group_index" ]; then
-      target_label="${base}-$((base_group_index - index))"
-    elif [ "$index" -gt "$base_group_index" ]; then
-      target_label="${base}+$((index - base_group_index))"
+    if [ "$index" -eq 0 ]; then
+      target_label="$base"
     else
-      continue
+      target_label="${base}$(group_suffix "$((index + 1))")"
     fi
-    rename_tab "${group_ids[$index]}" "$target_label"
+    if [ "${group_labels[$index]}" != "$target_label" ]; then
+      rename_tab "${group_ids[$index]}" "$target_label"
+    fi
   done
 }
 
-tabs_before=""
+# Herdr does not display tab indices, so prefix every label with its 1-based
+# position ("2.zsh") to keep prefix+1..9 switching predictable.
+renumber_all() {
+  local tabs_json item item_id item_label target_label
+  local position=0
+
+  tabs_json="$(list_tabs)"
+  while IFS= read -r item; do
+    position=$((position + 1))
+    item_id="$("$jq_bin" -r '.tab_id' <<<"$item")"
+    item_label="$("$jq_bin" -r '.label' <<<"$item")"
+    target_label="${position}.$(strip_ordinal "$item_label")"
+    if [ "$item_label" != "$target_label" ]; then
+      rename_tab "$item_id" "$target_label"
+    fi
+  done < <("$jq_bin" -c '.result.tabs[]' <<<"$tabs_json")
+}
+
+renumber_all_groups() {
+  local tabs_json item_label group_base
+  local seen=$'\n'
+
+  tabs_json="$(list_tabs)"
+  while IFS= read -r item_label; do
+    group_base="$(strip_suffix "$(strip_ordinal "$item_label")")"
+    case "$seen" in
+      *$'\n'"$group_base"$'\n'*) continue ;;
+    esac
+    seen="${seen}${group_base}"$'\n'
+    renumber_group "$group_base"
+  done < <("$jq_bin" -r '.result.tabs[].label' <<<"$tabs_json")
+}
+
+if [ "$mode" = "renumber" ]; then
+  renumber_all_groups
+  renumber_all
+  exit 0
+fi
+
+if [ "$mode" = "renumber-all" ]; then
+  while IFS= read -r workspace_id; do
+    [ -n "$workspace_id" ] || continue
+    renumber_all_groups
+    renumber_all
+  done < <("$herdr_bin" workspace list \
+    | "$jq_bin" -r '.result.workspaces[].workspace_id')
+  exit 0
+fi
+
+if [ "$mode" = "close-tab" ] || [ "$mode" = "close-pane" ]; then
+  tabs_json="$(list_tabs)"
+  closing_tab_id="$requested_tab_id"
+  focused_tab_id="$("$jq_bin" -r \
+    '[.result.tabs[] | select(.focused == true)][0].tab_id // empty' \
+    <<<"$tabs_json")"
+  if [ -n "$focused_tab_id" ]; then
+    closing_tab_id="$focused_tab_id"
+  fi
+  if ! closing_label="$("$jq_bin" -er --arg tab_id "$closing_tab_id" \
+    '.result.tabs[] | select(.tab_id == $tab_id) | .label' <<<"$tabs_json")"; then
+    die "closing tab label is unavailable"
+  fi
+  base="$(strip_suffix "$(strip_ordinal "$closing_label")")"
+
+  if [ "$mode" = "close-tab" ]; then
+    if ! "$herdr_bin" tab close "$closing_tab_id" >/dev/null; then
+      die "could not close tab"
+    fi
+  else
+    if ! "$herdr_bin" pane close "$requested_pane_id" >/dev/null; then
+      die "could not close pane"
+    fi
+  fi
+
+  renumber_group "$base"
+  renumber_all
+  exit 0
+fi
+
 current_tab_id="$requested_tab_id"
 current_index=""
 base=""
 
-if [ "$mode" = "before" ] || [ "$mode" = "after" ]; then
+if [ "$mode" = "after" ] || [ "$mode" = "before" ]; then
   tabs_before="$(list_tabs)"
 
   # A queued keypress should behave like tmux's synchronous binding: after the
@@ -185,16 +303,45 @@ if [ "$mode" = "before" ] || [ "$mode" = "after" ]; then
     '.result.tabs | map(.tab_id) | index($tab_id)' <<<"$tabs_before")"; then
     die "source tab no longer exists"
   fi
-  if ! current_label="$("$jq_bin" -er --arg tab_id "$current_tab_id" \
-    '.result.tabs[] | select(.tab_id == $tab_id) | .label' <<<"$tabs_before")"; then
-    die "source tab label is unavailable"
+
+  if [ "$mode" = "after" ]; then
+    if ! current_label="$("$jq_bin" -er --arg tab_id "$current_tab_id" \
+      '.result.tabs[] | select(.tab_id == $tab_id) | .label' <<<"$tabs_before")"; then
+      die "source tab label is unavailable"
+    fi
+    base="$(strip_suffix "$(strip_ordinal "$current_label")")"
+  elif [ "$current_index" -gt 0 ]; then
+    if ! previous_label="$("$jq_bin" -er \
+      ".result.tabs[$((current_index - 1))].label" <<<"$tabs_before")"; then
+      die "previous tab label is unavailable"
+    fi
+    base="$(strip_suffix "$(strip_ordinal "$previous_label")")"
+  else
+    if ! front_label="$("$jq_bin" -er \
+      '.result.tabs[0].label' <<<"$tabs_before")"; then
+      die "front tab label is unavailable"
+    fi
+    base="$(strip_suffix "$(strip_ordinal "$front_label")")"
   fi
-  base="$(strip_suffix "$current_label")"
+elif [ "$mode" = "first" ]; then
+  tabs_before="$(list_tabs)"
+  if ! front_label="$("$jq_bin" -er \
+    '.result.tabs[0].label' <<<"$tabs_before")"; then
+    die "front tab label is unavailable"
+  fi
+  base="$(strip_suffix "$(strip_ordinal "$front_label")")"
+elif [ "$mode" = "last" ]; then
+  tabs_before="$(list_tabs)"
+  if ! last_label="$("$jq_bin" -er \
+    '.result.tabs[-1].label' <<<"$tabs_before")"; then
+    die "last tab label is unavailable"
+  fi
+  base="$(strip_suffix "$(strip_ordinal "$last_label")")"
 fi
 
 create_args=(tab create --workspace "$workspace_id" --cwd "$pane_cwd" --focus)
-if [ "$mode" = "before" ] || [ "$mode" = "after" ]; then
-  create_args+=(--label "${base}+0")
+if [ -n "$base" ]; then
+  create_args+=(--label "$base")
 fi
 
 if ! create_response="$("$herdr_bin" "${create_args[@]}")"; then
@@ -204,7 +351,7 @@ if ! new_tab_id="$("$jq_bin" -er '.result.tab.tab_id' <<<"$create_response")"; t
   die "Herdr did not return the new tab id"
 fi
 
-if [ "$mode" = "before" ] || [ "$mode" = "after" ]; then
+if [ "$mode" = "after" ] || [ "$mode" = "before" ]; then
   tabs_after_create="$(list_tabs)"
   if ! current_index="$("$jq_bin" -er --arg tab_id "$current_tab_id" \
     '.result.tabs | map(.tab_id) | index($tab_id)' <<<"$tabs_after_create")"; then
@@ -215,8 +362,10 @@ fi
 case "$mode" in
   first)
     move_tab "$new_tab_id" 0
+    renumber_group "$base"
     ;;
   last)
+    renumber_group "$base"
     ;;
   before)
     move_tab "$new_tab_id" "$current_index"
@@ -227,3 +376,5 @@ case "$mode" in
     renumber_group "$base"
     ;;
 esac
+
+renumber_all
