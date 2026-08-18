@@ -165,25 +165,25 @@ Output contract (strict — violations make the output unusable):
 - Never emit markdown fences, a preamble, or trailing commentary"
 fi
 
+# Schemas stay within the keyword subset every provider accepts: no `$schema`
+# (Claude Code cannot resolve the meta-schema ref) and no uniqueItems/minLength/
+# maxLength (rejected by OpenAI strict mode). normalize_output enforces the rest.
 if [ "$DETAILED" = "1" ]; then
   SCHEMA_JSON='{
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "properties": {
       "candidates": {
         "type": "array",
         "minItems": 5,
         "maxItems": 5,
-        "uniqueItems": true,
         "items": {
           "type": "object",
           "properties": {
             "subject": {
               "type": "string",
-              "maxLength": 72,
               "pattern": "^(feat|fix|refactor|docs|test|chore|perf|ci|build|style|revert)(\\([^()\\n]+\\))?!?: [^\\n]+$"
             },
-            "body": { "type": "string", "minLength": 1 }
+            "body": { "type": "string" }
           },
           "required": ["subject", "body"],
           "additionalProperties": false
@@ -195,14 +195,12 @@ if [ "$DETAILED" = "1" ]; then
   }'
 else
   SCHEMA_JSON='{
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "properties": {
       "candidates": {
         "type": "array",
         "minItems": 10,
         "maxItems": 10,
-        "uniqueItems": true,
         "items": {
           "type": "string",
           "pattern": "^(feat|fix|refactor|docs|test|chore|perf|ci|build|style|revert)(\\([^()\\n]+\\))?!?: [^\\n]+$"
