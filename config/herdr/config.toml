@@ -27,10 +27,10 @@ rename_workspace = ""
 close_workspace = "prefix+shift+d"
 previous_workspace = "prefix+ctrl+p"
 next_workspace = "prefix+ctrl+n"
-switch_workspace = "prefix+ctrl+1..9"
+switch_workspace = "prefix+shift+1..9"
 previous_agent = "prefix+shift+p"
 next_agent = "prefix+shift+n"
-focus_agent = "prefix+shift+1..9"
+focus_agent = "prefix+ctrl+1..9"
 remote_image_paste = "alt+v"
 
 # Tab creation goes exclusively through the herdr-smart-tab bindings below so
