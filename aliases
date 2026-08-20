@@ -54,5 +54,26 @@ command -v md5sum >/dev/null || alias md5sum="md5"
 # macOS has no `sha1sum`, so use `shasum` as a fallback
 command -v sha1sum >/dev/null || alias sha1sum="shasum"
 
+# Surge (this Mac) hands out fake-IPs only to resolvers that go through it.
+# Tools that resolve DNS on their own -- bun, npm, curl -- connect to the real
+# IP instead, so Surge sees a bare-IP connection, every DOMAIN rule is skipped,
+# and the traffic falls through to FINAL. Routing them at Surge's local proxy
+# gives it the hostname back and the rules match again.
+# socks5h, not socks5: socks5 resolves locally and reproduces the very bug.
+export SURGE_HTTP_PROXY="http://127.0.0.1:6152"
+export SURGE_SOCKS_PROXY="socks5h://127.0.0.1:6153"
+export SURGE_NO_PROXY="localhost,127.0.0.1,::1,.local"
+
+surge-proxied() {
+  http_proxy="$SURGE_HTTP_PROXY" https_proxy="$SURGE_HTTP_PROXY" all_proxy="$SURGE_SOCKS_PROXY" \
+  HTTP_PROXY="$SURGE_HTTP_PROXY" HTTPS_PROXY="$SURGE_HTTP_PROXY" ALL_PROXY="$SURGE_SOCKS_PROXY" \
+  no_proxy="$SURGE_NO_PROXY" NO_PROXY="$SURGE_NO_PROXY" \
+  command "$@"
+}
+
+alias bun='surge-proxied bun'
+alias npm='surge-proxied npm'
+alias curl='surge-proxied curl'
+
 # Machine-local aliases; stays out of this repository.
 [[ -f ~/.aliases.local ]] && source ~/.aliases.local
