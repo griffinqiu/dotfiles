@@ -1,7 +1,9 @@
-# Identity and GitHub user only; nothing below overlaps it, so the include
-# position does not affect precedence.
-[include]
-  path = ~/Documents/Sync/gitconfig.sync
+[user]
+  name = Griffin Qiu
+  email = griffinqiu@gmail.com
+
+[github]
+  user = griffinqiu
 
 [init]
   defaultBranch = main

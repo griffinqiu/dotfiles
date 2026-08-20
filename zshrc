@@ -83,5 +83,4 @@ ocagent() {
   openclaw tui --session "agent:$1:main"
 }
 
-[[ -f ~/Documents/Sync/zshrc.sync ]] && source ~/Documents/Sync/zshrc.sync
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

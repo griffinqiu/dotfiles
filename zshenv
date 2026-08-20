@@ -1,7 +1,10 @@
 local _old_path="$PATH"
 
+# Bootmux reads its projects from TMUXINATOR_CONFIG, the variable name it
+# inherits from tmuxinator. Set here so non-interactive SSH sessions see it too.
+export TMUXINATOR_CONFIG="$HOME/.config/bootmux/projects"
+
 # Local config
-[[ -f ~/Documents/Sync/zshenv.sync ]] && source ~/Documents/Sync/zshenv.sync
 [[ -f ~/.zshenv.local ]] && source ~/.zshenv.local
 
 if [[ $PATH != $_old_path ]]; then
