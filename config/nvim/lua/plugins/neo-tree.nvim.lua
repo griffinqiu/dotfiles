@@ -41,6 +41,12 @@ return {
           mappings = {
             ["H"] = false,
             ["g."] = "toggle_hidden",
+            ["="] = {
+              function(state)
+                require("neo-tree.sources.filesystem").navigate(state, LazyVim.root())
+              end,
+              desc = "Reset root to project root",
+            },
             ["o"] = false,
             ["oc"] = false,
             ["od"] = false,

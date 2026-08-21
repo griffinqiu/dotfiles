@@ -1,3 +1,12 @@
+-- Both entry points pin the tab's cwd to the project root so `=` and relative
+-- paths resolve there, while the view stays on the current file's directory.
+local function pin_cwd_to_root()
+  local root = LazyVim.root()
+  if vim.uv.cwd() ~= root then
+    vim.cmd.tcd(vim.fn.fnameescape(root))
+  end
+end
+
 return {
   "stevearc/oil.nvim",
   lazy = false,
@@ -20,16 +29,26 @@ return {
       ["l"] = "actions.select",
       ["q"] = "actions.close",
       ["<2-LeftMouse>"] = "actions.select",
+      ["_"] = false,
+      ["="] = "actions.open_cwd",
     },
   },
   keys = {
     {
       "<leader>o",
       function()
+        pin_cwd_to_root()
         require("oil").toggle_float()
       end,
       desc = "Open parent directory (float)",
     },
-    { "<leader>O", "<CMD>Oil<CR>", desc = "Open parent directory" },
+    {
+      "<leader>O",
+      function()
+        pin_cwd_to_root()
+        vim.cmd.Oil()
+      end,
+      desc = "Open parent directory",
+    },
   },
 }
