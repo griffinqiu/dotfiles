@@ -1,8 +1,25 @@
 promptToReturnFromSubprocess: false
+confirmOnQuit: true
 os:
   editPreset: nvim
+git:
+  localBranchSortOrder: recency
+  diffRenderers:
+    - command: diff-so-fancy
+    - type: rawGit
+      args: [--color-words]
+      name: color-words
+    - type: rawGit
+      name: default
 gui:
   scrollHeight: 10
+  expandFocusedSidePanel: true
+  expandedSidePanelWeight: 3
+  commandLogSize: 3
+  shrinkSidePanelsToContent: true
+  showDivergenceFromBaseBranch: arrowAndNumber
+  switchTabsWithPanelJumpKeys: true
+  filterMode: fuzzy
   scrollOffBehavior: jump
   nerdFontsVersion: "3"
   # everforest dark medium: https://github.com/neanias/everforest-nvim

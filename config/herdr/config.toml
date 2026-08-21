@@ -11,9 +11,9 @@ prefix = "ctrl+a"
 help = "prefix+?"
 # settings = "prefix+ctrl+t"
 detach = "prefix+shift+q"
-# prefix+shift+r is rebound below to reload and then renumber tab labels.
-reload_config = ""
-open_notification_target = "prefix+shift+o"
+# prefix+ctrl+r below reloads and also renumbers tab labels.
+reload_config = "prefix+shift+r"
+open_notification_target = "prefix+space"
 
 # Workspace/session navigation. prefix+w is reused below for the bootmux project
 # picker instead of Herdr's persistent workspace navigation mode.
@@ -25,11 +25,11 @@ workspace_picker = ""
 new_workspace = ""
 rename_workspace = ""
 close_workspace = "prefix+shift+d"
-previous_workspace = "prefix+ctrl+p"
-next_workspace = "prefix+ctrl+n"
+previous_workspace = "prefix+shift+p"
+next_workspace = "prefix+shift+n"
 switch_workspace = "prefix+shift+1..9"
-previous_agent = "prefix+shift+p"
-next_agent = "prefix+shift+n"
+previous_agent = "prefix+ctrl+p"
+next_agent = "prefix+ctrl+n"
 focus_agent = "prefix+ctrl+1..9"
 remote_image_paste = "alt+v"
 
@@ -124,7 +124,7 @@ description = "close pane and renumber"
 # Reloading config doubles as the manual fixup for reorders the keybindings
 # cannot see, e.g. dragging tabs.
 [[keys.command]]
-key = "prefix+shift+r"
+key = "prefix+ctrl+r"
 type = "shell"
 command = '"${HERDR_BIN_PATH:-herdr}" server reload-config && "${HOME}/dotfiles/bin/herdr-smart-tab" renumber-all'
 description = "reload config and renumber tabs"
