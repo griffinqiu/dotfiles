@@ -36,7 +36,10 @@ set splitbelow splitright equalalways
 set colorcolumn=81 nonumber norelativenumber numberwidth=4
 set linespace=3 lazyredraw
 set timeoutlen=500 ttimeoutlen=10 updatetime=100
-set mouse= ttymouse=
+set mouse=a ttymouse=sgr
+" Modeless selections, the ones mouse=a cannot turn into a Visual selection,
+" still copy themselves the way the terminal used to.
+set clipboard+=autoselectml
 set shortmess=atIc nrformats=
 
 set ignorecase smartcase magic hlsearch incsearch showmatch matchtime=2
@@ -52,9 +55,18 @@ set statusline+=%{&fileformat}%{\"\".((exists(\"+bomb\")\ &&\ &bomb)?\",BOM\":\"
 set statusline+=%=\ %y\ %l,\ %c\ \<%P\>
 set complete+=kspell complete-=u complete-=i complete-=t
 
-" retrobox is Vim's built-in port of gruvbox, which this file used as a plugin.
+" gruvbox is a Vim package installed by bin/dotfiles-bootstrap. retrobox, Vim's
+" built-in port of it, covers hosts where that checkout is missing.
 set background=dark
-colorscheme retrobox
+let g:gruvbox_contrast_dark = 'soft'
+let g:gruvbox_contrast_light = 'soft'
+let g:gruvbox_invert_selection = 0
+silent! packadd! gruvbox
+if empty(globpath(&runtimepath, 'colors/gruvbox.vim'))
+  colorscheme retrobox
+else
+  colorscheme gruvbox
+endif
 
 " MacVim: mirror config/ghostty/config so Nerd Font glyphs render the same here
 " as they do for Neovim in the terminal. guifontwide covers CJK.
@@ -96,6 +108,10 @@ nmap ,cn :let @*=expand("%:."). ':' . line(".")<CR>
 nmap ,cs :let @*=expand("%:.")<CR>
 nmap ,cf :let @*=expand("%:t")<CR>
 nmap ,cl :let @*=expand("%:p")<CR>
+
+" A mouse drag now builds a Visual selection instead of a terminal one, so copy
+" it on release.
+xnoremap <LeftRelease> <LeftRelease>"+ygv
 
 nnoremap [b :bprevious<CR>
 nnoremap ]b :bnext<CR>

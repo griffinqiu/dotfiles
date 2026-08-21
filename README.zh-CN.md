@@ -54,12 +54,12 @@ Bootstrap不会安装Homebrew，也不会自动运行Doctor。首次安装软件
 
 | 范围 | 默认行为 | 配合`--upgrade` |
 |---|---|---|
-| MacVim | 由`packages`安装，使用轻量scratch配置，不使用外部插件管理器 | 选中`packages`时通过Homebrew升级 |
+| MacVim | 由`packages`安装，使用轻量scratch配置；gruvbox以固定版本的Vim package加载，仍不使用插件管理器 | 选中`packages`时通过Homebrew升级 |
 | Neovim | `plugins`从`lazy-lock.json`运行Lazy restore | 运行Lazy sync并更新lockfile |
 | tmux | `plugins`通过TPM运行`install_plugins` | 安装缺失插件，再运行`update_plugins all` |
 
-Oh My Zsh、`zsh-autosuggestions`、`zsh-syntax-highlighting`和TPM是由
-`packages`管理的固定Git依赖。只有显式使用`--upgrade`时，已有的干净checkout
+Oh My Zsh、`zsh-autosuggestions`、`zsh-syntax-highlighting`、TPM和gruvbox
+配色是由`packages`管理的固定Git依赖。只有显式使用`--upgrade`时，已有的干净checkout
 才会对齐到固定版本。
 
 ## 链接与本机覆盖

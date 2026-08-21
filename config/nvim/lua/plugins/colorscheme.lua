@@ -20,7 +20,6 @@ return {
   },
   -- Lua-native themes
   { "ellisonleao/gruvbox.nvim", opts = { contrast = "soft" } },
-  { "maxmx03/solarized.nvim" },
   { "rebelot/kanagawa.nvim" },
   {
     "neanias/everforest-nvim",
@@ -75,7 +74,6 @@ return {
   --   tokyonight, tokyonight-moon*, tokyonight-night, tokyonight-storm, tokyonight-day  (built-in)
   --   catppuccin, catppuccin-mocha*, catppuccin-frappe, catppuccin-macchiato, catppuccin-latte  (built-in)
   --   gruvbox
-  --   solarized
   --   kanagawa, kanagawa-wave*, kanagawa-dragon, kanagawa-lotus
   --   everforest
   --   nightfox, duskfox, nordfox, terafox, carbonfox, dawnfox, dayfox

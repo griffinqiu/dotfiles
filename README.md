@@ -56,12 +56,12 @@ also accepts `--optional` and `--quiet`.
 
 | Scope | Default behavior | With `--upgrade` |
 |---|---|---|
-| MacVim | Installed by `packages` with a lean scratch configuration and no external plugin manager | Upgraded through Homebrew when `packages` is selected |
+| MacVim | Installed by `packages` with a lean scratch configuration; gruvbox loads as a pinned Vim package, so there is still no plugin manager | Upgraded through Homebrew when `packages` is selected |
 | Neovim | `plugins` runs Lazy restore from `lazy-lock.json` | Runs Lazy sync and updates the lockfile |
 | tmux | `plugins` runs TPM `install_plugins` | Installs missing plugins, then runs `update_plugins all` |
 
-Oh My Zsh, `zsh-autosuggestions`, `zsh-syntax-highlighting`, and TPM are
-pinned Git dependencies managed by `packages`. Existing clean checkouts are
+Oh My Zsh, `zsh-autosuggestions`, `zsh-syntax-highlighting`, TPM, and the
+gruvbox colorscheme are pinned Git dependencies managed by `packages`. Existing clean checkouts are
 aligned only when `--upgrade` is explicit.
 
 ## Links and local overrides

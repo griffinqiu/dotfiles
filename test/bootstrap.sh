@@ -127,6 +127,7 @@ case "${1:-}" in
         */zsh-autosuggestions) printf '%s\n' "$TEST_ZSH_AUTOSUGGESTIONS_REV" ;;
         */zsh-syntax-highlighting) printf '%s\n' "$TEST_ZSH_SYNTAX_HIGHLIGHTING_REV" ;;
         */.oh-my-zsh) printf '%s\n' "$TEST_OMZ_REV" ;;
+        */gruvbox) printf '%s\n' "$TEST_GRUVBOX_REV" ;;
         *) exit 91 ;;
       esac
     else
@@ -173,6 +174,7 @@ TEST_TPM_REV=99469c4a9b1ccf77fade25842dc7bafbc8ce9946
 TEST_OMZ_REV=97b27bb2ec0701330b18c2d3e340b22e742b3fa8
 TEST_ZSH_AUTOSUGGESTIONS_REV=85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5
 TEST_ZSH_SYNTAX_HIGHLIGHTING_REV=c4d95591843d49838b7ad30081e7aba3135a6703
+TEST_GRUVBOX_REV=5d15b2765f59754d7ac263c88a0f6e3e58124951
 TEST_RCM_PREFIX=$test_tmp/rcm-prefix
 mkdir -p "$TEST_RCM_PREFIX/bin"
 cat >"$TEST_RCM_PREFIX/bin/rcup" <<'EOF'
@@ -181,7 +183,7 @@ printf 'rcup-prefix:RCRC=%s args=%s\n' "${RCRC:-}" "$*" >>"$TEST_LOG"
 EOF
 chmod +x "$TEST_RCM_PREFIX/bin/rcup"
 export TEST_TPM_REV TEST_OMZ_REV TEST_ZSH_AUTOSUGGESTIONS_REV \
-  TEST_ZSH_SYNTAX_HIGHLIGHTING_REV TEST_RCM_PREFIX
+  TEST_ZSH_SYNTAX_HIGHLIGHTING_REV TEST_GRUVBOX_REV TEST_RCM_PREFIX
 
 run_bootstrap() {
   HOME="$test_tmp/home" \
@@ -758,8 +760,13 @@ assert_fresh_pin \
   "$fresh_pins_home/.tmux/plugins/tpm" \
   'https://github.com/tmux-plugins/tpm.git' \
   "$TEST_TPM_REV"
-[ "$(grep -c '^git:init:' "$test_log")" -eq 4 ] || \
-  fail 'fresh package setup must initialize exactly four pinned checkouts'
+assert_fresh_pin \
+  'gruvbox' \
+  "$fresh_pins_home/.vim/pack/colors/opt/gruvbox" \
+  'https://github.com/morhetz/gruvbox.git' \
+  "$TEST_GRUVBOX_REV"
+[ "$(grep -c '^git:init:' "$test_log")" -eq 5 ] || \
+  fail 'fresh package setup must initialize exactly five pinned checkouts'
 pass 'fresh Git dependencies use exact targets, upstreams, and revisions'
 
 old_pins_home=$test_tmp/old-pins-home
@@ -767,12 +774,14 @@ mkdir -p \
   "$old_pins_home/.oh-my-zsh/.git" \
   "$old_pins_home/.oh-my-zsh/custom/plugins/zsh-autosuggestions/.git" \
   "$old_pins_home/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/.git" \
-  "$old_pins_home/.tmux/plugins/tpm/.git"
+  "$old_pins_home/.tmux/plugins/tpm/.git" \
+  "$old_pins_home/.vim/pack/colors/opt/gruvbox/.git"
 for old_pin_path in \
   "$old_pins_home/.oh-my-zsh" \
   "$old_pins_home/.oh-my-zsh/custom/plugins/zsh-autosuggestions" \
   "$old_pins_home/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" \
-  "$old_pins_home/.tmux/plugins/tpm"; do
+  "$old_pins_home/.tmux/plugins/tpm" \
+  "$old_pins_home/.vim/pack/colors/opt/gruvbox"; do
   printf '%s\n' 'keep old checkout' >"$old_pin_path/.test-sentinel"
 done
 : >"$test_log"
@@ -812,6 +821,10 @@ assert_old_pin_unchanged \
   'tmux plugin manager' \
   "$old_pins_home/.tmux/plugins/tpm" \
   "$TEST_TPM_REV"
+assert_old_pin_unchanged \
+  'gruvbox' \
+  "$old_pins_home/.vim/pack/colors/opt/gruvbox" \
+  "$TEST_GRUVBOX_REV"
 pass 'default package setup warns and preserves old pinned checkouts'
 
 dirty_pins_home=$test_tmp/dirty-pins-home
@@ -867,7 +880,8 @@ upgrade_home=$test_tmp/upgrade-home
 mkdir -p "$upgrade_home/.tmux/plugins/tpm/.git" \
   "$upgrade_home/.oh-my-zsh/.git" \
   "$upgrade_home/.oh-my-zsh/custom/plugins/zsh-autosuggestions/.git" \
-  "$upgrade_home/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/.git"
+  "$upgrade_home/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/.git" \
+  "$upgrade_home/.vim/pack/colors/opt/gruvbox/.git"
 : >"$test_log"
 HOME="$upgrade_home" \
   TEST_LOG="$test_log" \
@@ -885,16 +899,17 @@ grep -Fq "git:$upgrade_home/.tmux/plugins/tpm:fetch:" "$test_log" ||
   fail '--upgrade must fetch the pinned TPM revision'
 [ -f "$upgrade_home/.tmux/plugins/tpm/.dotfiles-upgraded" ] ||
   fail '--upgrade did not move TPM to its pin'
-for omz_checkout in \
+for upgrade_checkout in \
   "$upgrade_home/.oh-my-zsh" \
   "$upgrade_home/.oh-my-zsh/custom/plugins/zsh-autosuggestions" \
-  "$upgrade_home/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"; do
-  grep -Fq "git:$omz_checkout:fetch:" "$test_log" ||
-    fail "--upgrade must fetch the pinned revision for $omz_checkout"
-  [ -f "$omz_checkout/.dotfiles-upgraded" ] ||
-    fail "--upgrade did not move $omz_checkout to its pin"
+  "$upgrade_home/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" \
+  "$upgrade_home/.vim/pack/colors/opt/gruvbox"; do
+  grep -Fq "git:$upgrade_checkout:fetch:" "$test_log" ||
+    fail "--upgrade must fetch the pinned revision for $upgrade_checkout"
+  [ -f "$upgrade_checkout/.dotfiles-upgraded" ] ||
+    fail "--upgrade did not move $upgrade_checkout to its pin"
 done
-pass '--upgrade moves TPM, Oh My Zsh, and its custom plugins to their pins'
+pass '--upgrade moves TPM, Oh My Zsh, its custom plugins, and gruvbox to their pins'
 
 : >"$test_log"
 run_bootstrap --check --optional >/dev/null

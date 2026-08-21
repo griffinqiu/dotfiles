@@ -6,6 +6,7 @@ OH_MY_ZSH_REV=97b27bb2ec0701330b18c2d3e340b22e742b3fa8
 ZSH_AUTOSUGGESTIONS_REV=85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5
 ZSH_SYNTAX_HIGHLIGHTING_REV=c4d95591843d49838b7ad30081e7aba3135a6703
 TPM_REV=99469c4a9b1ccf77fade25842dc7bafbc8ce9946
+GRUVBOX_REV=5d15b2765f59754d7ac263c88a0f6e3e58124951
 
 usage() {
   cat <<'EOF'
@@ -529,6 +530,11 @@ if $run_packages && [ "${DOTFILES_BOOTSTRAP_SKIP_GIT_DEPS:-0}" != 1 ]; then
     'https://github.com/tmux-plugins/tpm.git' \
     "$TPM_REV" \
     "$HOME/.tmux/plugins/tpm"
+  install_pinned_checkout \
+    'gruvbox' \
+    'https://github.com/morhetz/gruvbox.git' \
+    "$GRUVBOX_REV" \
+    "$HOME/.vim/pack/colors/opt/gruvbox"
 fi
 
 if $run_links; then

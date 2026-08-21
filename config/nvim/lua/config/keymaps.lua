@@ -22,6 +22,10 @@ map("n", ",cl", ':let @*=expand("%:p")<CR>', { desc = "Copy full file path" })
 map("n", "<C-s>", ":update!<CR>", { silent = true, desc = "Save file" })
 map("v", "<C-s>", "<C-c>:update!<CR>", { silent = true, desc = "Save file" })
 map("i", "<C-s>", "<C-o>:update!<CR>", { silent = true, desc = "Save file" })
+
+-- A mouse drag now builds a Visual selection instead of a terminal one, so copy
+-- it on release the way the terminal used to.
+map("x", "<LeftRelease>", '<LeftRelease>"+ygv', { desc = "Copy mouse selection to clipboard" })
 -- map("n", "#", "#g``", { desc = "Previous search result, center and keep cursor position" })
 -- map("n", "*", "*g``", { desc = "Next search result, center and keep cursor position" })
 
