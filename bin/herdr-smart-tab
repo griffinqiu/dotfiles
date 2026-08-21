@@ -15,12 +15,32 @@
 set -euo pipefail
 
 usage() {
-  printf 'usage: herdr-smart-tab <before|after|first|last|close-tab|close-pane|renumber|renumber-all>\n' >&2
+  printf 'usage: herdr-smart-tab <before|after|first|last> [--focus|--no-focus]\n' >&2
+  printf '       herdr-smart-tab <close-tab|close-pane|renumber|renumber-all>\n' >&2
 }
 
 mode="${1:-}"
 case "$mode" in
-  before | after | first | last | close-tab | close-pane | renumber | renumber-all) ;;
+  before | after | first | last)
+    focus_option="${2:---focus}"
+    if [ "$#" -gt 2 ]; then
+      usage
+      exit 2
+    fi
+    case "$focus_option" in
+      --focus | --no-focus) ;;
+      *)
+        usage
+        exit 2
+        ;;
+    esac
+    ;;
+  close-tab | close-pane | renumber | renumber-all)
+    if [ "$#" -ne 1 ]; then
+      usage
+      exit 2
+    fi
+    ;;
   *)
     usage
     exit 2
@@ -339,7 +359,7 @@ elif [ "$mode" = "last" ]; then
   base="$(strip_suffix "$(strip_ordinal "$last_label")")"
 fi
 
-create_args=(tab create --workspace "$workspace_id" --cwd "$pane_cwd" --focus)
+create_args=(tab create --workspace "$workspace_id" --cwd "$pane_cwd" "$focus_option")
 if [ -n "$base" ]; then
   create_args+=(--label "$base")
 fi

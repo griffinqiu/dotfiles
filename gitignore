@@ -3,8 +3,77 @@
 .Trash
 Thumbs.db
 
-# Editor swap, backup, and generated index files
+# Editor and local tool state
 *.sw[nop]
 *~
+/.idea/
+/.vscode/
+/.aider*
+/.byebug_history
 /tags
 /TAGS
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Dependencies and virtual environments
+/.bundle/
+/bower_components/
+/node_modules/
+/vendor/
+/.venv/
+/venv/
+/ENV/
+/env/
+
+# Python build and cache artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+/build/
+/develop-eggs/
+/dist/
+/downloads/
+/eggs/
+/.eggs/
+/wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+/MANIFEST
+
+# Test and coverage artifacts
+.coverage
+.coverage.*
+*.cover
+.hypothesis/
+.pytest_cache/
+.tox/
+/htmlcov/
+
+# Logs and temporary files
+*.log
+/logs/
+/tmp/
+/temp/
+*.tmp
+*.temp
+rerun.txt
+
+# Local data and generated documentation
+*.db
+*.sqlite
+*.sqlite3
+.ipynb_checkpoints/
+/docs/_build/
+/site/
+/instance/
+/.webassets-cache/
+
+# Package-manager leftovers
+pip-log.txt
+pip-delete-this-directory.txt

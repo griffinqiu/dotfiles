@@ -1194,14 +1194,20 @@ is_globally_ignored '.DS_Store' || fail '.DS_Store should be globally ignored'
 is_globally_ignored 'scratch.swp' || fail 'editor swap files should be globally ignored'
 is_globally_ignored 'tags' || fail 'root tags should be globally ignored'
 is_globally_ignored 'TAGS' || fail 'root TAGS should be globally ignored'
+for generated_file in \
+  .env .env.local .aider.chat.history.md .venv/bin/python \
+  __pycache__/module.pyc node_modules/example package.log \
+  .pytest_cache/state.db tmp/output.txt local.sqlite3; do
+  is_globally_ignored "$generated_file" ||
+    fail "$generated_file should be globally ignored"
+done
 for project_file in \
-  .claude .env .tool-versions uv.lock node_modules/example package.log \
-  tags.lock tags.temp docs/tags; do
+  .claude .tool-versions uv.lock tags.lock tags.json docs/tags; do
   if is_globally_ignored "$project_file"; then
     fail "$project_file must be decided by each repository"
   fi
 done
-pass 'global ignore contains only OS/editor artifacts'
+pass 'global ignore covers common generated files without hiding project configuration'
 
 git -C "$repo_root" -c core.excludesFile=/dev/null \
   check-ignore --no-index -q -- 'config/.DS_Store' ||
