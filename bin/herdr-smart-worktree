@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 #
 # Unified Herdr worktree switcher plus workspace bootstrap. New workspaces
-# prefer the repository's own bootmux project template (matched by its root:
-# or by <repo>.yml) and fall back to the generic "worktree" template. Without
-# any template a workspace keeps its single shell tab, matching Herdr's
-# native behavior.
+# are initialized from the bootmux "worktree" template; without it a
+# workspace keeps its single shell tab, matching Herdr's native behavior.
 #
 # prefix+t opens an fzf dialog over the repository's linked worktrees: the
 # list always ends with a "+ create" row that tracks the typed query, so
@@ -89,7 +87,7 @@ fi
 repo_root="$(git -C "$repo_cwd" rev-parse --show-toplevel 2>/dev/null || true)"
 repo_name="$(basename "${repo_root:-$repo_cwd}")"
 
-bootmux_projects_dir="${XDG_CONFIG_HOME:-$HOME/.config}/bootmux/projects"
+template_file="${XDG_CONFIG_HOME:-$HOME/.config}/bootmux/projects/worktree.yml"
 
 worktrees_dir="$HOME/.herdr/worktrees"
 herdr_config="${XDG_CONFIG_HOME:-$HOME/.config}/herdr/config.toml"
@@ -101,53 +99,6 @@ if [ -r "$herdr_config" ]; then
     worktrees_dir="${configured_dir/#\~/$HOME}"
   fi
 fi
-
-# Expand a leading ~ and resolve to a physical path so template roots and
-# git's toplevel compare equal regardless of symlinks or trailing slashes.
-normalize_root_path() {
-  local path="$1"
-  case "$path" in
-    [~]) path="$HOME" ;;
-    [~]/*) path="$HOME/${path#\~/}" ;;
-  esac
-  if [ -d "$path" ]; then
-    (cd "$path" && pwd -P)
-  else
-    printf '%s' "${path%/}"
-  fi
-}
-
-# Prefer the repo's own bootmux project (matched by its root: pointing at the
-# main checkout, then by <repo_name>.yml) over the generic worktree template.
-resolve_template_file() {
-  local main_checkout candidate candidate_name root_value first_root_match=''
-  main_checkout="$(normalize_root_path "${repo_root:-$repo_cwd}")"
-  for candidate in "$bootmux_projects_dir"/*.yml; do
-    [ -f "$candidate" ] || continue
-    candidate_name="$(basename "$candidate")"
-    [ "$candidate_name" = 'worktree.yml' ] && continue
-    root_value="$(sed -n 's/^root:[[:space:]]*//p' "$candidate" | head -n 1)"
-    root_value="${root_value#[\"\']}"
-    root_value="${root_value%[\"\']}"
-    case "$root_value" in
-      /* | [~] | [~]/*) ;;
-      *) continue ;;
-    esac
-    [ "$(normalize_root_path "$root_value")" = "$main_checkout" ] || continue
-    if [ "$candidate_name" = "$repo_name.yml" ]; then
-      printf '%s' "$candidate"
-      return 0
-    fi
-    [ -n "$first_root_match" ] || first_root_match="$candidate"
-  done
-  if [ -n "$first_root_match" ]; then
-    printf '%s' "$first_root_match"
-  elif [ -f "$bootmux_projects_dir/$repo_name.yml" ]; then
-    printf '%s' "$bootmux_projects_dir/$repo_name.yml"
-  elif [ -f "$bootmux_projects_dir/worktree.yml" ]; then
-    printf '%s' "$bootmux_projects_dir/worktree.yml"
-  fi
-}
 
 strip_ordinal() {
   if [[ "$1" =~ ^[0-9]+\.(.*)$ ]]; then
@@ -173,19 +124,18 @@ renumber_tabs() {
   done < <(jq -c '.result.tabs[]' <<<"$tabs_json")
 }
 
-# Append the resolved bootmux template's tabs, drop the placeholder shell tab
-# the workspace was created with, and renumber. bootmux resolves the target
+# Append the bootmux template's tabs, drop the placeholder shell tab the
+# workspace was created with, and renumber. bootmux resolves the target
 # workspace from the caller's Herdr environment, so point it explicitly at
 # the new workspace instead of the pane this script was launched from.
 apply_template() {
   local workspace_id="$1" initial_tab_id="$2" root_path="$3"
-  local template_file rewritten_template tab_count first_tab_id
-  template_file="$(resolve_template_file)"
-  [ -n "$template_file" ] || return 0
+  local rewritten_template tab_count first_tab_id
+  [ -f "$template_file" ] || return 0
   command -v bootmux >/dev/null 2>&1 \
     || fail "bootmux is required for the workspace template"
-  # Per-repo templates point their top-level root: at the main checkout;
-  # force it to "." so the appended tabs open in root_path (the cd below).
+  # Force the template's top-level root: to "." so the appended tabs open in
+  # root_path (the cd below), whatever the yml says.
   rewritten_template="$(mktemp "${TMPDIR:-/tmp}/herdr-bootmux-template.XXXXXX")"
   if ! awk '/^root:/ && !replaced { print "root: ."; replaced = 1; next }
     { print }

@@ -9,7 +9,7 @@ prefix = "ctrl+a"
 
 # General
 help = "prefix+?"
-# settings = "prefix+ctrl+t"
+settings = "prefix+ctrl+t"
 detach = "prefix+shift+q"
 # prefix+ctrl+r below reloads and also renumbers tab labels.
 reload_config = "prefix+shift+r"
@@ -18,7 +18,7 @@ open_notification_target = "prefix+space"
 # Workspace/session navigation. prefix+w is reused below for the bootmux project
 # picker instead of Herdr's persistent workspace navigation mode.
 goto = "prefix+g"
-# prefix+t and prefix+ctrl+t go through the herdr-smart-worktree popups below
+# prefix+t goes through the herdr-smart-worktree popup below
 # so worktree workspaces open with the default tab layout, not a single shell.
 new_worktree = ""
 open_worktree = ""
@@ -164,9 +164,9 @@ height = "80%"
 # Replace the native worktree prompts with one filter-or-create dialog:
 # typing filters existing worktrees (enter opens or focuses) and doubles as
 # a new branch name (enter on the create row makes the worktree). Freshly
-# opened workspaces prefer the repository's own bootmux project template,
-# falling back to the generic "worktree" template, or keep a single shell
-# tab when neither exists. prefix+c creates a plain workspace the same way.
+# opened workspaces are initialized from the bootmux "worktree" template,
+# or keep a single shell tab when the template is absent. prefix+c creates
+# a plain workspace the same way.
 [[keys.command]]
 key = "prefix+c"
 type = "shell"
@@ -186,6 +186,7 @@ agent_panel_sort = "priority"
 prompt_new_tab_name = false
 show_agent_labels_on_pane_borders = true
 
+status_indicators = "dots"
 [ui.toast]
 delivery = "herdr"
 delay_seconds = 1
