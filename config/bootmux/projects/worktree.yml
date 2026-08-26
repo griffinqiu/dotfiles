@@ -1,0 +1,19 @@
+name: WORKTREE
+root: .
+
+windows:
+  - claude:
+      panes:
+        - claude
+  - codex:
+      panes:
+        - codex
+  - editor:
+      panes:
+        - nvim README.md -c "Neotree show reveal"
+  - console:
+      panes:
+        - pwd
+  - git:
+      panes:
+        - lazygit

@@ -1,0 +1,438 @@
+#!/usr/bin/env bash
+#
+# Unified Herdr worktree switcher plus workspace bootstrap. New workspaces
+# prefer the repository's own bootmux project template (matched by its root:
+# or by <repo>.yml) and fall back to the generic "worktree" template. Without
+# any template a workspace keeps its single shell tab, matching Herdr's
+# native behavior.
+#
+# prefix+t opens an fzf dialog over the repository's linked worktrees: the
+# list always ends with a "+ create" row that tracks the typed query, so
+# enter either opens the selected worktree (focusing it when already open)
+# or creates one for the typed branch — existing branches are checked out,
+# an empty query lets Herdr auto-generate one. ctrl-d deletes the selected
+# worktree after a y confirmation (its branch is kept). prefix+c creates a
+# plain workspace at the active pane's cwd the same way. Template tabs get
+# the same "N.name" position-prefix labels that herdr-smart-tab maintains.
+#
+# usage: herdr-smart-worktree                  interactive dialog
+#        herdr-smart-worktree create BRANCH    non-interactive create
+#        herdr-smart-worktree open BRANCH      non-interactive open
+#        herdr-smart-worktree workspace
+
+set -euo pipefail
+
+# Fast path for fzf's change:reload binding: emit the cached worktree rows
+# plus the trailing create row for the current query. The embedded query
+# keeps the create row matching whatever is typed.
+if [ "${1:-}" = '__list' ]; then
+  list_cache="${2:-}"
+  preview_prefix="${3:-}"
+  query="${4:-}"
+  [ -r "$list_cache" ] && cat -- "$list_cache"
+  sanitized="${query//\//-}"
+  [ -n "$sanitized" ] || sanitized='worktree'
+  if [ -n "$query" ]; then
+    create_label="+ create \"$query\""
+  else
+    create_label='+ create (auto)'
+  fi
+  printf '%s\t%s/%s\t__create__\n' "$create_label" "$preview_prefix" "$sanitized"
+  exit 0
+fi
+
+mode='dialog'
+case "${1:-}" in
+  create | open | workspace)
+    mode="$1"
+    shift
+    ;;
+esac
+branch_arg_given=0
+requested_branch=''
+if [ "$#" -ge 1 ]; then
+  branch_arg_given=1
+  requested_branch="$1"
+fi
+if [ "$branch_arg_given" -eq 0 ] && { [ "$mode" = 'create' ] || [ "$mode" = 'open' ]; }; then
+  mode='dialog'
+fi
+
+herdr_bin="${HERDR_BIN_PATH:-}"
+if [ -z "$herdr_bin" ]; then
+  herdr_bin="$(command -v herdr || true)"
+fi
+
+fail() {
+  local message="$1"
+  if [ -n "$herdr_bin" ] && [ -x "$herdr_bin" ]; then
+    "$herdr_bin" notification show "Herdr worktree" \
+      --body "$message" >/dev/null 2>&1 || true
+  fi
+  printf 'herdr-smart-worktree: %s\n' "$message" >&2
+  if [ -t 0 ]; then
+    read -r -n 1 -s -p 'Press any key to close...' || true
+  fi
+  exit 1
+}
+
+[ -n "$herdr_bin" ] && [ -x "$herdr_bin" ] || fail "herdr binary is unavailable"
+command -v jq >/dev/null 2>&1 || fail "jq is required"
+
+repo_cwd="${HERDR_ACTIVE_PANE_CWD:-}"
+if [ -z "$repo_cwd" ]; then
+  repo_cwd="$("$herdr_bin" pane current 2>/dev/null \
+    | jq -r '.result.pane.cwd // empty' || true)"
+fi
+[ -n "$repo_cwd" ] || fail "could not resolve the active pane cwd"
+
+repo_root="$(git -C "$repo_cwd" rev-parse --show-toplevel 2>/dev/null || true)"
+repo_name="$(basename "${repo_root:-$repo_cwd}")"
+
+bootmux_projects_dir="${XDG_CONFIG_HOME:-$HOME/.config}/bootmux/projects"
+
+worktrees_dir="$HOME/.herdr/worktrees"
+herdr_config="${XDG_CONFIG_HOME:-$HOME/.config}/herdr/config.toml"
+if [ -r "$herdr_config" ]; then
+  configured_dir="$(sed -n \
+    '/^\[worktrees\]/,/^\[/s/^[[:space:]]*directory[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' \
+    "$herdr_config" | head -n 1)"
+  if [ -n "$configured_dir" ]; then
+    worktrees_dir="${configured_dir/#\~/$HOME}"
+  fi
+fi
+
+# Expand a leading ~ and resolve to a physical path so template roots and
+# git's toplevel compare equal regardless of symlinks or trailing slashes.
+normalize_root_path() {
+  local path="$1"
+  case "$path" in
+    [~]) path="$HOME" ;;
+    [~]/*) path="$HOME/${path#\~/}" ;;
+  esac
+  if [ -d "$path" ]; then
+    (cd "$path" && pwd -P)
+  else
+    printf '%s' "${path%/}"
+  fi
+}
+
+# Prefer the repo's own bootmux project (matched by its root: pointing at the
+# main checkout, then by <repo_name>.yml) over the generic worktree template.
+resolve_template_file() {
+  local main_checkout candidate candidate_name root_value first_root_match=''
+  main_checkout="$(normalize_root_path "${repo_root:-$repo_cwd}")"
+  for candidate in "$bootmux_projects_dir"/*.yml; do
+    [ -f "$candidate" ] || continue
+    candidate_name="$(basename "$candidate")"
+    [ "$candidate_name" = 'worktree.yml' ] && continue
+    root_value="$(sed -n 's/^root:[[:space:]]*//p' "$candidate" | head -n 1)"
+    root_value="${root_value#[\"\']}"
+    root_value="${root_value%[\"\']}"
+    case "$root_value" in
+      /* | [~] | [~]/*) ;;
+      *) continue ;;
+    esac
+    [ "$(normalize_root_path "$root_value")" = "$main_checkout" ] || continue
+    if [ "$candidate_name" = "$repo_name.yml" ]; then
+      printf '%s' "$candidate"
+      return 0
+    fi
+    [ -n "$first_root_match" ] || first_root_match="$candidate"
+  done
+  if [ -n "$first_root_match" ]; then
+    printf '%s' "$first_root_match"
+  elif [ -f "$bootmux_projects_dir/$repo_name.yml" ]; then
+    printf '%s' "$bootmux_projects_dir/$repo_name.yml"
+  elif [ -f "$bootmux_projects_dir/worktree.yml" ]; then
+    printf '%s' "$bootmux_projects_dir/worktree.yml"
+  fi
+}
+
+strip_ordinal() {
+  if [[ "$1" =~ ^[0-9]+\.(.*)$ ]]; then
+    printf '%s' "${BASH_REMATCH[1]}"
+  else
+    printf '%s' "$1"
+  fi
+}
+
+renumber_tabs() {
+  local workspace_id="$1" tabs_json row tab_id label target position=0
+  tabs_json="$("$herdr_bin" tab list --workspace "$workspace_id")" \
+    || fail "could not list tabs for renumbering"
+  while IFS= read -r row; do
+    position=$((position + 1))
+    tab_id="$(jq -r '.tab_id' <<<"$row")"
+    label="$(jq -r '.label' <<<"$row")"
+    target="${position}.$(strip_ordinal "$label")"
+    if [ "$label" != "$target" ]; then
+      "$herdr_bin" tab rename "$tab_id" "$target" >/dev/null \
+        || fail "could not rename tab $tab_id"
+    fi
+  done < <(jq -c '.result.tabs[]' <<<"$tabs_json")
+}
+
+# Append the resolved bootmux template's tabs, drop the placeholder shell tab
+# the workspace was created with, and renumber. bootmux resolves the target
+# workspace from the caller's Herdr environment, so point it explicitly at
+# the new workspace instead of the pane this script was launched from.
+apply_template() {
+  local workspace_id="$1" initial_tab_id="$2" root_path="$3"
+  local template_file rewritten_template tab_count first_tab_id
+  template_file="$(resolve_template_file)"
+  [ -n "$template_file" ] || return 0
+  command -v bootmux >/dev/null 2>&1 \
+    || fail "bootmux is required for the workspace template"
+  # Per-repo templates point their top-level root: at the main checkout;
+  # force it to "." so the appended tabs open in root_path (the cd below).
+  rewritten_template="$(mktemp "${TMPDIR:-/tmp}/herdr-bootmux-template.XXXXXX")"
+  if ! awk '/^root:/ && !replaced { print "root: ."; replaced = 1; next }
+    { print }
+    END { if (!replaced) print "root: ." }' \
+    "$template_file" >"$rewritten_template"; then
+    rm -f "$rewritten_template"
+    fail "could not rewrite the bootmux template root"
+  fi
+  if ! (cd "$root_path" \
+    && HERDR_WORKSPACE_ID="$workspace_id" \
+      HERDR_ACTIVE_WORKSPACE_ID="$workspace_id" \
+      bootmux start -p "$rewritten_template" --append --no-attach \
+        >/dev/null 2>&1); then
+    rm -f "$rewritten_template"
+    fail "could not apply the bootmux template $(basename "$template_file")"
+  fi
+  rm -f "$rewritten_template"
+  tab_count="$("$herdr_bin" tab list --workspace "$workspace_id" \
+    | jq -r '.result.tabs | length')"
+  if [ "$tab_count" -gt 1 ]; then
+    "$herdr_bin" tab close "$initial_tab_id" >/dev/null \
+      || fail "could not close the initial workspace tab"
+  fi
+  renumber_tabs "$workspace_id"
+  first_tab_id="$("$herdr_bin" tab list --workspace "$workspace_id" \
+    | jq -r '.result.tabs[0].tab_id')"
+  "$herdr_bin" tab focus "$first_tab_id" >/dev/null 2>&1 || true
+}
+
+wt_branches=()
+wt_paths=()
+wt_open=()
+wt_count=0
+branch_col=6
+
+load_worktrees() {
+  local list_json row branch_len i
+  wt_branches=()
+  wt_paths=()
+  wt_open=()
+  wt_count=0
+  branch_col=6
+  list_json="$("$herdr_bin" worktree list --cwd "$repo_cwd")" \
+    || fail "could not list worktrees"
+  while IFS= read -r row; do
+    wt_branches+=("$(jq -r '.branch // .label' <<<"$row")")
+    wt_paths+=("$(jq -r '.path' <<<"$row")")
+    wt_open+=("$(jq -r '.open_workspace_id // ""' <<<"$row")")
+  done < <(jq -c '.result.worktrees[] | select(.is_linked_worktree)' \
+    <<<"$list_json")
+  wt_count="${#wt_branches[@]}"
+  for ((i = 0; i < wt_count; i++)); do
+    branch_len="${#wt_branches[$i]}"
+    if [ -n "${wt_open[$i]}" ]; then
+      branch_len=$((branch_len + 7))
+    fi
+    if [ "$branch_len" -gt "$branch_col" ]; then
+      branch_col="$branch_len"
+    fi
+  done
+}
+
+open_worktree_at() {
+  local idx="$1" open_response already_open workspace_id active_tab_id
+  local worktree_path
+  open_response="$("$herdr_bin" worktree open --cwd "$repo_cwd" \
+    --path "${wt_paths[$idx]}" --focus)" \
+    || fail "could not open worktree ${wt_branches[$idx]}"
+  already_open="$(jq -r '.result.already_open' <<<"$open_response")"
+  if [ "$already_open" = 'true' ]; then
+    return 0
+  fi
+  workspace_id="$(jq -er '.result.workspace.workspace_id' \
+    <<<"$open_response")" || fail "Herdr did not return the workspace id"
+  active_tab_id="$(jq -er '.result.workspace.active_tab_id' \
+    <<<"$open_response")" || fail "Herdr did not return the workspace tab id"
+  worktree_path="$(jq -er '.result.worktree.path' <<<"$open_response")" \
+    || fail "Herdr did not return the worktree path"
+  apply_template "$workspace_id" "$active_tab_id" "$worktree_path"
+}
+
+create_worktree() {
+  local branch="$1" create_args create_response workspace_id active_tab_id
+  local worktree_path
+  create_args=(worktree create --cwd "$repo_cwd" --focus)
+  if [ -n "$branch" ]; then
+    create_args+=(--branch "$branch")
+  fi
+  if ! create_response="$("$herdr_bin" "${create_args[@]}")"; then
+    fail "could not create worktree${branch:+ for branch $branch}"
+  fi
+  workspace_id="$(jq -er '.result.workspace.workspace_id' \
+    <<<"$create_response")" \
+    || fail "Herdr did not return the new workspace id"
+  active_tab_id="$(jq -er '.result.workspace.active_tab_id' \
+    <<<"$create_response")" \
+    || fail "Herdr did not return the new workspace tab id"
+  worktree_path="$(jq -er '.result.worktree.path' <<<"$create_response")" \
+    || fail "Herdr did not return the worktree path"
+  apply_template "$workspace_id" "$active_tab_id" "$worktree_path"
+}
+
+# Open worktrees are removed through Herdr (closing their workspace); closed
+# ones through git. Without force, git safely refuses dirty worktrees.
+remove_worktree_at() {
+  local idx="$1" force="${2:-}"
+  local open_ws="${wt_open[$idx]}" remove_args
+  if [ -n "$open_ws" ]; then
+    remove_args=(worktree remove --workspace "$open_ws")
+    [ -z "$force" ] || remove_args+=(--force)
+    "$herdr_bin" "${remove_args[@]}" >/dev/null 2>&1
+  else
+    remove_args=(worktree remove)
+    [ -z "$force" ] || remove_args+=(--force)
+    git -C "$repo_cwd" "${remove_args[@]}" "${wt_paths[$idx]}" >/dev/null 2>&1
+  fi
+}
+
+ask_yes_no() {
+  local answer=''
+  printf '%s [y/N] ' "$1"
+  IFS= read -r -n 1 answer || true
+  printf '\n'
+  case "$answer" in
+    y | Y) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+confirm_delete_at() {
+  local idx="$1"
+  ask_yes_no "delete worktree \"${wt_branches[$idx]}\"?" || return 0
+  remove_worktree_at "$idx" && return 0
+  ask_yes_no "\"${wt_branches[$idx]}\" has uncommitted changes or is locked — force delete?" \
+    || return 0
+  if ! remove_worktree_at "$idx" force; then
+    printf 'force removal of %s failed\n' "${wt_branches[$idx]}"
+    read -r -n 1 -s -p 'press any key…' || true
+    printf '\n'
+  fi
+}
+
+# fzf output with --print-query and --expect is query, pressed key, then the
+# selection. The change:reload binding regenerates the list so the trailing
+# create row always carries the current query; esc exits 130 and both open
+# and create paths terminate the loop, so only ctrl-d iterates.
+run_fzf_dialog() {
+  local script_path="${BASH_SOURCE[0]}" preview_prefix list_cache
+  local out status query key selection idx marker i
+  preview_prefix="${worktrees_dir/#$HOME/\~}/$repo_name"
+  while :; do
+    load_worktrees
+    list_cache="$(mktemp "${TMPDIR:-/tmp}/herdr-worktree-list.XXXXXX")"
+    for ((i = 0; i < wt_count; i++)); do
+      marker=''
+      if [ -n "${wt_open[$i]}" ]; then
+        marker=' (open)'
+      fi
+      printf '%-*s\t%s\t%s\n' "$branch_col" \
+        "${wt_branches[$i]}${marker}" "${wt_paths[$i]/#$HOME/\~}" "$i"
+    done >"$list_cache"
+    out="$("$script_path" __list "$list_cache" "$preview_prefix" '' | fzf \
+      --print-query \
+      --expect=ctrl-d \
+      --delimiter '\t' --with-nth 1,2 --nth 1 \
+      --layout=reverse --info=hidden --no-multi --no-sort \
+      --prompt='worktree> ' \
+      --header='enter open/create · ctrl-d delete' \
+      --bind "change:reload('$script_path' __list '$list_cache' '$preview_prefix' {q})")" \
+      && status=0 || status=$?
+    rm -f "$list_cache"
+    [ "$status" -le 1 ] || return 1
+    query="$(sed -n 1p <<<"$out")"
+    key="$(sed -n 2p <<<"$out")"
+    selection="$(sed -n 3p <<<"$out")"
+    idx="${selection##*$'\t'}"
+    if [ "$key" = 'ctrl-d' ]; then
+      if [ -n "$selection" ] && [ "$idx" != '__create__' ]; then
+        confirm_delete_at "$idx"
+      fi
+      continue
+    fi
+    if [ -z "$selection" ] || [ "$idx" = '__create__' ]; then
+      printf 'creating worktree…\n'
+      create_worktree "$query"
+    else
+      printf 'opening worktree %s…\n' "${wt_branches[$idx]}"
+      open_worktree_at "$idx"
+    fi
+    return 0
+  done
+}
+
+if [ "$mode" = 'workspace' ]; then
+  ws_response="$("$herdr_bin" workspace create --cwd "$repo_cwd" --focus)" \
+    || fail "could not create workspace"
+  workspace_id="$(jq -er '.result.workspace.workspace_id' <<<"$ws_response")" \
+    || fail "Herdr did not return the new workspace id"
+  initial_tab_id="$(jq -er '.result.tab.tab_id' <<<"$ws_response")" \
+    || fail "Herdr did not return the new workspace tab id"
+  apply_template "$workspace_id" "$initial_tab_id" "$repo_cwd"
+  exit 0
+fi
+
+if [ "$mode" = 'create' ]; then
+  create_worktree "$requested_branch"
+  exit 0
+fi
+
+if [ "$mode" = 'open' ]; then
+  load_worktrees
+  [ "$wt_count" -gt 0 ] || fail "no linked worktrees to open"
+  found=-1
+  for ((i = 0; i < wt_count; i++)); do
+    if [ "${wt_branches[$i]}" = "$requested_branch" ]; then
+      found="$i"
+      break
+    fi
+  done
+  [ "$found" -ge 0 ] || fail "no worktree for branch $requested_branch"
+  open_worktree_at "$found"
+  exit 0
+fi
+
+[ -t 0 ] && [ -t 1 ] \
+  || fail "a create or open subcommand with a branch is required when not running interactively"
+
+if command -v fzf >/dev/null 2>&1; then
+  run_fzf_dialog || exit 0
+  exit 0
+fi
+
+load_worktrees
+for ((i = 0; i < wt_count; i++)); do
+  printf '%d) %s\t%s\n' $((i + 1)) "${wt_branches[$i]}" "${wt_paths[$i]}"
+done
+read -r -p 'Number to open, branch name to create (Ctrl-C cancels): ' choice \
+  || exit 0
+case "$choice" in
+  '' | *[!0-9]*)
+    create_worktree "$choice"
+    ;;
+  *)
+    if [ "$choice" -ge 1 ] && [ "$choice" -le "$wt_count" ]; then
+      open_worktree_at $((choice - 1))
+    else
+      fail "invalid selection $choice"
+    fi
+    ;;
+esac
