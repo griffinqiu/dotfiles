@@ -1,0 +1,17 @@
+id = "dotfiles.remote-open"
+name = "Remote Open"
+version = "0.1.0"
+min_herdr_version = "0.7.0"
+description = "Ctrl-click any http(s) link to open it on the MacBook that drives this session."
+platforms = ["macos"]
+
+[[actions]]
+id = "open"
+title = "Open link on MacBook"
+command = ["bash", "open.sh"]
+
+[[link_handlers]]
+id = "any-http"
+title = "Open on MacBook"
+pattern = "^https?://"
+action = "open"

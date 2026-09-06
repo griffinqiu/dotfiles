@@ -30,6 +30,10 @@ export VISUAL=nvim
 export EDITOR=$VISUAL
 export ERL_AFLAGS="-kernel shell_history enabled"
 
+if [[ "$(hostname -s)" == "Griffins-MacMini" ]]; then
+  export BROWSER="$HOME/dotfiles/bin/remote-open"
+fi
+
 # Stays on this machine: shell history routinely captures tokens and paths that
 # should not reach a synced folder. Oh My Zsh only fills HISTFILE when unset,
 # and raises HISTSIZE to its own floor of 50000.

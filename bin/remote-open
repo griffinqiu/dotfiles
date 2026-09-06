@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -u
+
+url=${1:-}
+host=${REMOTE_OPEN_HOST:-macbook}
+
+case "$url" in
+  http://* | https://*) ;;
+  *) exec /usr/bin/open "$@" ;;
+esac
+
+if printf '%s\n' "$url" | ssh \
+  -o BatchMode=yes \
+  -o ConnectTimeout=3 \
+  -o StrictHostKeyChecking=accept-new \
+  "$host" \
+  'IFS= read -r url; exec /usr/bin/open "$url"' \
+  2>/dev/null; then
+  exit 0
+fi
+
+exec /usr/bin/open "$url"
