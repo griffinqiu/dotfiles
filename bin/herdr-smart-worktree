@@ -17,6 +17,7 @@
 #        herdr-smart-worktree create BRANCH    non-interactive create
 #        herdr-smart-worktree open BRANCH      non-interactive open
 #        herdr-smart-worktree workspace
+#        herdr-smart-worktree remove           delete the current worktree
 
 set -euo pipefail
 
@@ -41,7 +42,7 @@ fi
 
 mode='dialog'
 case "${1:-}" in
-  create | open | workspace)
+  create | open | workspace | remove)
     mode="$1"
     shift
     ;;
@@ -328,6 +329,34 @@ run_fzf_dialog() {
     return 0
   done
 }
+
+# Delete the focused workspace's worktree with the same confirm-then-force
+# flow as ctrl-d in the dialog. Exits silently when the workspace is not a
+# worktree checkout, replacing the native binding's error banner.
+if [ "$mode" = 'remove' ]; then
+  target_ws="${HERDR_ACTIVE_WORKSPACE_ID:-}"
+  if [ -z "$target_ws" ]; then
+    target_ws="$("$herdr_bin" workspace list \
+      | jq -r '[.result.workspaces[] | select(.focused)][0].workspace_id // empty')"
+  fi
+  [ -n "$target_ws" ] || exit 0
+  branch="$("$herdr_bin" worktree list --workspace "$target_ws" 2>/dev/null \
+    | jq -r --arg ws "$target_ws" \
+      '[.result.worktrees[]
+        | select(.is_linked_worktree and .open_workspace_id == $ws)][0].branch
+        // empty' \
+    || true)"
+  [ -n "$branch" ] || exit 0
+  ask_yes_no "delete worktree \"$branch\" and close this workspace?" || exit 0
+  if "$herdr_bin" worktree remove --workspace "$target_ws" >/dev/null 2>&1; then
+    exit 0
+  fi
+  ask_yes_no "\"$branch\" has uncommitted changes or is locked — force delete?" \
+    || exit 0
+  "$herdr_bin" worktree remove --workspace "$target_ws" --force >/dev/null 2>&1 \
+    || fail "could not remove worktree $branch"
+  exit 0
+fi
 
 if [ "$mode" = 'workspace' ]; then
   ws_response="$("$herdr_bin" workspace create --cwd "$repo_cwd" --focus)" \

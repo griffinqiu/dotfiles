@@ -22,7 +22,9 @@ goto = "prefix+g"
 # so worktree workspaces open with the default tab layout, not a single shell.
 new_worktree = ""
 open_worktree = ""
-remove_worktree = "prefix+shift+t"
+# Unbound so the "not a Herdr-managed worktree checkout" banner can never
+# trigger; worktrees are deleted with ctrl-d in the prefix+t dialog.
+remove_worktree = ""
 workspace_picker = ""
 new_workspace = ""
 rename_workspace = ""
