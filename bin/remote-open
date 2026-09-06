@@ -3,19 +3,29 @@
 set -u
 
 url=${1:-}
-host=${REMOTE_OPEN_HOST:-macbook}
+host=${REMOTE_OPEN_HOST:-}
+
+if [ -z "$host" ]; then
+  config_home=${XDG_CONFIG_HOME:-"$HOME/.config"}
+  host_file=${REMOTE_OPEN_HOST_FILE:-"$config_home/remote-open/host"}
+  if [ -r "$host_file" ]; then
+    IFS= read -r host <"$host_file" || host=
+  fi
+fi
 
 case "$url" in
   http://* | https://*) ;;
   *) exec /usr/bin/open "$@" ;;
 esac
 
+[ -n "$host" ] || exec /usr/bin/open "$@"
+
 if printf '%s\n' "$url" | ssh \
   -o BatchMode=yes \
   -o ConnectTimeout=3 \
   -o StrictHostKeyChecking=accept-new \
   "$host" \
-  'IFS= read -r url; exec /usr/bin/open "$url"' \
+  remote-open \
   2>/dev/null; then
   exit 0
 fi

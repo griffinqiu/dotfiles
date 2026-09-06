@@ -40,8 +40,14 @@ EOF
 chmod +x "$fake_bin/ssh"
 
 url='https://example.com/search?q=one&next=two'
+remote_home=$test_root/remote-home
+mkdir -p "$remote_home/.config/remote-open"
+printf '%s\n' remote-browser >"$remote_home/.config/remote-open/host"
+
 SSH_ARGS_LOG=$test_root/ssh-args \
   SSH_STDIN_LOG=$test_root/ssh-stdin \
+  HOME="$remote_home" \
+  XDG_CONFIG_HOME="$remote_home/.config" \
   PATH="$fake_bin:$PATH" \
   "$repo_root/bin/remote-open" "$url"
 
@@ -52,23 +58,57 @@ expected_args=$(printf '%s\n' \
   'ConnectTimeout=3' \
   '-o' \
   'StrictHostKeyChecking=accept-new' \
-  'macbook' \
-  'IFS= read -r url; exec /usr/bin/open "$url"')
+  'remote-browser' \
+  'remote-open')
 assert_eq "$expected_args" "$(cat "$test_root/ssh-args")" \
-  'http URLs should use non-interactive SSH to the default host'
+  'http URLs should use non-interactive SSH to the locally configured host'
 assert_eq "$url" "$(cat "$test_root/ssh-stdin")" \
   'the URL should reach the remote opener without shell interpretation'
-pass 'remote-open forwards HTTP URLs safely to the default MacBook host'
+pass 'remote-open forwards HTTP URLs safely using machine-local configuration'
 
 SSH_ARGS_LOG=$test_root/custom-ssh-args \
   SSH_STDIN_LOG=$test_root/custom-ssh-stdin \
-  REMOTE_OPEN_HOST=travel-mac \
+  HOME="$test_root/unconfigured-home" \
+  XDG_CONFIG_HOME="$test_root/unconfigured-home/.config" \
+  REMOTE_OPEN_HOST=travel-browser \
   PATH="$fake_bin:$PATH" \
   "$repo_root/bin/remote-open" 'http://example.com'
 
-grep -Fqx 'travel-mac' "$test_root/custom-ssh-args" ||
+grep -Fqx 'travel-browser' "$test_root/custom-ssh-args" ||
   fail 'REMOTE_OPEN_HOST did not override the default host'
 pass 'remote-open accepts a custom destination host'
+
+LOCAL_OPEN_LOG=$test_root/local-open \
+  HOME="$test_root/unconfigured-home" \
+  XDG_CONFIG_HOME="$test_root/unconfigured-home/.config" \
+  bash -c '
+    exec() { printf "%s\n" "$@" >"$LOCAL_OPEN_LOG"; exit 0; }
+    source "$1" "$2"
+  ' bash "$repo_root/bin/remote-open" "$url"
+expected_local_open=$(printf '%s\n' /usr/bin/open "$url")
+assert_eq "$expected_local_open" "$(cat "$test_root/local-open")" \
+  'machines without remote-open configuration should open locally'
+pass 'remote-open leaves shared installations local by default'
+
+RECEIVER_OPEN_LOG=$test_root/receiver-open \
+  SSH_ORIGINAL_COMMAND=remote-open \
+  bash -c '
+    exec() { printf "%s\n" "$@" >"$RECEIVER_OPEN_LOG"; exit 0; }
+    source "$1"
+  ' bash "$repo_root/bin/remote-open-receiver" <<<"$url"
+assert_eq "$expected_local_open" "$(cat "$test_root/receiver-open")" \
+  'the forced receiver should open a validated URL'
+pass 'the forced receiver accepts remote-open URL requests'
+
+if printf '%s\n' "$url" | SSH_ORIGINAL_COMMAND=whoami \
+  "$repo_root/bin/remote-open-receiver" 2>/dev/null; then
+  fail 'the forced receiver accepted an arbitrary SSH command'
+fi
+if printf '%s\n' 'file:///etc/passwd' | SSH_ORIGINAL_COMMAND=remote-open \
+  "$repo_root/bin/remote-open-receiver" 2>/dev/null; then
+  fail 'the forced receiver accepted a non-HTTP URL'
+fi
+pass 'the forced receiver rejects shell commands and unsupported URLs'
 
 plugin_home=$test_root/plugin-home
 mkdir -p "$plugin_home/dotfiles/bin"
@@ -95,26 +135,12 @@ PLUGIN_OPEN_LOG=$test_root/plugin-open \
 [[ ! -e $test_root/plugin-open ]] || fail 'an empty Herdr URL invoked remote-open'
 pass 'the Herdr action ignores invocations without a clicked URL'
 
-LOCAL_OPEN_LOG=$test_root/local-open \
-  HERDR_PLUGIN_CLICKED_URL="$url" \
-  bash -c '
-    hostname() { printf "%s\n" Griffins-MacBook; }
-    exec() { printf "%s\n" "$@" >"$LOCAL_OPEN_LOG"; exit 0; }
-    source "$1"
-  ' bash "$repo_root/config/herdr/plugins/remote-open/open.sh"
-expected_local_open=$(printf '%s\n' /usr/bin/open "$url")
-assert_eq "$expected_local_open" "$(cat "$test_root/local-open")" \
-  'the Herdr action should open locally outside the Mac mini'
-pass 'the Herdr action keeps shared installations local on other Macs'
-
-run_zshrc_for_host() {
-  local host_name=$1
-  TEST_HOST_NAME=$host_name \
-    REPO_ROOT="$repo_root" \
-    HOME="$test_root/zsh-home" \
+run_zshrc_for_home() {
+  local home_dir=$1
+  REPO_ROOT="$repo_root" \
+    HOME="$home_dir" \
     BROWSER=existing-browser \
     zsh -f -c '
-      hostname() { print -r -- "$TEST_HOST_NAME"; }
       mise() { return 1; }
       stty() { return 0; }
       source "$REPO_ROOT/zshrc"
@@ -122,13 +148,17 @@ run_zshrc_for_host() {
     '
 }
 
-assert_eq "$test_root/zsh-home/dotfiles/bin/remote-open" \
-  "$(run_zshrc_for_host Griffins-MacMini)" \
-  'Mac mini shells should route browser opens through remote-open'
-pass 'zshrc configures remote-open on the Mac mini'
+configured_zsh_home=$test_root/configured-zsh-home
+mkdir -p "$configured_zsh_home/.config/remote-open"
+printf '%s\n' remote-browser >"$configured_zsh_home/.config/remote-open/host"
+assert_eq "$configured_zsh_home/dotfiles/bin/remote-open" \
+  "$(run_zshrc_for_home "$configured_zsh_home")" \
+  'configured shells should route browser opens through remote-open'
+pass 'zshrc enables remote-open from machine-local configuration'
 
-assert_eq 'existing-browser' "$(run_zshrc_for_host Griffins-MacBook)" \
-  'other Macs should preserve their browser configuration'
+assert_eq 'existing-browser' \
+  "$(run_zshrc_for_home "$test_root/unconfigured-zsh-home")" \
+  'unconfigured machines should preserve their browser configuration'
 pass 'zshrc leaves browser configuration unchanged on other machines'
 
 printf '1..%d\n' "$tests"

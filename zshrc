@@ -30,9 +30,11 @@ export VISUAL=nvim
 export EDITOR=$VISUAL
 export ERL_AFLAGS="-kernel shell_history enabled"
 
-if [[ "$(hostname -s)" == "Griffins-MacMini" ]]; then
+remote_open_host_file="${REMOTE_OPEN_HOST_FILE:-${XDG_CONFIG_HOME:-$HOME/.config}/remote-open/host}"
+if [[ -n ${REMOTE_OPEN_HOST:-} || -r $remote_open_host_file ]]; then
   export BROWSER="$HOME/dotfiles/bin/remote-open"
 fi
+unset remote_open_host_file
 
 # Stays on this machine: shell history routinely captures tokens and paths that
 # should not reach a synced folder. Oh My Zsh only fills HISTFILE when unset,

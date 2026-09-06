@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -u
+
+usage_error=64
+
+[ "${SSH_ORIGINAL_COMMAND:-}" = remote-open ] || exit "$usage_error"
+IFS= read -r url || exit "$usage_error"
+
+case "$url" in
+  http://* | https://*) exec /usr/bin/open "$url" ;;
+  *) exit "$usage_error" ;;
+esac
