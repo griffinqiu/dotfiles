@@ -90,3 +90,8 @@ ocagent() {
 }
 
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+
+# Upgrade the existing machine-local entrypoint without replacing custom aliases.
+if [[ ${aliases[herdr-macmini-mosh]-} == 'mosh -- macmini /opt/homebrew/bin/herdr' ]]; then
+  alias herdr-macmini-mosh='"$HOME/dotfiles/bin/herdr-mosh" macmini'
+fi

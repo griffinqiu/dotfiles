@@ -83,6 +83,24 @@ Explicit local override files:
 Keep secrets, machine-specific tokens, and local-service configuration outside
 the main repository.
 
+## Herdr image paste over Mosh
+
+`bin/herdr-mosh HOST [HERDR_ARGUMENTS...]` runs `/opt/homebrew/bin/herdr` on a
+remote Mac through Mosh. Option-V reads a PNG image from the local macOS
+clipboard, uploads it through a separate non-interactive SSH connection, and
+pastes its remote path without pressing Enter. Empty bracketed paste signals
+from the terminal use the same bridge. Text pastes and Ctrl-V pass through.
+
+The existing plain-Mosh `herdr-macmini-mosh` alias is upgraded when a new shell
+loads `zshrc`; custom alias definitions are preserved. Reconnect through that
+entrypoint to activate the wrapper in an existing session.
+
+Images are limited to 20 MiB and retained in private
+`/tmp/herdr-mosh-image.*/image.png` files on the remote Mac so agents can read
+them later. Remove these directories when the images are no longer needed.
+The local clipboard is unchanged. Image transfer requires working SSH even
+when the Mosh connection is still active.
+
 ## Claude Code and Codex
 
 Claude paths are the only editable sources. Codex consumes the same instructions

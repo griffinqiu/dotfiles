@@ -78,6 +78,20 @@ Oh My Zsh、`zsh-autosuggestions`、`zsh-syntax-highlighting`、TPM和gruvbox
 
 密钥、机器专用token和本地服务配置不应进入主仓库。
 
+## 通过 Mosh 向 Herdr 粘贴图片
+
+`bin/herdr-mosh HOST [HERDR_ARGUMENTS...]` 通过 Mosh 在远端 Mac 上运行
+`/opt/homebrew/bin/herdr`。按 Option-V 会读取本机 macOS 剪贴板中的 PNG，
+通过独立的免交互 SSH 连接上传，再粘贴远端路径，不发送回车。终端发出的
+空 bracketed paste 信号也会触发图片桥接；普通文本粘贴和 Ctrl-V 原样转发。
+
+新 shell 加载 `zshrc` 时，会将现有的普通 Mosh `herdr-macmini-mosh` 别名
+切换到包装脚本，自定义过的别名不会被覆盖。已有会话需要通过该入口重新连接。
+
+图片大小上限为 20 MiB，上传后保留在远端私有的
+`/tmp/herdr-mosh-image.*/image.png` 文件中，供 agent 后续读取；不再需要时
+可删除这些目录。本机剪贴板保持不变。即使 Mosh 仍然在线，传图也需要 SSH 可用。
+
 ## Claude Code与Codex
 
 Claude路径是唯一可编辑来源。Codex通过相对符号链接使用相同的指令和可移植skills。
