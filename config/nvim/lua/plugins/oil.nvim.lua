@@ -7,6 +7,17 @@ local function pin_cwd_to_root()
   end
 end
 
+-- `open -R` reveals the entry in Finder instead of handing files to their
+-- default application the way `gx` does.
+local function reveal_in_finder()
+  local oil = require("oil")
+  local entry = oil.get_cursor_entry()
+  local dir = oil.get_current_dir()
+  if entry and dir then
+    vim.system({ "open", "-R", dir .. entry.name })
+  end
+end
+
 return {
   "stevearc/oil.nvim",
   lazy = false,
@@ -24,6 +35,7 @@ return {
       ["<C-s>"] = { "actions.select", opts = { horizontal = true } },
       ["<C-v>"] = { "actions.select", opts = { vertical = true } },
       ["gr"] = "actions.refresh",
+      ["go"] = { callback = reveal_in_finder, mode = "n", desc = "Reveal in Finder" },
       ["h"] = "actions.parent",
       ["<BS>"] = "actions.parent",
       ["l"] = "actions.select",

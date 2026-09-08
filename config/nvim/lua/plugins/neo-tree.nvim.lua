@@ -30,6 +30,14 @@ return {
             end,
             desc = "Open with System Application",
           },
+          -- `open -R` reveals the entry in Finder instead of handing files to
+          -- their default application the way `gx` does.
+          ["go"] = {
+            function(state)
+              vim.system({ "open", "-R", state.tree:get_node().path })
+            end,
+            desc = "Reveal in Finder",
+          },
           ["<C-p>"] = { "toggle_preview", config = { use_float = false } },
           ["<C-s>"] = "open_split",
           ["<C-v>"] = "open_vsplit",
