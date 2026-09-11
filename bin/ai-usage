@@ -54,6 +54,7 @@ CLAUDE_API_PRICING = {
 
 # (uncached input, cached input, output), USD per 1M tokens.
 CODEX_API_PRICING = {
+    "gpt-6-astra": (10.00, 1.00, 50.00),
     "gpt-5.6-sol": (5.00, 0.50, 30.00),
     "gpt-5.6-terra": (2.50, 0.25, 15.00),
     "gpt-5.6-luna": (1.00, 0.10, 6.00),
@@ -66,6 +67,7 @@ CODEX_API_PRICING = {
 
 # ChatGPT/Codex credits per 1M tokens: input, cached input, output.
 CODEX_CREDIT_PRICING = {
+    "gpt-6-astra": (250.00, 25.00, 1250.00),
     "gpt-5.6-sol": (125.00, 12.50, 750.00),
     "gpt-5.6-terra": (50.00, 5.00, 300.00),
     "gpt-5.6-luna": (5.00, 0.50, 30.00),
@@ -81,8 +83,9 @@ CLAUDE_CACHE_READ_MULTIPLIER = 0.10
 CODEX_CACHE_WRITE_MULTIPLIER = 1.25
 CODEX_LONG_CONTEXT_THRESHOLD = 272_000
 
-# GPT-5.6/5.5 Fast uses 2.5x credits; GPT-5.4 Fast uses 2x.
+# GPT-6/5.6/5.5 Fast uses 2.5x credits; GPT-5.4 Fast uses 2x.
 CODEX_FAST_MULTIPLIERS = {
+    "gpt-6": 2.50,
     "gpt-5.6": 2.50,
     "gpt-5.5": 2.50,
     "gpt-5.4": 2.00,
@@ -232,7 +235,7 @@ def claude_api_cost(model, counts):
 
 
 def codex_has_long_context_surcharge(model):
-    if model.startswith("gpt-5.6") or model.startswith("gpt-5.5"):
+    if model.startswith(("gpt-6", "gpt-5.6", "gpt-5.5")):
         return True
     return model == "gpt-5.4" or model.startswith("gpt-5.4-") and not (
         model.startswith("gpt-5.4-mini") or model.startswith("gpt-5.4-nano")
