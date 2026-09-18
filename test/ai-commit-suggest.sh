@@ -293,30 +293,56 @@ grep -Fq "All providers failed." "$ERR" || fail "terminal failure diagnostic mis
 ok "malformed, duplicate, and wrong-count results cannot pass validation"
 
 reset_logs
-started_at=$(perl -MTime::HiRes=time -e 'print time')
-if (cd "$WORK_REPO" && \
+(cd "$WORK_REPO" && \
+  AI_COMMIT_TIMEOUT_SECS=1 \
+  STUB_COPILOT_MODE=slow \
+  STUB_CLAUDE_MODE=slow \
+  "$SCRIPT" --short) >"$OUT" 2>"$ERR" || {
+  cat "$ERR" >&2
+  fail "provider timeout prevented fallback from succeeding"
+}
+expected_calls=$(printf 'copilot\nclaude\ncodex')
+[ "$(cat "$STUB_LOG_DIR/calls")" = "$expected_calls" ] || fail "timeouts did not advance through fallback providers"
+[ "$(wc -l <"$OUT" | tr -d ' ')" = "10" ] || fail "timeout fallback did not return 10 candidates"
+grep -Fq "GitHub Copilot timed out after 1s" "$ERR" || fail "Copilot timeout diagnostic missing"
+grep -Fq "Anthropic Claude Code timed out after 1s" "$ERR" || fail "Claude timeout diagnostic missing"
+for provider in copilot claude; do
+  timeout_tmp=$(cat "$STUB_LOG_DIR/$provider.pwd")
+  [ ! -d "$timeout_tmp" ] || fail "timeout cleanup left the private directory"
+  [ -s "$STUB_LOG_DIR/$provider.sleep.heartbeat" ] || fail "timeout sleep child never started"
+  timeout_heartbeat_before=$(wc -c <"$STUB_LOG_DIR/$provider.sleep.heartbeat" | tr -d ' ')
+  sleep 0.2
+  timeout_heartbeat_after=$(wc -c <"$STUB_LOG_DIR/$provider.sleep.heartbeat" | tr -d ' ')
+  [ "$timeout_heartbeat_before" = "$timeout_heartbeat_after" ] \
+    || fail "timeout cleanup left the sleep child producing heartbeats"
+done
+ok "consecutive provider timeouts fall back and clean the full process trees"
+
+reset_logs
+(cd "$WORK_REPO" && \
   AI_COMMIT_TIMEOUT_SECS=1 \
   STUB_COPILOT_MODE=delayfail \
+  STUB_CLAUDE_MODE=delayfail \
   STUB_DELAY_SECS=0.7 \
-  STUB_CLAUDE_MODE=slow \
-  "$SCRIPT" --short) >"$OUT" 2>"$ERR"; then
-  fail "total fallback deadline unexpectedly succeeded"
+  "$SCRIPT" --short) >"$OUT" 2>"$ERR" || fail "deadline was not reset between providers"
+if grep -Fq "timed out" "$ERR"; then
+  fail "a provider inherited the previous provider's deadline"
 fi
-ended_at=$(perl -MTime::HiRes=time -e 'print time')
-duration=$(awk "BEGIN { print $ended_at - $started_at }")
-awk "BEGIN { exit !($duration < 1.5) }" || fail "fallback deadline reset per provider ($duration seconds)"
-expected_calls=$(printf 'copilot\nclaude')
-[ "$(cat "$STUB_LOG_DIR/calls")" = "$expected_calls" ] || fail "total deadline did not span fallback providers"
-grep -Fq "total provider deadline exceeded after 1s" "$ERR" || fail "total deadline diagnostic missing"
-timeout_tmp=$(cat "$STUB_LOG_DIR/claude.pwd")
-[ ! -d "$timeout_tmp" ] || fail "timeout cleanup left the private directory"
-[ -s "$STUB_LOG_DIR/claude.sleep.heartbeat" ] || fail "timeout sleep child never started"
-timeout_heartbeat_before=$(wc -c <"$STUB_LOG_DIR/claude.sleep.heartbeat" | tr -d ' ')
-sleep 0.2
-timeout_heartbeat_after=$(wc -c <"$STUB_LOG_DIR/claude.sleep.heartbeat" | tr -d ' ')
-[ "$timeout_heartbeat_before" = "$timeout_heartbeat_after" ] \
-  || fail "timeout cleanup left the sleep child producing heartbeats"
-ok "one total deadline spans fallback attempts and cleans the full process tree"
+[ "$(cat "$STUB_LOG_DIR/calls")" = "$expected_calls" ] || fail "fresh deadlines did not reach Codex"
+ok "each fallback provider receives a fresh deadline"
+
+reset_logs
+if (cd "$WORK_REPO" && \
+  AI_COMMIT_TIMEOUT_SECS=1 \
+  STUB_COPILOT_MODE=slow \
+  STUB_CLAUDE_MODE=slow \
+  STUB_CODEX_MODE=slow \
+  "$SCRIPT" --short) >"$OUT" 2>"$ERR"; then
+  fail "all providers timing out unexpectedly succeeded"
+fi
+[ "$(cat "$STUB_LOG_DIR/calls")" = "$expected_calls" ] || fail "all-timeout fallback order changed"
+grep -Fq "All providers failed." "$ERR" || fail "all-timeout terminal diagnostic missing"
+ok "all providers timing out ends with failure after trying every provider"
 
 reset_logs
 (

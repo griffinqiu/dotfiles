@@ -4,20 +4,7 @@
   "bindings": [
     {
       "context": "Chat",
-      "bindings": {
-        "meta+p": null,
-        "meta+m": "chat:modelPicker",
-        "ctrl+_": null,
-        "meta+u": "chat:undo",
-        "ctrl+g": null,
-        "meta+g": "chat:externalEditor",
-        "ctrl+s": null,
-        "meta+s": "chat:stash",
-        "ctrl+v": null,
-        "meta+v": "chat:imagePaste",
-        "ctrl+q": null,
-        "meta+q": "chat:snippetPicker"
-      }
+      "bindings": {}
     }
   ]
 }

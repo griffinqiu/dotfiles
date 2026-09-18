@@ -27,6 +27,7 @@ case "$PROVIDER" in
     ;;
 esac
 
+# Each provider gets its own deadline so a timeout can still fall back.
 TIMEOUT_SECS="${AI_COMMIT_TIMEOUT_SECS:-120}"
 case "$TIMEOUT_SECS" in
   '' | *[!0-9]* | 0)
@@ -215,6 +216,7 @@ fi
 PRIVATE_TMPDIR=""
 CHILD_PID=""
 WATCHDOG_PID=""
+PROVIDER_TIMED_OUT=0
 ELAPSED_TICKS=0
 TMP_BASE="${TMPDIR:-/tmp}"
 TMP_BASE=${TMP_BASE%/}
@@ -270,10 +272,7 @@ cleanup() {
 }
 
 deadline_exceeded() {
-  WATCHDOG_PID=""
-  printf '\r\033[K\033[33m●\033[0m total provider deadline exceeded after %ss\n' \
-    "$TIMEOUT_SECS" >&2
-  exit 124
+  PROVIDER_TIMED_OUT=1
 }
 
 start_deadline() {
@@ -314,12 +313,26 @@ printf '%s\n' "$SCHEMA_JSON" >"$SCHEMA_FILE"
 wait_with_timer() {
   pid=$1
   label=$2
-  while kill -0 "$pid" 2>/dev/null; do
+  ELAPSED_TICKS=0
+  PROVIDER_TIMED_OUT=0
+  start_deadline
+  while [ "$PROVIDER_TIMED_OUT" = 0 ] && kill -0 "$pid" 2>/dev/null; do
     sleep 0.1
     ELAPSED_TICKS=$((ELAPSED_TICKS + 1))
     elapsed=$(awk "BEGIN{printf \"%.1f\", $ELAPSED_TICKS/10}")
     printf '\r\033[K\033[36m●\033[0m %s %s/%ss' "$label" "$elapsed" "$TIMEOUT_SECS" >&2
   done
+  terminate_process_group "$WATCHDOG_PID"
+  { wait "$WATCHDOG_PID"; } 2>/dev/null || true
+  WATCHDOG_PID=""
+  if [ "$PROVIDER_TIMED_OUT" = 1 ]; then
+    terminate_process_group "$pid"
+    { wait "$pid"; } 2>/dev/null || true
+    CHILD_PID=""
+    printf '\r\033[K\033[33m%s timed out after %ss\033[0m\n' \
+      "$label" "$TIMEOUT_SECS" >&2
+    return 124
+  fi
   { wait "$pid"; } 2>/dev/null
   rc=$?
   CHILD_PID=""
@@ -354,6 +367,7 @@ emit_provider_result() {
   label=$1
   rc=$2
   diagnostic_file=$3
+  [ "$PROVIDER_TIMED_OUT" = 1 ] && return 1
   if [ "$rc" = "0" ] && [ -s "$PROVIDER_OUT" ]; then
     cat "$PROVIDER_OUT"
     return 0
@@ -538,7 +552,6 @@ for p in $PROVIDERS; do
   esac
 done
 
-start_deadline
 FIRST=1
 for p in $ORDERED; do
   if [ "$FIRST" = "1" ]; then
