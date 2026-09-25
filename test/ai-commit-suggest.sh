@@ -88,6 +88,7 @@ esac
 
 printf '%s\n' "$provider" >>"$STUB_LOG_DIR/calls"
 printf '%s\n' "$PWD" >"$STUB_LOG_DIR/$provider.pwd"
+env | grep -E '^HERDR_(ENV|PANE_ID|SOCKET_PATH)=' >"$STUB_LOG_DIR/$provider.herdr-env" || true
 mkdir -p provider-cache
 printf 'provider state\n' >provider-cache/state
 ls -l prompt.txt schema.json >"$STUB_LOG_DIR/$provider.modes" 2>/dev/null || true
@@ -252,6 +253,20 @@ if grep -Fq "changed content" "$STUB_LOG_DIR/codex.args"; then
   fail "Codex prompt leaked into argv"
 fi
 ok "Codex uses read-only ephemeral structured execution over stdin"
+
+for provider in copilot claude codex; do
+  reset_logs
+  (cd "$WORK_REPO" && \
+    HERDR_ENV=1 \
+    HERDR_PANE_ID=test-pane \
+    HERDR_SOCKET_PATH="$TEST_ROOT/herdr.sock" \
+    AI_COMMIT_PROVIDER=$provider \
+    "$SCRIPT" --short) >"$OUT" 2>"$ERR"
+  [ -e "$STUB_LOG_DIR/$provider.herdr-env" ] || fail "$provider stub did not run"
+  [ ! -s "$STUB_LOG_DIR/$provider.herdr-env" ] \
+    || fail "$provider inherited Herdr pane identity: $(cat "$STUB_LOG_DIR/$provider.herdr-env")"
+done
+ok "providers cannot report themselves as the Herdr pane's resumable agent"
 
 reset_logs
 (cd "$WORK_REPO" && STUB_COPILOT_MODE=nine "$SCRIPT" --short) >"$OUT" 2>"$ERR"

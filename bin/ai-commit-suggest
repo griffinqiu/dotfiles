@@ -229,8 +229,11 @@ PROVIDER_STDOUT=""
 RAW_FILE=""
 NORMALIZED_FILE=""
 
+# Without the pane identity, Herdr's agent hooks cannot record this one-shot
+# run as the pane's session and resume it after a server restart.
 exec_grouped() {
-  exec perl -MPOSIX -e '
+  # shellcheck disable=SC2016
+  exec env -u HERDR_ENV -u HERDR_PANE_ID -u HERDR_SOCKET_PATH perl -MPOSIX -e '
     POSIX::setpgid(0, 0);
     die "unable to create provider process group: $!\n"
       unless POSIX::getpgrp() == $$;
