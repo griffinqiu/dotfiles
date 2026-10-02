@@ -9,6 +9,13 @@ local emacs_keys = {
 
 return {
   "folke/snacks.nvim",
+  keys = {
+    {
+      "<leader>ff",
+      LazyVim.pick("files", { hidden = true, ignored = true }),
+      desc = "Find All Files (Root Dir)",
+    },
+  },
   opts = {
     picker = {
       win = {
