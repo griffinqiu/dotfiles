@@ -77,6 +77,8 @@ alias curl='surge-proxied curl'
 alias openclaw='surge-proxied openclaw'
 alias hermes='surge-proxied hermes'
 alias pi='surge-proxied pi'
+alias claude='surge-proxied claude'
+alias claude2='CLAUDE_CONFIG_DIR="$HOME/.claude-second" surge-proxied claude'
 alias codex='https_proxy=http://127.0.0.1:6152 http_proxy=http://127.0.0.1:6152 all_proxy=socks5://127.0.0.1:6153 command codex'
 
 # Machine-local aliases; stays out of this repository.

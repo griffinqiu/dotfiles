@@ -80,6 +80,12 @@ token_seg="${pct_color}󰍛 ${token_display} · ${used_pct}%${RESET}"
 cost_seg="${YLW} ${cost_display}${RESET}"
 
 
+is_newer_version() {
+  local candidate="$1" current="$2"
+  [ "$candidate" != "$current" ] &&
+    [ "$(printf '%s\n%s\n' "$current" "$candidate" | sort -V | tail -1)" = "$candidate" ]
+}
+
 update_seg=""
 if [ -n "$version" ]; then
   CACHE_FILE="/tmp/claude-statusline-latest-version"
@@ -98,7 +104,7 @@ if [ -n "$version" ]; then
     [ -n "$latest" ] && echo "$latest" >"$CACHE_FILE"
   fi
 
-  if [ -n "$latest" ] && [ "$latest" != "$version" ]; then
+  if [ -n "$latest" ] && is_newer_version "$latest" "$version"; then
     update_seg="${SEP}${GRAY}󰄾 ${latest}${RESET}"
   fi
 fi

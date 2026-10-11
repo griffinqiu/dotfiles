@@ -61,11 +61,6 @@ reset_logs() {
 mkdir -p "$STUB_BIN" "$STUB_LOG_DIR" "$WORK_REPO"
 
 git -C "$WORK_REPO" init -q
-git -C "$WORK_REPO" config user.name "AI Commit Test"
-git -C "$WORK_REPO" config user.email "ai-commit-test@example.invalid"
-printf 'initial\n' >"$WORK_REPO/example.txt"
-git -C "$WORK_REPO" add example.txt
-git -C "$WORK_REPO" commit -qm "chore: seed test repository"
 printf 'changed content\n' >"$WORK_REPO/example.txt"
 git -C "$WORK_REPO" add example.txt
 
@@ -102,6 +97,13 @@ case "$provider" in
   copilot)
     while [ "$#" -gt 0 ]; do
       case "$1" in
+        --model)
+          shift
+          if [ "${1:-}" = "gpt-5.6-luna" ] && [ "${STUB_COPILOT_LUNA_DISABLED:-0}" = 1 ]; then
+            printf '%s\n' 'Error: Run `copilot --model gpt-5.6-luna` in interactive mode to enable this model' >&2
+            exit 1
+          fi
+          ;;
         -p | --print)
           shift
           [ "$#" -gt 0 ] || exit 91
@@ -199,6 +201,7 @@ ln -s stub-provider "$STUB_BIN/codex"
 
 PATH="$STUB_BIN:$PATH"
 export PATH STUB_LOG_DIR
+unset AI_COMMIT_COPILOT_MODEL
 
 OUT="$TEST_ROOT/out"
 ERR="$TEST_ROOT/err"
@@ -210,6 +213,31 @@ fi
 grep -Fq "Unknown provider: pilot" "$ERR" || fail "invalid provider diagnostic missing"
 [ ! -e "$STUB_LOG_DIR/calls" ] || fail "invalid provider invoked a CLI"
 ok "provider validation is an exact enumeration"
+
+reset_logs
+(cd "$WORK_REPO" && STUB_COPILOT_LUNA_DISABLED=1 "$SCRIPT" --short) >"$OUT" 2>"$ERR"
+if grep -Fq 'in interactive mode to enable this model' "$ERR"; then
+  cat "$ERR" >&2
+  fail "default Copilot model requires interactive activation"
+fi
+[ "$(cat "$STUB_LOG_DIR/calls")" = "copilot" ] || fail "disabled Luna caused provider fallback"
+assert_line "$STUB_LOG_DIR/copilot.args" auto
+[ "$(wc -l <"$OUT" | tr -d ' ')" = "10" ] || fail "Auto did not produce 10 candidates"
+ok "Copilot default works without activating Luna"
+
+reset_logs
+(cd "$WORK_REPO" && AI_COMMIT_COPILOT_MODEL=gpt-5.6-luna "$SCRIPT" --short) >"$OUT" 2>"$ERR"
+assert_line "$STUB_LOG_DIR/copilot.args" gpt-5.6-luna
+[ "$(cat "$STUB_LOG_DIR/calls")" = "copilot" ] || fail "explicit Copilot model was not used"
+ok "Copilot model can be explicitly selected"
+
+reset_logs
+(cd "$WORK_REPO" && AI_COMMIT_COPILOT_MODEL=gpt-5.6-luna STUB_COPILOT_LUNA_DISABLED=1 "$SCRIPT" --short) >"$OUT" 2>"$ERR"
+expected_calls=$(printf 'copilot\nclaude')
+[ "$(cat "$STUB_LOG_DIR/calls")" = "$expected_calls" ] || fail "disabled explicit model did not fall back"
+grep -Fq 'in interactive mode to enable this model' "$ERR" || fail "model activation diagnostic missing"
+[ "$(wc -l <"$OUT" | tr -d ' ')" = "10" ] || fail "model activation fallback did not produce candidates"
+ok "disabled explicit Copilot model keeps provider fallback"
 
 reset_logs
 (cd "$WORK_REPO" && "$SCRIPT" --short) >"$OUT" 2>"$ERR"

@@ -2,6 +2,7 @@
 
 # Default provider: copilot; remaining fallback order: claude > codex
 # Override with: AI_COMMIT_PROVIDER=codex ai-commit-suggest
+# Pin an enabled Copilot model with AI_COMMIT_COPILOT_MODEL.
 DEFAULT_PROVIDER="copilot"
 PROVIDERS="claude codex copilot"
 
@@ -386,7 +387,7 @@ run_copilot() {
     exec_grouped gh copilot -- \
       -p "$PROMPT" \
       --silent \
-      --model gpt-5.6-luna \
+      --model "${AI_COMMIT_COPILOT_MODEL:-auto}" \
       --effort low \
       --available-tools= \
       --allow-all-tools \

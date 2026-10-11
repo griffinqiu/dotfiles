@@ -220,3 +220,6 @@ red = "#e67e80"
 blue = "#7fbbb3"
 teal = "#83c092"
 peach = "#e69875"
+
+[ui.sound]
+enabled = true
