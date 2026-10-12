@@ -146,6 +146,10 @@ case "$provider" in
   codex) mode=${STUB_CODEX_MODE:-valid} ;;
 esac
 
+if [ "$provider" = copilot ] && [ "$(grep -c '^copilot$' "$STUB_LOG_DIR/calls")" -gt 1 ]; then
+  mode=${STUB_COPILOT_RETRY_MODE:-$mode}
+fi
+
 case "$mode" in
   fail)
     printf '%s unavailable\n' "$provider" >&2
@@ -182,12 +186,22 @@ case "$mode" in
   extra)
     payload='{"candidates":["feat: candidate one","fix: candidate two","docs: candidate three","test: candidate four","chore: candidate five","perf: candidate six","ci: candidate seven","build: candidate eight","style: candidate nine","refactor: candidate ten"],"explanation":"must be rejected"}'
     ;;
-  valid)
+  valid | fenced | longsubject | preamble | multiple | emptybody | badsubject | separator | wrongtype)
     if [ "${STUB_OUTPUT_MODE:-short}" = "detailed" ]; then
       payload='{"candidates":[{"subject":"feat: candidate one","body":"Explain the first motivation."},{"subject":"fix: candidate two","body":"Explain the second motivation."},{"subject":"docs: candidate three","body":"Explain the third motivation."},{"subject":"test: candidate four","body":"Explain the fourth motivation."},{"subject":"chore: candidate five","body":"Explain the fifth motivation."}]}'
     else
       payload='{"candidates":["feat: candidate one","fix: candidate two","docs: candidate three","test: candidate four","chore: candidate five","perf: candidate six","ci: candidate seven","build: candidate eight","style: candidate nine","refactor: candidate ten"]}'
     fi
+    case "$mode" in
+      fenced) payload=$(printf '\140\140\140json\n%s\n\140\140\140\n' "$payload") ;;
+      longsubject) payload=$(printf '%s' "$payload" | jq '.candidates[0].subject = ("feat: " + ("x" * 73))') ;;
+      emptybody) payload=$(printf '%s' "$payload" | jq '.candidates[0].body = "   "') ;;
+      badsubject) payload=$(printf '%s' "$payload" | jq '.candidates[0].subject = "not a commit subject"') ;;
+      separator) payload=$(printf '%s' "$payload" | jq '.candidates[0].body = "===COMMIT==="') ;;
+      wrongtype) payload=$(printf '%s' "$payload" | jq '.candidates[0].subject = null') ;;
+      preamble) payload=$(printf 'Here are the messages:\n%s' "$payload") ;;
+      multiple) payload=$(printf '%s\n%s' "$payload" "$payload") ;;
+    esac
     ;;
   *) exit 93 ;;
 esac
@@ -320,17 +334,53 @@ for provider in copilot claude codex; do
 done
 ok "providers cannot report themselves as the Herdr pane's resumable agent"
 
+for output_mode in short detailed; do
+  reset_logs
+  (cd "$WORK_REPO" && STUB_OUTPUT_MODE=$output_mode STUB_COPILOT_MODE=fenced "$SCRIPT" "--$output_mode") >"$OUT" 2>"$ERR"
+  [ "$(cat "$STUB_LOG_DIR/calls")" = copilot ] || fail "fenced $output_mode JSON caused fallback"
+done
+ok "complete fenced JSON is accepted in both output modes"
+
+for invalid_mode in longsubject emptybody badsubject separator wrongtype; do
+  reset_logs
+  (cd "$WORK_REPO" && STUB_OUTPUT_MODE=detailed STUB_COPILOT_MODE=$invalid_mode STUB_COPILOT_RETRY_MODE=valid "$SCRIPT" --detailed) >"$OUT" 2>"$ERR"
+  [ "$(cat "$STUB_LOG_DIR/calls")" = "$(printf 'copilot\ncopilot')" ] || fail "$invalid_mode was not repaired by Copilot"
+  grep -Fq 'candidate 1' "$ERR" || fail "candidate-specific diagnostic missing"
+  grep -Fq 'Validation failure:' "$STUB_LOG_DIR/copilot.prompt" || fail "retry lacks validation feedback"
+  grep -Fq 'changed content' "$STUB_LOG_DIR/copilot.prompt" || fail "retry lost original diff"
+  assert_count 4 '^===COMMIT===$' "$OUT"
+done
+ok "invalid detailed candidates get one correction with specific feedback"
+
+for invalid_mode in malformed preamble multiple; do
+  reset_logs
+  (cd "$WORK_REPO" && STUB_COPILOT_MODE=$invalid_mode "$SCRIPT" --short) >"$OUT" 2>"$ERR"
+  [ "$(cat "$STUB_LOG_DIR/calls")" = "$(printf 'copilot\ncopilot\nclaude')" ] || fail "$invalid_mode bypassed validation or retry limit"
+  grep -Fq 'not a single valid JSON value' "$ERR" || fail "JSON diagnostic missing"
+  [ "$(wc -l <"$OUT" | tr -d ' ')" = 10 ] || fail "invalid output leaked into candidates"
+done
+ok "malformed, mixed prose and multiple JSON responses fall back after one retry"
+
+for retry_mode in fail slow; do
+  reset_logs
+  (cd "$WORK_REPO" && AI_COMMIT_TIMEOUT_SECS=2 STUB_COPILOT_MODE=nine STUB_COPILOT_RETRY_MODE=$retry_mode "$SCRIPT" --short) >"$OUT" 2>"$ERR"
+  [ "$(cat "$STUB_LOG_DIR/calls")" = "$(printf 'copilot\ncopilot\nclaude')" ] || fail "$retry_mode correction did not fall back"
+  [ "$(wc -l <"$OUT" | tr -d ' ')" = 10 ] || fail "failed correction lost fallback candidates"
+done
+ok "correction transport failures and timeouts fall back without further retries"
+
 reset_logs
 (cd "$WORK_REPO" && STUB_COPILOT_MODE=nine "$SCRIPT" --short) >"$OUT" 2>"$ERR"
-expected_calls=$(printf 'copilot\nclaude')
+expected_calls=$(printf 'copilot\ncopilot\nclaude')
 [ "$(cat "$STUB_LOG_DIR/calls")" = "$expected_calls" ] || fail "wrong default fallback order"
 [ "$(wc -l <"$OUT" | tr -d ' ')" = "10" ] || fail "fallback did not return 10 candidates"
 grep -Fq "exact-count validation" "$ERR" || fail "count validation diagnostic missing"
+grep -Fq 'expected 10 candidates, got 9' "$ERR" || fail "actual candidate count missing"
 ok "wrong candidate count triggers the existing Copilot-to-Claude fallback"
 
 reset_logs
 (cd "$WORK_REPO" && STUB_COPILOT_MODE=extra "$SCRIPT" --short) >"$OUT" 2>"$ERR"
-expected_calls=$(printf 'copilot\nclaude')
+expected_calls=$(printf 'copilot\ncopilot\nclaude')
 [ "$(cat "$STUB_LOG_DIR/calls")" = "$expected_calls" ] || fail "Copilot extra-key output did not fall back"
 ok "Copilot output rejects top-level keys other than candidates"
 
@@ -354,7 +404,7 @@ if (cd "$WORK_REPO" && \
   "$SCRIPT" --short) >"$OUT" 2>"$ERR"; then
   fail "all-invalid provider outputs unexpectedly succeeded"
 fi
-expected_calls=$(printf 'copilot\nclaude\ncodex')
+expected_calls=$(printf 'copilot\ncopilot\nclaude\ncodex')
 [ "$(cat "$STUB_LOG_DIR/calls")" = "$expected_calls" ] || fail "all-provider fallback order changed"
 grep -Fq "All providers failed." "$ERR" || fail "terminal failure diagnostic missing"
 ok "malformed, duplicate, and wrong-count results cannot pass validation"

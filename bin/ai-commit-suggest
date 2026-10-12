@@ -28,7 +28,7 @@ case "$PROVIDER" in
     ;;
 esac
 
-# Each provider gets its own deadline so a timeout can still fall back.
+# Each provider attempt gets its own deadline so a timeout can still fall back.
 TIMEOUT_SECS="${AI_COMMIT_TIMEOUT_SECS:-120}"
 case "$TIMEOUT_SECS" in
   '' | *[!0-9]* | 0)
@@ -304,6 +304,7 @@ PROVIDER_ERR="$PRIVATE_TMPDIR/provider.err"
 PROVIDER_STDOUT="$PRIVATE_TMPDIR/provider.stdout"
 RAW_FILE="$PRIVATE_TMPDIR/raw.out"
 NORMALIZED_FILE="$PRIVATE_TMPDIR/normalized.json"
+VALIDATION_ERR="$PRIVATE_TMPDIR/validation.err"
 
 trap cleanup EXIT
 trap 'exit 129' HUP
@@ -385,7 +386,7 @@ run_copilot() {
   (
     cd "$PRIVATE_TMPDIR" || exit 1
     exec_grouped gh copilot -- \
-      -p "$PROMPT" \
+      -p "${COPILOT_PROMPT:-$PROMPT}" \
       --silent \
       --model "${AI_COMMIT_COPILOT_MODEL:-auto}" \
       --available-tools= \
@@ -450,65 +451,65 @@ run_claude() {
 }
 
 extract_candidate_object() {
-  jq -c '
+  jq -Rsc '
     def decoded:
-      if type == "string" then (try fromjson catch empty) else . end;
+      if type == "string" then
+        gsub("^\\s+|\\s+$"; "")
+        | if test("^```(?:json)?\\s*\\n[\\s\\S]*\\n```$") then
+            sub("^```(?:json)?\\s*\\n"; "") | sub("\\n```$"; "")
+          else . end
+        | try fromjson catch error("response is not a single valid JSON value")
+      else . end;
     def locate:
       decoded
-      | if type != "object" then empty
-        elif ((.candidates? | type) == "array") then .
+      | if type != "object" then error("response must be a JSON object")
+        elif has("candidates") then .
         elif has("structured_output") then (.structured_output | locate)
         elif has("result") then (.result | locate)
         elif has("response") then (.response | locate)
         elif has("output") then (.output | locate)
-        else empty
+        else error("response is missing candidates")
         end;
     locate
-  ' "$1" 2>/dev/null
+  ' "$1"
 }
 
 normalize_output() {
   input_file=$1
-  if ! extract_candidate_object "$input_file" >"$NORMALIZED_FILE" || [ ! -s "$NORMALIZED_FILE" ]; then
+  if ! extract_candidate_object "$input_file" >"$NORMALIZED_FILE" 2>"$VALIDATION_ERR"; then
     return 1
   fi
 
-  if [ "$DETAILED" = "1" ]; then
-    jq -er '
-      def valid_subject:
-        type == "string"
-        and length <= 72
-        and test("^(feat|fix|refactor|docs|test|chore|perf|ci|build|style|revert)(\\([^()\\n]+\\))?!?: [^\\n]+$");
-      .candidates as $items
-      | if ((keys | sort) == ["candidates"])
-          and (($items | length) == 5)
-          and (($items | unique | length) == 5)
-          and all($items[];
-            type == "object"
-            and ((keys | sort) == ["body", "subject"])
-            and (.subject | valid_subject)
-            and (.body | type == "string"
-              and ((gsub("^\\s+|\\s+$"; "") | length) > 0)
-              and (contains("===COMMIT===") | not)))
-        then $items | map(.subject + "\n\n" + .body) | join("\n===COMMIT===\n")
-        else error("expected exactly five valid detailed candidates")
-        end
-    ' "$NORMALIZED_FILE" 2>/dev/null
-  else
-    jq -er '
-      def valid_subject:
-        type == "string"
-        and test("^(feat|fix|refactor|docs|test|chore|perf|ci|build|style|revert)(\\([^()\\n]+\\))?!?: [^\\n]+$");
-      .candidates as $items
-      | if ((keys | sort) == ["candidates"])
-          and (($items | length) == 10)
-          and (($items | unique | length) == 10)
-          and all($items[]; valid_subject)
-        then $items[]
-        else error("expected exactly ten valid short candidates")
-        end
-    ' "$NORMALIZED_FILE" 2>/dev/null
-  fi
+  jq -er --argjson detailed "$DETAILED" '
+    def check_subject($position):
+      if type != "string" then error("candidate \($position): subject must be a string")
+      elif ($detailed == 1 and length > 72) then
+        error("candidate \($position): subject is \(length) characters; maximum is 72")
+      elif (test("^(feat|fix|refactor|docs|test|chore|perf|ci|build|style|revert)(\\([^()\\n]+\\))?!?: [^\\n]+$") | not) then
+        error("candidate \($position): subject must use conventional commits format")
+      else . end;
+    (if $detailed == 1 then 5 else 10 end) as $count
+    | if (keys | sort) != ["candidates"] then error("response must contain only candidates")
+      elif (.candidates | type) != "array" then error("candidates must be an array")
+      elif (.candidates | length) != $count then
+        error("expected \($count) candidates, got \(.candidates | length)")
+      elif (.candidates | unique | length) != $count then error("candidates must be distinct")
+      else .candidates end
+    | to_entries | map(
+        (.key + 1) as $position | .value
+        | if $detailed == 1 then
+            if type != "object" then error("candidate \($position): expected subject/body object")
+            elif (keys | sort) != ["body", "subject"] then
+              error("candidate \($position): expected only subject and body keys")
+            elif (.body | type) != "string" then error("candidate \($position): body must be a string")
+            elif (.body | gsub("^\\s+|\\s+$"; "") | length) == 0 then
+              error("candidate \($position): body must not be empty")
+            elif (.body | contains("===COMMIT===")) then
+              error("candidate \($position): body contains reserved separator")
+            else (.subject | check_subject($position)) + "\n\n" + .body end
+          else check_subject($position) end)
+    | if $detailed == 1 then join("\n===COMMIT===\n") else .[] end
+  ' "$NORMALIZED_FILE" 2>"$VALIDATION_ERR"
 }
 
 provider_label() {
@@ -533,17 +534,29 @@ run_provider() {
 }
 
 try_provider() {
-  : >"$RAW_FILE"
-  : >"$NORMALIZED_FILE"
-  if run_provider "$1" >"$RAW_FILE"; then
+  provider_attempt=1
+  COPILOT_PROMPT="$PROMPT"
+  while :; do
+    : >"$RAW_FILE"
+    : >"$NORMALIZED_FILE"
+    run_provider "$1" >"$RAW_FILE" || return 1
     if normalize_output "$RAW_FILE" >"$PROVIDER_STDOUT" && [ -s "$PROVIDER_STDOUT" ]; then
       cat "$PROVIDER_STDOUT"
       return 0
     fi
-    printf '\033[33m%s:\033[0m output failed schema or exact-count validation\n' \
-      "$(provider_label "$1")" >&2
-  fi
-  return 1
+    validation_reason=$(sed 's/^jq: error (at .*): //' "$VALIDATION_ERR")
+    printf '\033[33m%s:\033[0m output failed schema or exact-count validation: %s\n' \
+      "$(provider_label "$1")" "${validation_reason:-empty output}" >&2
+    [ "$1" = copilot ] && [ "$provider_attempt" = 1 ] || return 1
+    provider_attempt=2
+    printf '\033[36m↻ retrying GitHub Copilot once to correct output format…\033[0m\n' >&2
+    COPILOT_PROMPT="$PROMPT
+
+The previous response failed local validation. Regenerate the complete candidate set.
+Validation failure: $validation_reason
+Check every candidate before answering. Return only the JSON object matching this schema:
+$SCHEMA_JSON"
+  done
 }
 
 # Build fallback order: chosen provider first, then remaining in priority order
