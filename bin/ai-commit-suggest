@@ -388,7 +388,6 @@ run_copilot() {
       -p "$PROMPT" \
       --silent \
       --model "${AI_COMMIT_COPILOT_MODEL:-auto}" \
-      --effort low \
       --available-tools= \
       --allow-all-tools \
       --disable-builtin-mcps \

@@ -95,14 +95,21 @@ output_file=""
 
 case "$provider" in
   copilot)
+    model=""
+    effort=""
     while [ "$#" -gt 0 ]; do
       case "$1" in
         --model)
           shift
+          model=${1:-}
           if [ "${1:-}" = "gpt-5.6-luna" ] && [ "${STUB_COPILOT_LUNA_DISABLED:-0}" = 1 ]; then
             printf '%s\n' 'Error: Run `copilot --model gpt-5.6-luna` in interactive mode to enable this model' >&2
             exit 1
           fi
+          ;;
+        --effort | --reasoning-effort)
+          shift
+          effort=${1:-}
           ;;
         -p | --print)
           shift
@@ -112,6 +119,10 @@ case "$provider" in
       esac
       shift
     done
+    if [ "$model" = auto ] && [ -n "$effort" ]; then
+      printf 'Error: Model "auto" does not support reasoning effort configuration (requested: "%s").\n' "$effort" >&2
+      exit 1
+    fi
     ;;
   claude)
     cat >"$prompt_file"
@@ -220,14 +231,27 @@ if grep -Fq 'in interactive mode to enable this model' "$ERR"; then
   cat "$ERR" >&2
   fail "default Copilot model requires interactive activation"
 fi
-[ "$(cat "$STUB_LOG_DIR/calls")" = "copilot" ] || fail "disabled Luna caused provider fallback"
+[ "$(cat "$STUB_LOG_DIR/calls")" = "copilot" ] || {
+  cat "$ERR" >&2
+  fail "default Copilot invocation caused provider fallback"
+}
 assert_line "$STUB_LOG_DIR/copilot.args" auto
+assert_count 0 '^--(reasoning-)?effort(=|$)' "$STUB_LOG_DIR/copilot.args"
 [ "$(wc -l <"$OUT" | tr -d ' ')" = "10" ] || fail "Auto did not produce 10 candidates"
 ok "Copilot default works without activating Luna"
 
 reset_logs
+(cd "$WORK_REPO" && STUB_OUTPUT_MODE=detailed "$SCRIPT" --detailed) >"$OUT" 2>"$ERR"
+[ "$(cat "$STUB_LOG_DIR/calls")" = "copilot" ] || fail "Copilot Auto detailed mode fell back"
+assert_count 4 '^===COMMIT===$' "$OUT"
+assert_count 5 '^[a-z]+: candidate ' "$OUT"
+assert_count 0 '^--(reasoning-)?effort(=|$)' "$STUB_LOG_DIR/copilot.args"
+ok "Copilot Auto supports detailed output without forcing reasoning effort"
+
+reset_logs
 (cd "$WORK_REPO" && AI_COMMIT_COPILOT_MODEL=gpt-5.6-luna "$SCRIPT" --short) >"$OUT" 2>"$ERR"
 assert_line "$STUB_LOG_DIR/copilot.args" gpt-5.6-luna
+assert_count 0 '^--(reasoning-)?effort(=|$)' "$STUB_LOG_DIR/copilot.args"
 [ "$(cat "$STUB_LOG_DIR/calls")" = "copilot" ] || fail "explicit Copilot model was not used"
 ok "Copilot model can be explicitly selected"
 
@@ -243,7 +267,7 @@ reset_logs
 (cd "$WORK_REPO" && "$SCRIPT" --short) >"$OUT" 2>"$ERR"
 [ "$(wc -l <"$OUT" | tr -d ' ')" = "10" ] || fail "short output did not contain exactly 10 lines"
 [ "$(cat "$STUB_LOG_DIR/calls")" = "copilot" ] || fail "default provider was not Copilot"
-for flag in --silent --effort low --available-tools= --allow-all-tools \
+for flag in --silent --available-tools= --allow-all-tools \
   --disable-builtin-mcps --no-custom-instructions --no-ask-user --no-remote \
   --no-remote-export --no-auto-update --log-level none --no-color; do
   assert_line "$STUB_LOG_DIR/copilot.args" "$flag"
