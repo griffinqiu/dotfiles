@@ -9,9 +9,10 @@
 # enter either opens the selected worktree (focusing it when already open)
 # or creates one for the typed branch — existing branches are checked out,
 # an empty query lets Herdr auto-generate one. ctrl-d deletes the selected
-# worktree after a y confirmation (its branch is kept). prefix+c creates a
-# plain workspace at the active pane's cwd the same way. Template tabs get
-# the same "N.name" position-prefix labels that herdr-smart-tab maintains.
+# worktree after a y confirmation (its branch is kept). prefix+shift+c
+# creates a plain workspace at the active pane's cwd the same way. Template
+# tabs get the same "N.name" position-prefix labels that herdr-smart-tab
+# maintains.
 #
 # usage: herdr-smart-worktree                  interactive dialog
 #        herdr-smart-worktree create BRANCH    non-interactive create

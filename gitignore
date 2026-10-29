@@ -79,3 +79,5 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 **/.claude/settings.local.json
+
+**/.claude/.cc-writes/

@@ -61,7 +61,7 @@ swap_pane_up = ""
 swap_pane_right = ""
 cycle_pane_next = ""
 cycle_pane_previous = ""
-last_pane = "prefix+o"
+last_pane = "prefix+ctrl+o"
 split_vertical = "prefix+v"
 split_horizontal = "prefix+s"
 close_pane = ""
@@ -106,6 +106,19 @@ key = "prefix+shift+a"
 type = "shell"
 command = '"${HOME}/dotfiles/bin/herdr-smart-tab" last'
 description = "new tab at end (tmux A)"
+
+# Agents are summoned on demand instead of preopened by the workspace template.
+[[keys.command]]
+key = "prefix+c"
+type = "shell"
+command = '"${HOME}/dotfiles/bin/herdr-smart-tab" agent claude'
+description = "new Claude tab in the claude group"
+
+[[keys.command]]
+key = "prefix+o"
+type = "shell"
+command = '"${HOME}/dotfiles/bin/herdr-smart-tab" agent codex'
+description = "new Codex tab in the codex group"
 
 [[keys.command]]
 key = "prefix+shift+x"
@@ -167,10 +180,10 @@ height = "80%"
 # typing filters existing worktrees (enter opens or focuses) and doubles as
 # a new branch name (enter on the create row makes the worktree). Freshly
 # opened workspaces are initialized from the bootmux "worktree" template,
-# or keep a single shell tab when the template is absent. prefix+c creates
-# a plain workspace the same way.
+# or keep a single shell tab when the template is absent. prefix+shift+c
+# creates a plain workspace the same way.
 [[keys.command]]
-key = "prefix+c"
+key = "prefix+shift+c"
 type = "shell"
 command = 'zsh -ic "$HOME/dotfiles/bin/herdr-smart-worktree workspace"'
 description = "new workspace with default tabs"

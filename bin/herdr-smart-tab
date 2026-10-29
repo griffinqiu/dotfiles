@@ -11,16 +11,45 @@
 # tab's group name, with the whole group renumbered by position; appending at
 # the end joins the last tab's group. Every tab also carries a "N." position
 # prefix so prefix+1..9 switching stays predictable (Herdr shows no indices).
+#
+# "agent NAME" opens a tab running that agent at the end of its group; agent
+# groups follow the console tab in AGENT_GROUPS order (claude tabs, then codex).
 
 set -euo pipefail
 
+AGENT_ANCHOR_GROUP=console
+AGENT_GROUPS=(claude codex)
+
 usage() {
   printf 'usage: herdr-smart-tab <before|after|first|last> [--focus|--no-focus]\n' >&2
+  printf '       herdr-smart-tab agent <%s>\n' "$(IFS='|'; printf '%s' "${AGENT_GROUPS[*]}")" >&2
   printf '       herdr-smart-tab <close-tab|close-pane|renumber|renumber-all>\n' >&2
 }
 
 mode="${1:-}"
 case "$mode" in
+  agent)
+    agent_name="${2:-}"
+    if [ "$#" -ne 2 ]; then
+      usage
+      exit 2
+    fi
+    # The anchor plus agent groups up to and including the requested one;
+    # the new tab goes after the last tab belonging to any of them.
+    leading_agent_groups=("$AGENT_ANCHOR_GROUP")
+    is_known_agent=0
+    for agent_group in "${AGENT_GROUPS[@]}"; do
+      leading_agent_groups+=("$agent_group")
+      if [ "$agent_group" = "$agent_name" ]; then
+        is_known_agent=1
+        break
+      fi
+    done
+    if [ "$is_known_agent" -eq 0 ]; then
+      usage
+      exit 2
+    fi
+    ;;
   before | after | first | last)
     focus_option="${2:---focus}"
     if [ "$#" -gt 2 ]; then
@@ -299,6 +328,39 @@ if [ "$mode" = "close-tab" ] || [ "$mode" = "close-pane" ]; then
   fi
 
   renumber_group "$base"
+  renumber_all
+  exit 0
+fi
+
+if [ "$mode" = "agent" ]; then
+  tabs_before="$(list_tabs)"
+  insert_index=0
+  position=0
+  while IFS= read -r item_label; do
+    position=$((position + 1))
+    group_base="$(strip_suffix "$(strip_ordinal "$item_label")")"
+    for agent_group in "${leading_agent_groups[@]}"; do
+      if [ "$group_base" = "$agent_group" ]; then
+        insert_index="$position"
+      fi
+    done
+  done < <("$jq_bin" -r '.result.tabs[].label' <<<"$tabs_before")
+
+  if ! create_response="$("$herdr_bin" tab create --workspace "$workspace_id" \
+    --cwd "$pane_cwd" --label "$agent_name" --focus)"; then
+    die "could not create tab"
+  fi
+  if ! new_tab_id="$("$jq_bin" -er '.result.tab.tab_id' <<<"$create_response")" \
+    || ! new_pane_id="$("$jq_bin" -er '.result.root_pane.pane_id' <<<"$create_response")"; then
+    die "Herdr did not return the new tab and pane ids"
+  fi
+  if [ "$insert_index" -lt "$position" ]; then
+    move_tab "$new_tab_id" "$insert_index"
+  fi
+  if ! "$herdr_bin" pane run "$new_pane_id" "$agent_name" >/dev/null; then
+    die "could not start $agent_name"
+  fi
+  renumber_group "$agent_name"
   renumber_all
   exit 0
 fi

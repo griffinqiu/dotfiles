@@ -5,6 +5,7 @@ version = "1.26.4"
 backend = "core:go"
 
 [tools.go."platforms.macos-arm64"]
+checksum = "sha256:b62ad2b6d7d2464f12a5bcad7ff47f19d08325773b5efd21610e445a05a9bf53"
 url = "https://dl.google.com/go/go1.26.4.darwin-arm64.tar.gz"
 
 [[tools.lua]]
@@ -46,7 +47,7 @@ url = "https://github.com/jdx/ruby/releases/download/4.0.5-3/ruby-4.0.5.macos.ta
 provenance = "github-attestations"
 
 [[tools.rust]]
-version = "1.96.0"
+version = "stable"
 backend = "core:rust"
 
 [[tools.zig]]
