@@ -89,3 +89,9 @@ ocagent() {
 if [[ ${aliases[herdr-macmini-mosh]-} == 'mosh -- macmini /opt/homebrew/bin/herdr' ]]; then
   alias herdr-macmini-mosh='"$HOME/dotfiles/bin/herdr-mosh" macmini'
 fi
+
+# >>> grok installer >>>
+export PATH="$HOME/.grok/bin:$PATH"
+fpath=(~/.grok/completions/zsh $fpath)
+autoload -Uz compinit && compinit -C
+# <<< grok installer <<<
