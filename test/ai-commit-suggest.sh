@@ -99,6 +99,14 @@ case "$provider" in
     effort=""
     while [ "$#" -gt 0 ]; do
       case "$1" in
+        --no-remote)
+          printf '%s\n' 'error: --no-remote was removed. Use /remote off in a session; manage incoming connections in /environments.' >&2
+          exit 1
+          ;;
+        --no-remote-export)
+          printf '%s\n' 'error: --no-remote-export was renamed to --sync-session=off.' >&2
+          exit 1
+          ;;
         --model)
           shift
           model=${1:-}
@@ -282,10 +290,11 @@ reset_logs
 [ "$(wc -l <"$OUT" | tr -d ' ')" = "10" ] || fail "short output did not contain exactly 10 lines"
 [ "$(cat "$STUB_LOG_DIR/calls")" = "copilot" ] || fail "default provider was not Copilot"
 for flag in --silent --available-tools= --allow-all-tools \
-  --disable-builtin-mcps --no-custom-instructions --no-ask-user --no-remote \
-  --no-remote-export --no-auto-update --log-level none --no-color; do
+  --disable-builtin-mcps --no-custom-instructions --no-ask-user \
+  --sync-session=off --no-auto-update --log-level none --no-color; do
   assert_line "$STUB_LOG_DIR/copilot.args" "$flag"
 done
+assert_count 0 '^--no-remote(-export)?$' "$STUB_LOG_DIR/copilot.args"
 grep -Fq "untrusted data" "$STUB_LOG_DIR/copilot.prompt" || fail "prompt injection boundary missing"
 copilot_tmp=$(cat "$STUB_LOG_DIR/copilot.pwd")
 [ ! -d "$copilot_tmp" ] || fail "Copilot private directory was not cleaned"

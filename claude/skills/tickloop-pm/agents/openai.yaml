@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tickloop PM"
+  short_description: "Report to and coordinate with the Tickloop PM via the pm command"
+  default_prompt: "Use $tickloop-pm to report to the Tickloop PM and record ticket state."
