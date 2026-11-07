@@ -88,3 +88,10 @@ Claude Code 运行在用户无法直接看到屏幕的远程 macOS 主机上。�
 - **替代做法**：认证优先设备码、`--no-browser`、API key 或 `.env`；必须由用户参与的步骤用 `! <command>` 让用户在自己的终端里跑；本地服务需要通过用户可访问的安全地址或托管 Artifact 展示。
 - **临时文件**：一律放会话 scratchpad。
 - **沙箱**：Bash 默认在沙箱里跑；沙箱不影响本机回环端口的互通（已验证），只有出站网络或权限受限时才考虑关沙箱。
+
+## 两台机器：MacBook 与 macmini
+
+用户有两台开发机：MacBook（主机，pm 与 PM 会话所在）和 macmini（`ssh macmini`，Herdr machine `macmini`，tailnet `macmini.tailc348df.ts.net`）。两台的用户名、home 和项目目录完全一致。
+
+- 用户贴来的终端输出里，提示符前带 `✦` 的是在 macmini 上执行的，不带的是在 MacBook 上执行的。据此判断命令跑在哪台机器上，不要混淆。
+- 控制 macmini 用 `herdr --machine macmini ...`，不要用 ssh 去操作它；只有 Herdr 做不到的（传文件、取命令退出码）才用 ssh/rsync。
