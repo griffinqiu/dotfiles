@@ -152,3 +152,4 @@ git -C ~/dotfiles pull --ff-only && ~/dotfiles/bin/dotfiles-bootstrap
 The default update reruns all managed components without proactively upgrading
 Homebrew packages or drifted pinned Git checkouts. Add `--upgrade` only when an
 upgrade is intended.
+<!-- tickloop e2e 20261111-0157 -->
