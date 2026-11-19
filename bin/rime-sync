@@ -1,0 +1,120 @@
+#!/bin/sh
+
+set -eu
+
+DEFAULT_SQUIRREL_BIN="/Library/Input Methods/Squirrel.app/Contents/MacOS/Squirrel"
+
+usage() {
+  cat >&2 <<'EOF'
+Usage: rime-sync
+
+Redeploy Squirrel so configuration changes take effect, then sync the Rime
+user dictionary through the shared sync_dir. Run it on each machine.
+EOF
+  exit 2
+}
+
+[ "$#" -eq 0 ] || usage
+
+squirrel_bin=${RIME_SQUIRREL_BIN:-$DEFAULT_SQUIRREL_BIN}
+rime_dir=${RIME_USER_DIR:-$HOME/Library/Rime}
+log_dir=${RIME_LOG_DIR:-${TMPDIR:-/tmp}}
+error_log=${log_dir%/}/rime.squirrel/rime.squirrel.ERROR
+timeout_seconds=${RIME_SYNC_TIMEOUT:-60}
+
+die() {
+  echo "rime-sync: $*" >&2
+  exit 1
+}
+
+[ -x "$squirrel_bin" ] || die "Squirrel not found at $squirrel_bin"
+[ -f "$rime_dir/installation.yaml" ] || die "missing $rime_dir/installation.yaml; switch to Squirrel once"
+
+installation_value() {
+  sed -n "s/^$1: *\"\{0,1\}\([^\"]*\)\"\{0,1\} *\$/\1/p" "$rime_dir/installation.yaml" | head -n 1
+}
+
+installation_id=$(installation_value installation_id)
+[ -n "$installation_id" ] || die "installation_id missing from $rime_dir/installation.yaml"
+sync_dir=$(installation_value sync_dir)
+snapshot_dir=${sync_dir:-$rime_dir/sync}/$installation_id
+
+modified_time() {
+  stat -f %m "$1" 2>/dev/null || echo 0
+}
+
+newest_snapshot_time() {
+  newest=0
+  for snapshot in "$snapshot_dir"/*.userdb.txt; do
+    snapshot_time=$(modified_time "$snapshot")
+    [ "$snapshot_time" -le "$newest" ] || newest=$snapshot_time
+  done
+  echo "$newest"
+}
+
+error_log_size() {
+  if [ -f "$error_log" ]; then
+    wc -c <"$error_log" | tr -d ' '
+  else
+    echo 0
+  fi
+}
+
+# Squirrel buffers its INFO log, so completion is detected from the files each
+# step rewrites; only the ERROR log is written immediately.
+wait_for_step() {
+  step=$1
+  started_at=$2
+  error_offset=$3
+
+  elapsed=0
+  while [ "$elapsed" -lt "$timeout_seconds" ]; do
+    if [ "$(error_log_size)" -gt "$error_offset" ]; then
+      echo "rime-sync: $step failed:" >&2
+      tail -c +"$((error_offset + 1))" "$error_log" >&2
+      exit 1
+    fi
+    case "$step" in
+      deploy) finished_at=$(modified_time "$rime_dir/user.yaml") ;;
+      sync) finished_at=$(newest_snapshot_time) ;;
+    esac
+    if [ "$finished_at" -ge "$started_at" ]; then
+      echo "$step: ok"
+      return 0
+    fi
+    sleep 1
+    elapsed=$((elapsed + 1))
+  done
+
+  die "$step not confirmed within ${timeout_seconds}s; is Squirrel running?"
+}
+
+# `Squirrel --reload/--sync` post these notifications without immediate delivery,
+# so macOS holds them until Squirrel is the active input source again.
+post_squirrel_notification() {
+  if [ -n "${RIME_SQUIRREL_NOTIFIER:-}" ]; then
+    "$RIME_SQUIRREL_NOTIFIER" "$1"
+    return
+  fi
+  osascript -l JavaScript - "$1" >/dev/null <<'EOF'
+function run(argv) {
+  ObjC.import("Foundation");
+  $.NSDistributedNotificationCenter.defaultCenter
+    .postNotificationNameObjectUserInfoDeliverImmediately(argv[0], $(), $(), true);
+}
+EOF
+}
+
+# Squirrel skips deployment when nothing changed, so mark its own default.yaml
+# as modified; that file is local, unlike the custom files shared through sync.
+started_at=$(date +%s)
+error_offset=$(error_log_size)
+touch "$rime_dir/default.yaml"
+post_squirrel_notification SquirrelReloadNotification
+wait_for_step deploy "$started_at" "$error_offset"
+
+started_at=$(date +%s)
+error_offset=$(error_log_size)
+post_squirrel_notification SquirrelSyncNotification
+wait_for_step sync "$started_at" "$error_offset"
+echo "Run rime-sync on the other machine too to pick up this machine's words."
