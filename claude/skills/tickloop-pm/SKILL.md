@@ -54,7 +54,7 @@ Any new commit makes both checks stale; redo them before `pm ready`.
 
 ## Environments
 
-Every machine has its own DEV; your ticket uses the DEV of the machine it runs on, and `pm` picks it for you. There is one PRE, deployed only from the PM's Mac.
+Every machine has its own DEV; your ticket uses the DEV of the machine it runs on, and `pm` picks it for you. A ticket on macmini verifies DEV in macmini's own Chrome (the /chrome extension connected on macmini), never the macbook browser. On macmini never run large headless Playwright sweeps: only a few targeted specs, `--workers=1`, one run at a time. There is one PRE, deployed only from the PM's Mac.
 
 | Need | Command |
 | --- | --- |
@@ -73,9 +73,10 @@ Deploy only through `pm`; it checks the grant. Production and official releases 
 - `pm spawn <word> --task-file <ticket.md>` starts an external worker in a new tab on worktree `<your-worktree>-<word>`; `<word>` is one lowercase word or abbreviation, letters only, at most 10.
 - `pm spawn <word> --repo <repo> --task-file <ticket.md>` does the same in another repo the ticket owns (your brief lists them), on worktree `<ticket>-<word>` derived from the ticket's worktree there.
 - Workers commit but do not push; merge a worker's local branch into your ticket branch (same local repository: a ticket's coordinator and workers always run on one machine) and push the ticket branch yourself.
-- Workers run only checks scoped to their change. You run the full `make check` once per merged batch on the integration branch and send failures back with `pm send <worker>`; a message reopens a worker that already reported.
+- Workers run only checks scoped to their change. You run the full `make check` once per ticket, after every task is done and merged, right before `pm check` / `pm ready` (never after a batch, a DEV deploy or a main merge; a blocker counts as done once merged with scoped checks passing). Send failures back with `pm send <worker>` and rerun only what failed; a message reopens a worker that already reported.
 - Before heavy work (a full `make check`, cargo tests, integration tests) run `pm heavy`. It is advice, never a gate. Exit 0 (`ok: macmini load 12 (limit 30)`) means go; exit 3 (`skip: ...`) means the machine is overloaded: do not wait. A worker skips the check and lists it with its exact command under `Skipped checks` in its report; a coordinator goes on with the steps that are not heavy and runs its deferred checks, plus every check its workers skipped, on the integration branch before `pm check` or `pm ready`, even if the load is still high then. `pm spawn` never checks the load.
-- After the full check that includes its merge passes: `pm reap <worker>` closes its tab and deletes its worktree and merged branch.
+- After its merge and scoped checks pass: `pm reap <worker>` closes its tab and deletes its worktree and merged branch.
+- Merge main before you stop (user, 2026-11-18): every time before you stop (end your turn, report, wait on a worker, the user or acceptance), `git fetch origin main`; if it has new commits, merge them into the ticket branch, resolve conflicts, run the scoped checks and push without being asked. No full `make check` after it; redo review and E2E. Workers never merge main themselves.
 
 ## On another machine
 

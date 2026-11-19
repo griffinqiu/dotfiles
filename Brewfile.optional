@@ -12,4 +12,6 @@ brew "wget"
 brew "yarn"
 brew "zellij"
 
+cask "hammerspoon"
 cask "kitty"
+cask "squirrel-app"

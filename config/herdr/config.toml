@@ -35,7 +35,7 @@ switch_workspace = "prefix+shift+1..9"
 previous_agent = "prefix+ctrl+p"
 next_agent = "prefix+ctrl+n"
 focus_agent = "prefix+ctrl+1..9"
-remote_image_paste = "alt+v"
+remote_image_paste = "ctrl+v"
 
 # Tab creation goes exclusively through the herdr-smart-tab bindings below so
 # every created tab gets its positional "N." label prefix renumbered.
