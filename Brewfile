@@ -28,7 +28,7 @@ brew "tmux"
 brew "universal-ctags"
 brew "uv"
 brew "zoxide"
-brew "griffinqiu/tap/bootmux"
+brew "griffinqiu/tap/bootmux", trusted: true
 
 cask "1password-cli"
 cask "copilot-cli"
