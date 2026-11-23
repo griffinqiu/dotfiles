@@ -1,7 +1,8 @@
 # CLAUDE.md
 
 This is the canonical personal instruction file for Claude Code. The dotfiles
-repository exposes the same content to Codex through `codex/AGENTS.md`.
+repository exposes the same content to Codex through `codex/AGENTS.md` and to
+Pi through `pi/agent/AGENTS.md`.
 
 ## Code Style and Quality Standards
 

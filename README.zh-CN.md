@@ -30,7 +30,7 @@ Bootstrap不会安装Homebrew，也不会自动运行Doctor。首次安装软件
 
 | 组件 | 职责 |
 |---|---|
-| `packages` | 通过核心`Brewfile`安装缺失项，不升级已有软件包；安装缺失的固定Git依赖 |
+| `packages` | 通过核心`Brewfile`安装缺失项，不升级已有软件包；安装缺失的固定Git依赖；缺少Claude Code或Codex时用官方安装脚本安装 |
 | `links` | 安全迁移受保护路径，通过RCM/`rcup`建立或刷新链接，再清理源文件已从本checkout删除的链接 |
 | `runtimes` | 按`config/mise/config.toml`和`config/mise/mise.lock`安装精确版本 |
 | `plugins` | 从lockfile恢复Neovim插件，并安装缺失的tmux插件 |
@@ -103,6 +103,11 @@ Claude路径是唯一可编辑来源。Codex通过相对符号链接使用相同
 | Neovim指令 | `config/nvim/CLAUDE.md` | `config/nvim/AGENTS.md → CLAUDE.md` |
 | 所有项目可用的skills | `claude/skills/*` | `agents/skills/*`中的相对别名 |
 | 仅本仓库可用的skills | `.claude/skills/*` | `.agents/skills/*`中的相对别名 |
+
+Pi通过`pi/agent/AGENTS.md → ../../claude/CLAUDE.md`读取同一份全局指令，
+并自行从`~/.agents/skills`发现skills。可共享的`pi/agent/settings.json`和
+`pi/agent/mcp.json`链接到`~/.pi/agent`；凭证、会话和工具自动安装的扩展
+保留在本机。Pi本身在Mise配置中固定版本。
 
 RCM把全局层发布到`~/.claude`、`~/.codex`和`~/.agents`；点号目录层只保留在
 当前仓库。`dotfiles-theme`属于仓库本地skill，`claude/skills/gitlab-mr*`则

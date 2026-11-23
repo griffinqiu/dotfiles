@@ -15,7 +15,8 @@ configuration into this repository without an explicit request.
 - Keep project instructions in `CLAUDE.md`; never replace `AGENTS.md` with a
   copied file.
 - Keep global personal instructions in `claude/CLAUDE.md`; expose them through
-  `codex/AGENTS.md -> ../claude/CLAUDE.md`.
+  `codex/AGENTS.md -> ../claude/CLAUDE.md` and
+  `pi/agent/AGENTS.md -> ../../claude/CLAUDE.md`.
 - Keep skill bodies in Claude discovery paths; every Codex entry is a relative
   symlink to one. Which Claude path decides the scope:
   - `claude/skills/` with an `agents/skills/` alias is published by RCM into

@@ -2,6 +2,7 @@
 go = "1.26.4"
 lua = "5.5.0"
 node = "26.3.0"
+"npm:@earendil-works/pi-coding-agent" = "1.6.0"
 python = "3.14.6"
 ruby = "4.0.5"
 rust = "stable"

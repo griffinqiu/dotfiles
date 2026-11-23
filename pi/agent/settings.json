@@ -1,0 +1,12 @@
+{
+  "lastChangelogVersion": "1.5.2",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-6-astra",
+  "packages": [
+    "git:github.com/badlogic/pi-doom",
+    "npm:@termdraw/pi",
+    "git:github.com/tickloopai/tickloop-plugins"
+  ],
+  "theme": "dark",
+  "defaultThinkingLevel": "xhigh"
+}

@@ -24,6 +24,10 @@ backend = "core:node"
 checksum = "sha256:77ef7f7a15aa757c2ca19d63cf41c8d9eb3b18590ebc6883871310787d8c6b6c"
 url = "https://nodejs.org/dist/v26.3.0/node-v26.3.0-darwin-arm64.tar.gz"
 
+[[tools."npm:@earendil-works/pi-coding-agent"]]
+version = "1.6.0"
+backend = "npm:@earendil-works/pi-coding-agent"
+
 [[tools.python]]
 version = "3.14.6"
 backend = "core:python"

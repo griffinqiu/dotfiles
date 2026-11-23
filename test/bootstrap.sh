@@ -158,7 +158,30 @@ case "${1:-}" in
 esac
 EOF
 
+cat >"$test_tmp/bin/curl" <<'EOF'
+#!/bin/sh
+printf 'curl:%s\n' "$*" >>"$TEST_LOG"
+output=
+previous=
+for argument do
+  [ "$previous" != -o ] || output=$argument
+  previous=$argument
+done
+case "$argument" in
+  https://claude.ai/install.sh) agent_command=claude ;;
+  https://chatgpt.com/codex/install.sh) agent_command=codex ;;
+  *) exit 22 ;;
+esac
+cat >"$output" <<INSTALLER
+printf 'installer:%s:path=%s:non-interactive=%s\n' $agent_command "\${PATH%%:*}" "\${CODEX_NON_INTERACTIVE:-}" >>"\$TEST_LOG"
+mkdir -p "\$HOME/.local/bin"
+: >"\$HOME/.local/bin/$agent_command"
+chmod +x "\$HOME/.local/bin/$agent_command"
+INSTALLER
+EOF
+
 chmod +x \
+  "$test_tmp/bin/curl" \
   "$test_tmp/bin/brew" \
   "$test_tmp/bin/rcup" \
   "$test_tmp/bin/doctor" \
@@ -190,6 +213,7 @@ run_bootstrap() {
     TEST_LOG="$test_log" \
     DOTFILES_ROOT="$repo_root" \
     DOTFILES_BREW_BIN="$test_tmp/bin/brew" \
+    DOTFILES_CURL_BIN="$test_tmp/bin/curl" \
     DOTFILES_RCUP_BIN="$test_tmp/bin/rcup" \
     DOTFILES_DOCTOR_BIN="$test_tmp/bin/doctor" \
     DOTFILES_MISE_BIN="$test_tmp/bin/mise" \
@@ -207,6 +231,7 @@ run_bootstrap_home() {
     TEST_LOG="$test_log" \
     DOTFILES_ROOT="$repo_root" \
     DOTFILES_BREW_BIN="$test_tmp/bin/brew" \
+    DOTFILES_CURL_BIN="$test_tmp/bin/curl" \
     DOTFILES_RCUP_BIN="$test_tmp/bin/rcup" \
     DOTFILES_DOCTOR_BIN="$test_tmp/bin/doctor" \
     DOTFILES_MISE_BIN="$test_tmp/bin/mise" \
@@ -224,6 +249,7 @@ run_packages_with_git_deps() {
     TEST_LOG="$test_log" \
     DOTFILES_ROOT="$repo_root" \
     DOTFILES_BREW_BIN="$test_tmp/bin/brew" \
+    DOTFILES_CURL_BIN="$test_tmp/bin/curl" \
     DOTFILES_GIT_BIN="$test_tmp/bin/git-deps" \
     TEST_GIT_DIRTY_PATH="${TEST_GIT_DIRTY_PATH:-}" \
     DOTFILES_MACHINE_ARCH=arm64 \
@@ -342,12 +368,34 @@ if grep -q '^doctor:' "$test_log"; then
 fi
 pass 'default bootstrap installs every component without running doctor'
 
+agent_bin_dir=$test_tmp/home/.local/bin
+for agent_command in claude codex; do
+  grep -Fqx "installer:$agent_command:path=$agent_bin_dir:non-interactive=1" \
+    "$test_log" ||
+    fail "bootstrap must run the official $agent_command installer non-interactively"
+  [ -x "$agent_bin_dir/$agent_command" ] ||
+    fail "bootstrap must leave $agent_command in ~/.local/bin"
+done
+grep -Eq '^curl:-fsSL -o .+/install\.sh https://claude\.ai/install\.sh$' \
+  "$test_log" || fail 'bootstrap must download the Claude Code installer'
+grep -Eq '^curl:-fsSL -o .+/install\.sh https://chatgpt\.com/codex/install\.sh$' \
+  "$test_log" || fail 'bootstrap must download the Codex installer'
+brew_line=$(grep -n '^brew:bundle' "$test_log" | sed -n '1s/:.*//p')
+first_installer_line=$(grep -n '^installer:' "$test_log" | sed -n '1s/:.*//p')
+[ "$brew_line" -lt "$first_installer_line" ] && \
+  [ "$first_installer_line" -lt "$rcup_line" ] ||
+  fail 'agent installers must run after Homebrew and before links'
+pass 'packages installs Claude Code and Codex with their official installers'
+
 : >"$test_log"
 run_bootstrap --only packages >/dev/null
 grep -Fqx "brew:bundle install --no-upgrade --file $repo_root/Brewfile" \
   "$test_log" || fail 'packages component must install the core Brewfile'
 if grep -Eq '^(rcup|mise|plugin:|doctor:)' "$test_log"; then
   fail 'packages component must not run links, runtimes, plugins, or doctor'
+fi
+if grep -Eq '^(curl|installer):' "$test_log"; then
+  fail 'packages component must leave existing self-updating agents alone'
 fi
 
 : >"$test_log"
@@ -887,6 +935,7 @@ HOME="$upgrade_home" \
   TEST_LOG="$test_log" \
   DOTFILES_ROOT="$repo_root" \
   DOTFILES_BREW_BIN="$test_tmp/bin/brew" \
+  DOTFILES_CURL_BIN="$test_tmp/bin/curl" \
   DOTFILES_RCUP_BIN="$test_tmp/bin/rcup" \
   DOTFILES_DOCTOR_BIN="$test_tmp/bin/doctor" \
   DOTFILES_MISE_BIN="$test_tmp/bin/mise" \
@@ -976,6 +1025,7 @@ if HOME="$nonempty_home" \
   TEST_LOG="$test_log" \
   DOTFILES_ROOT="$repo_root" \
   DOTFILES_BREW_BIN="$test_tmp/bin/brew" \
+  DOTFILES_CURL_BIN="$test_tmp/bin/curl" \
   DOTFILES_RCUP_BIN="$test_tmp/bin/rcup" \
   DOTFILES_DOCTOR_BIN="$test_tmp/bin/doctor" \
   DOTFILES_MISE_BIN="$test_tmp/bin/mise" \
@@ -1321,7 +1371,7 @@ if command -v mise >/dev/null 2>&1; then
     MISE_GLOBAL_CONFIG_FILE="$repo_root/config/mise/config.toml" \
     MISE_GLOBAL_CONFIG_ROOT="$repo_root/config/mise" \
     mise ls --current 2>/dev/null | grep -c .)
-  expected_tools=$(grep -cE '^[a-z]+ = "' "$repo_root/config/mise/config.toml")
+  expected_tools=$(grep -cE '^"?[a-z][^ ]* = "' "$repo_root/config/mise/config.toml")
   [ "$resolved_tools" -eq "$expected_tools" ] ||
     fail "mise resolved $resolved_tools of $expected_tools pinned tools"
 

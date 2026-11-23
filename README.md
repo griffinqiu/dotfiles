@@ -31,7 +31,7 @@ With no options, Bootstrap runs the following components in order:
 
 | Component | Responsibility |
 |---|---|
-| `packages` | Install missing items from the core `Brewfile` without upgrading existing packages; install missing pinned Git dependencies |
+| `packages` | Install missing items from the core `Brewfile` without upgrading existing packages; install missing pinned Git dependencies; install Claude Code and Codex with their official installers when missing |
 | `links` | Safely migrate protected paths, create or refresh links through RCM/`rcup`, then prune links whose source this checkout no longer has |
 | `runtimes` | Install exact versions from `config/mise/config.toml` and `config/mise/mise.lock` |
 | `plugins` | Restore Neovim plugins from the lockfile and install missing tmux plugins |
@@ -113,6 +113,13 @@ and portable skills through relative symbolic links.
 | Neovim instructions | `config/nvim/CLAUDE.md` | `config/nvim/AGENTS.md → CLAUDE.md` |
 | Skills available to every project | `claude/skills/*` | Relative aliases under `agents/skills/*` |
 | Skills private to this repository | `.claude/skills/*` | Relative aliases under `.agents/skills/*` |
+
+Pi reads the same global instructions through
+`pi/agent/AGENTS.md → ../../claude/CLAUDE.md` and discovers skills from
+`~/.agents/skills` on its own. Its shareable settings, `pi/agent/settings.json`
+and `pi/agent/mcp.json`, are linked into `~/.pi/agent`; credentials, sessions,
+and tool-installed extensions stay local. Pi itself is pinned in the Mise
+configuration.
 
 RCM publishes the global layer into `~/.claude`, `~/.codex`, and `~/.agents`;
 the dotted layer remains repository-local. `dotfiles-theme` is

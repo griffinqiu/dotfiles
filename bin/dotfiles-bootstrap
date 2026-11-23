@@ -7,6 +7,8 @@ ZSH_AUTOSUGGESTIONS_REV=85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5
 ZSH_SYNTAX_HIGHLIGHTING_REV=c4d95591843d49838b7ad30081e7aba3135a6703
 TPM_REV=99469c4a9b1ccf77fade25842dc7bafbc8ce9946
 GRUVBOX_REV=5d15b2765f59754d7ac263c88a0f6e3e58124951
+CLAUDE_INSTALLER_URL=https://claude.ai/install.sh
+CODEX_INSTALLER_URL=https://chatgpt.com/codex/install.sh
 
 usage() {
   cat <<'EOF'
@@ -384,6 +386,28 @@ install_pinned_checkout() {
   printf 'Installed %s at %s\n' "$checkout_name" "$checkout_revision"
 }
 
+install_agent_cli() {
+  agent_command=$1
+  installer_url=$2
+  installer_shell=$3
+  agent_bin_dir=$HOME/.local/bin
+
+  # Both agents update themselves, so an existing install is left alone.
+  [ ! -x "$agent_bin_dir/$agent_command" ] || return 0
+
+  printf 'Installing %s with its official installer ...\n' "$agent_command"
+  bootstrap_tmp=$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-bootstrap.XXXXXX")
+  "$curl_bin" -fsSL -o "$bootstrap_tmp/install.sh" "$installer_url"
+  # With the install directory already on PATH, the installers leave the
+  # RCM-linked shell profiles untouched.
+  PATH="$agent_bin_dir:$PATH" CODEX_NON_INTERACTIVE=1 \
+    "$installer_shell" "$bootstrap_tmp/install.sh"
+  rm -rf -- "$bootstrap_tmp"
+  bootstrap_tmp=
+  [ -x "$agent_bin_dir/$agent_command" ] ||
+    die "$agent_command installer did not create $agent_bin_dir/$agent_command"
+}
+
 preflight_plugins() {
   plugin_mode=$1
 
@@ -535,6 +559,14 @@ if $run_packages && [ "${DOTFILES_BOOTSTRAP_SKIP_GIT_DEPS:-0}" != 1 ]; then
     'https://github.com/morhetz/gruvbox.git' \
     "$GRUVBOX_REV" \
     "$HOME/.vim/pack/colors/opt/gruvbox"
+fi
+
+if $run_packages; then
+  curl_bin=${DOTFILES_CURL_BIN:-$(command -v curl || true)}
+  [ -n "$curl_bin" ] && [ -x "$curl_bin" ] ||
+    die 'curl is required to install Claude Code and Codex'
+  install_agent_cli claude "$CLAUDE_INSTALLER_URL" /bin/bash
+  install_agent_cli codex "$CODEX_INSTALLER_URL" /bin/sh
 fi
 
 if $run_links; then
