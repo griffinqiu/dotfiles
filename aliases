@@ -64,31 +64,27 @@ command -v sha1sum >/dev/null || alias sha1sum="shasum"
 # and the traffic falls through to FINAL. Routing them at Surge's local proxy
 # gives it the hostname back and the rules match again.
 # socks5h, not socks5: socks5 resolves locally and reproduces the very bug.
-# Linux hosts run no Surge, so these tools connect directly there.
-if [[ $OSTYPE == darwin* ]]; then
-  export SURGE_HTTP_PROXY="http://127.0.0.1:6152"
-  export SURGE_SOCKS_PROXY="socks5h://127.0.0.1:6153"
-  export SURGE_NO_PROXY="localhost,127.0.0.1,::1,.local"
+# Linux hosts run their proxy on the same ports, so this applies there too.
+export SURGE_HTTP_PROXY="http://127.0.0.1:6152"
+export SURGE_SOCKS_PROXY="socks5h://127.0.0.1:6153"
+export SURGE_NO_PROXY="localhost,127.0.0.1,::1,.local"
 
-  surge-proxied() {
-    http_proxy="$SURGE_HTTP_PROXY" https_proxy="$SURGE_HTTP_PROXY" all_proxy="$SURGE_SOCKS_PROXY" \
-    HTTP_PROXY="$SURGE_HTTP_PROXY" HTTPS_PROXY="$SURGE_HTTP_PROXY" ALL_PROXY="$SURGE_SOCKS_PROXY" \
-    no_proxy="$SURGE_NO_PROXY" NO_PROXY="$SURGE_NO_PROXY" \
-    command "$@"
-  }
+surge-proxied() {
+  http_proxy="$SURGE_HTTP_PROXY" https_proxy="$SURGE_HTTP_PROXY" all_proxy="$SURGE_SOCKS_PROXY" \
+  HTTP_PROXY="$SURGE_HTTP_PROXY" HTTPS_PROXY="$SURGE_HTTP_PROXY" ALL_PROXY="$SURGE_SOCKS_PROXY" \
+  no_proxy="$SURGE_NO_PROXY" NO_PROXY="$SURGE_NO_PROXY" \
+  command "$@"
+}
 
-  alias bun='surge-proxied bun'
-  alias npm='surge-proxied npm'
-  alias curl='surge-proxied curl'
-  alias openclaw='surge-proxied openclaw'
-  alias hermes='surge-proxied hermes'
-  alias pi='surge-proxied pi'
-  alias claude='surge-proxied claude'
-  alias claude2='CLAUDE_CONFIG_DIR="$HOME/.claude-second" surge-proxied claude'
-  alias codex='https_proxy=http://127.0.0.1:6152 http_proxy=http://127.0.0.1:6152 all_proxy=socks5://127.0.0.1:6153 command codex'
-else
-  alias claude2='CLAUDE_CONFIG_DIR="$HOME/.claude-second" command claude'
-fi
+alias bun='surge-proxied bun'
+alias npm='surge-proxied npm'
+alias curl='surge-proxied curl'
+alias openclaw='surge-proxied openclaw'
+alias hermes='surge-proxied hermes'
+alias pi='surge-proxied pi'
+alias claude='surge-proxied claude'
+alias claude2='CLAUDE_CONFIG_DIR="$HOME/.claude-second" surge-proxied claude'
+alias codex='https_proxy=http://127.0.0.1:6152 http_proxy=http://127.0.0.1:6152 all_proxy=socks5://127.0.0.1:6153 command codex'
 
 # Machine-local aliases; stays out of this repository.
 [[ -f ~/.aliases.local ]] && source ~/.aliases.local

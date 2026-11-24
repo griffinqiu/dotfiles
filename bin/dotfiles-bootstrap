@@ -357,6 +357,11 @@ install_standalone_cli() {
   printf 'Installing %s with its official installer ...\n' "$cli_command"
   bootstrap_tmp=$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-bootstrap.XXXXXX")
   "$curl_bin" -fsSL -o "$bootstrap_tmp/install.sh" "$installer_url"
+  # Region and captive-portal blocks can answer with an HTML page and status 200.
+  case "$(head -n 1 "$bootstrap_tmp/install.sh")" in
+    '#!'*) ;;
+    *) die "$installer_url returned a page instead of a shell script; rerun with https_proxy set if this host needs a proxy" ;;
+  esac
   # With the install directory already on PATH, the installers leave the
   # RCM-linked shell profiles untouched.
   PATH="$cli_bin_dir:$PATH" CODEX_NON_INTERACTIVE=1 \

@@ -173,7 +173,12 @@ case "$argument" in
   https://mise.run) agent_command=mise ;;
   *) exit 22 ;;
 esac
+if [ "${TEST_CURL_BLOCKED:-0}" = 1 ]; then
+  printf '%s\n' '<!DOCTYPE html><title>App unavailable in region</title>' >"$output"
+  exit 0
+fi
 cat >"$output" <<INSTALLER
+#!/bin/sh
 printf 'installer:%s:path=%s:non-interactive=%s\n' $agent_command "\${PATH%%:*}" "\${CODEX_NON_INTERACTIVE:-}" >>"\$TEST_LOG"
 mkdir -p "\$HOME/.local/bin"
 : >"\$HOME/.local/bin/$agent_command"
@@ -1110,6 +1115,24 @@ grep -Fqx 'standalone mise' "$linux_mise_home/.local/bin/mise" ||
 [ ! -e "$linux_mise_home/.local/bin/mise.pre-dotfiles" ] ||
   fail 'Linux links must not migrate the standalone Mise'
 pass 'Linux keeps the standalone Mise that macOS migrates away'
+
+blocked_home=$test_tmp/blocked-installer-home
+mkdir -p "$blocked_home"
+: >"$test_log"
+TEST_CURL_BLOCKED=1
+export TEST_CURL_BLOCKED
+if blocked_output=$(run_linux_bootstrap "$blocked_home" --only packages 2>&1); then
+  fail 'bootstrap must stop when an installer URL returns an HTML page'
+fi
+unset TEST_CURL_BLOCKED
+case "$blocked_output" in
+  *'returned a page instead of a shell script'*) ;;
+  *) fail "a blocked installer download must be explained, got: $blocked_output" ;;
+esac
+if grep -q '^installer:' "$test_log"; then
+  fail 'bootstrap must not execute a downloaded page as an installer'
+fi
+pass 'installer downloads that return an HTML page stop with a clear error'
 
 for unsupported_platform in Linux:aarch64 FreeBSD:amd64; do
   : >"$test_log"

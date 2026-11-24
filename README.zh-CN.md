@@ -54,8 +54,16 @@ MacVim、字体）仍只在macOS上安装。
 | Mise本身 | 官方安装脚本，装到`~/.local/bin/mise` |
 
 `bin/dotfiles-linux-packages check`只报告缺失的包，不做修改；`install`还会生成
-shell需要的`en_US.UTF-8` locale。只适用于macOS的shell设置——Surge代理别名、
-Keychain凭据助手和Oh My Zsh的`macos`插件——在Linux上会自动关闭。
+shell需要的`en_US.UTF-8` locale。只适用于macOS的shell设置——Keychain凭据助手和
+Oh My Zsh的`macos`插件——在Linux上会自动关闭。代理别名在两个平台上都生效，
+两边的代理监听同样的本地端口。
+
+Bootstrap是普通的`sh`脚本，用不到这些别名。如果claude.ai、chatgpt.com或GitHub
+需要走代理，请显式传入；curl、Mise和Git都会读取它：
+
+```sh
+https_proxy=http://127.0.0.1:6152 http_proxy=http://127.0.0.1:6152 ./bin/dotfiles-bootstrap
+```
 
 修改固定版本的工具后，同时刷新两个平台的lockfile：
 

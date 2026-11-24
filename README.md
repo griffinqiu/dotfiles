@@ -57,8 +57,17 @@ applications (Ghostty, Kitty, Hammerspoon, MacVim, fonts) stay macOS-only.
 
 `bin/dotfiles-linux-packages check` reports missing packages without changing
 anything; `install` also generates the `en_US.UTF-8` locale the shell expects.
-macOS-only shell settings — the Surge proxy aliases, the Keychain credential
-helper, and the Oh My Zsh `macos` plugin — turn themselves off on Linux.
+macOS-only shell settings — the Keychain credential helper and the Oh My Zsh
+`macos` plugin — turn themselves off on Linux. The proxy aliases apply on both
+platforms, which run their proxy on the same local ports.
+
+Bootstrap is a plain `sh` script and does not see those aliases. Where
+claude.ai, chatgpt.com, or GitHub need the proxy, pass it explicitly; curl,
+Mise, and Git all honor it:
+
+```sh
+https_proxy=http://127.0.0.1:6152 http_proxy=http://127.0.0.1:6152 ./bin/dotfiles-bootstrap
+```
 
 After changing a pinned tool, refresh both platforms in the lockfile:
 
