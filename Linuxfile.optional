@@ -1,0 +1,12 @@
+# Useful but non-essential Linux packages. Install these explicitly with:
+#   ./bin/dotfiles-bootstrap --optional
+#
+# apt              dnf
+gnupg              gnupg2
+mosh               mosh
+ncdu               ncdu
+pipx               pipx
+procps             procps-ng
+stress             stress
+sysbench           sysbench
+wget               wget

@@ -93,7 +93,7 @@ if [ -n "$version" ]; then
 
   latest=""
   if [ -f "$CACHE_FILE" ]; then
-    cache_age=$(($(date +%s) - $(stat -f %m "$CACHE_FILE" 2>/dev/null || echo 0)))
+    cache_age=$(($(date +%s) - $(stat -c %Y "$CACHE_FILE" 2>/dev/null || stat -f %m "$CACHE_FILE" 2>/dev/null || echo 0)))
     if [ "$cache_age" -le "$CACHE_MAX_AGE" ]; then
       latest=$(cat "$CACHE_FILE")
     fi

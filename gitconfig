@@ -39,8 +39,9 @@
 [rebase]
   autosquash = true
 
+# The keychain helper ships with Git on macOS only; elsewhere this is a no-op.
 [credential]
-  helper = osxkeychain
+  helper = "!f() { if [ \"$(uname -s)\" = Darwin ]; then exec git credential-osxkeychain \"$@\"; fi; }; f"
 
 [filter "lfs"]
   required = true

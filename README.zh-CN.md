@@ -2,8 +2,8 @@
 
 [English](README.md)
 
-一套面向Apple Silicon macOS的克制、受管理的开发环境，覆盖终端工具、编辑器、
-多路复用器、语言运行时和AI代理配置。
+一套面向Apple Silicon macOS和无界面x86_64 Linux的克制、受管理的开发环境，
+覆盖终端工具、编辑器、多路复用器、语言运行时和AI代理配置。
 
 日常工作流只有两个入口：`dotfiles-bootstrap`负责改变环境；
 `dotfiles-doctor`只读检查环境。
@@ -12,8 +12,9 @@
 
 系统要求：
 
-- Apple Silicon Mac（`arm64`）；不支持Intel Mac或Linux。
-- 预先安装[Homebrew](https://brew.sh/)。
+- 预先装好[Homebrew](https://brew.sh/)的Apple Silicon Mac（`arm64`），或带
+  `apt`（Debian、Ubuntu）/`dnf`（Fedora）且有`sudo`权限的x86_64 Linux主机。
+  不支持Intel Mac和ARM Linux。
 - 可用的Git、GitHub SSH访问权限和网络连接。
 
 ```sh
@@ -24,13 +25,16 @@ git clone git@github.com:griffinqiu/dotfiles.git ~/dotfiles && cd ~/dotfiles && 
 Bootstrap不会安装Homebrew，也不会自动运行Doctor。首次安装软件包、运行时和插件
 需要网络连接。
 
+Linux上需要手动执行一次`chsh -s "$(command -v zsh)"`把登录shell换成zsh；
+Bootstrap发现不是zsh时会提示，但不会替你修改。
+
 ## Bootstrap
 
 不带参数时，Bootstrap按顺序运行以下组件：
 
 | 组件 | 职责 |
 |---|---|
-| `packages` | 通过核心`Brewfile`安装缺失项，不升级已有软件包；安装缺失的固定Git依赖；缺少Claude Code或Codex时用官方安装脚本安装 |
+| `packages` | 通过核心`Brewfile`（macOS）或`Linuxfile`（Linux）安装缺失项，不升级已有软件包；安装缺失的固定Git依赖；缺少Claude Code、Codex（Linux上还有Mise）时用官方安装脚本安装 |
 | `links` | 安全迁移受保护路径，通过RCM/`rcup`建立或刷新链接，再清理源文件已从本checkout删除的链接 |
 | `runtimes` | 按`config/mise/config.toml`和`config/mise/mise.lock`安装精确版本 |
 | `plugins` | 从lockfile恢复Neovim插件，并安装缺失的tmux插件 |
@@ -38,11 +42,33 @@ Bootstrap不会安装Homebrew，也不会自动运行Doctor。首次安装软件
 `Brewfile`是Homebrew Bundle的标准manifest。MacVim和Neovim都是必装的核心依赖；
 `Brewfile.optional`是单独启用的附加清单，不会替代核心manifest。
 
+## Linux
+
+Linux按通过SSH使用的无界面开发机支持；GUI应用（Ghostty、Kitty、Hammerspoon、
+MacVim、字体）仍只在macOS上安装。
+
+| 层次 | Linux上的来源 |
+|---|---|
+| 系统软件包 | `Linuxfile`/`Linuxfile.optional`：每行一个包，先写`apt`包名再写`dnf`包名（`-`表示该包管理器不需要），由`bin/dotfiles-linux-packages`通过`sudo`安装 |
+| 发行版太旧或没有的命令行工具 | Neovim、fzf、fd、gh、glab、lazygit、uv、bun、stylua、shfmt、diff-so-fancy、Herdr、Bootmux和1Password CLI在`config/mise/config.toml`中以`os = ["linux"]`固定版本，并锁定`linux-x64` |
+| Mise本身 | 官方安装脚本，装到`~/.local/bin/mise` |
+
+`bin/dotfiles-linux-packages check`只报告缺失的包，不做修改；`install`还会生成
+shell需要的`en_US.UTF-8` locale。只适用于macOS的shell设置——Surge代理别名、
+Keychain凭据助手和Oh My Zsh的`macos`插件——在Linux上会自动关闭。
+
+修改固定版本的工具后，同时刷新两个平台的lockfile：
+
+```sh
+MISE_GLOBAL_CONFIG_FILE=~/dotfiles/config/mise/config.toml \
+  MISE_GLOBAL_CONFIG_ROOT=~/dotfiles/config/mise mise lock -g
+```
+
 | 参数 | 作用 |
 |---|---|
 | 无参数 | 按`packages → links → runtimes → plugins`运行全部组件 |
 | `--only COMPONENTS` | 运行`packages`、`links`、`runtimes`、`plugins`的逗号分隔子集 |
-| `--optional` | 选中`packages`时安装`Brewfile.optional`；配合`--check`时纳入Doctor检查 |
+| `--optional` | 选中`packages`时安装`Brewfile.optional`或`Linuxfile.optional`；配合`--check`时纳入Doctor检查 |
 | `--upgrade` | 升级选中的软件包和/或插件集合；不改变`links`或`runtimes`的行为 |
 
 只运行部分组件时不会自动补跑其前置组件。旧命令
@@ -126,7 +152,7 @@ RCM把全局层发布到`~/.claude`、`~/.codex`和`~/.agents`；点号目录层
 - Bootstrap不会运行`brew bundle cleanup`、卸载软件，也不会在后续组件失败时
   回滚已经完成的组件。
 
-Doctor检查平台、命令、Homebrew状态、选定的RCM链接、Mise配置与lockfile、
+Doctor检查平台、命令、Homebrew或Linux软件包状态、选定的RCM链接、Mise配置与lockfile、
 固定Git依赖、Agent别名和部分配置语法。它不会修复环境，也不声称验证插件目录
 和所有编辑器链接。
 

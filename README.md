@@ -2,9 +2,9 @@
 
 [简体中文](README.zh-CN.md)
 
-A focused, managed development environment for Apple Silicon macOS,
-covering terminal tools, editors, multiplexers, language runtimes, and AI agent
-configuration.
+A focused, managed development environment for Apple Silicon macOS and headless
+x86_64 Linux, covering terminal tools, editors, multiplexers, language runtimes,
+and AI agent configuration.
 
 The workflow has two entry points: `dotfiles-bootstrap` changes the environment;
 `dotfiles-doctor` inspects it without making changes.
@@ -13,8 +13,9 @@ The workflow has two entry points: `dotfiles-bootstrap` changes the environment;
 
 Requirements:
 
-- An Apple Silicon Mac (`arm64`). Intel Macs and Linux are not supported.
-- [Homebrew](https://brew.sh/) installed in advance.
+- An Apple Silicon Mac (`arm64`) with [Homebrew](https://brew.sh/) installed
+  in advance, or an x86_64 Linux host with `apt` (Debian, Ubuntu) or `dnf`
+  (Fedora) and `sudo` rights. Intel Macs and ARM Linux are not supported.
 - Working Git, GitHub SSH access, and a network connection.
 
 ```sh
@@ -25,13 +26,16 @@ git clone git@github.com:griffinqiu/dotfiles.git ~/dotfiles && cd ~/dotfiles && 
 Bootstrap does not install Homebrew or run Doctor automatically. Initial package,
 runtime, and plugin installation requires network access.
 
+On Linux, switch the login shell to zsh once with `chsh -s "$(command -v zsh)"`;
+Bootstrap reminds you when it is not, but never changes it itself.
+
 ## Bootstrap
 
 With no options, Bootstrap runs the following components in order:
 
 | Component | Responsibility |
 |---|---|
-| `packages` | Install missing items from the core `Brewfile` without upgrading existing packages; install missing pinned Git dependencies; install Claude Code and Codex with their official installers when missing |
+| `packages` | Install missing items from the core `Brewfile` (macOS) or `Linuxfile` (Linux) without upgrading existing packages; install missing pinned Git dependencies; install Claude Code and Codex (and Mise on Linux) with their official installers when missing |
 | `links` | Safely migrate protected paths, create or refresh links through RCM/`rcup`, then prune links whose source this checkout no longer has |
 | `runtimes` | Install exact versions from `config/mise/config.toml` and `config/mise/mise.lock` |
 | `plugins` | Restore Neovim plugins from the lockfile and install missing tmux plugins |
@@ -40,11 +44,34 @@ With no options, Bootstrap runs the following components in order:
 mandatory core dependencies. `Brewfile.optional` is a separate opt-in inventory
 and never replaces the core manifest.
 
+## Linux
+
+Linux is supported as a headless, SSH-reached development host; GUI
+applications (Ghostty, Kitty, Hammerspoon, MacVim, fonts) stay macOS-only.
+
+| Layer | Linux source |
+|---|---|
+| System packages | `Linuxfile` / `Linuxfile.optional`: one row per package, the `apt` name then the `dnf` name (`-` skips one), installed by `bin/dotfiles-linux-packages` through `sudo` |
+| CLI tools the distributions ship too old or not at all | Neovim, fzf, fd, gh, glab, lazygit, uv, bun, stylua, shfmt, diff-so-fancy, Herdr, Bootmux, and 1Password CLI are pinned in `config/mise/config.toml` with `os = ["linux"]` and locked for `linux-x64` |
+| Mise itself | The official installer, into `~/.local/bin/mise` |
+
+`bin/dotfiles-linux-packages check` reports missing packages without changing
+anything; `install` also generates the `en_US.UTF-8` locale the shell expects.
+macOS-only shell settings — the Surge proxy aliases, the Keychain credential
+helper, and the Oh My Zsh `macos` plugin — turn themselves off on Linux.
+
+After changing a pinned tool, refresh both platforms in the lockfile:
+
+```sh
+MISE_GLOBAL_CONFIG_FILE=~/dotfiles/config/mise/config.toml \
+  MISE_GLOBAL_CONFIG_ROOT=~/dotfiles/config/mise mise lock -g
+```
+
 | Option | Effect |
 |---|---|
 | No option | Run `packages → links → runtimes → plugins` |
 | `--only COMPONENTS` | Run a comma-separated subset of `packages`, `links`, `runtimes`, and `plugins` |
-| `--optional` | Install `Brewfile.optional` when `packages` is selected; with `--check`, include it in Doctor |
+| `--optional` | Install `Brewfile.optional` or `Linuxfile.optional` when `packages` is selected; with `--check`, include it in Doctor |
 | `--upgrade` | Upgrade selected packages and/or plugin sets; it does not change `links` or `runtimes` |
 
 Selected components do not implicitly run their prerequisites. The legacy
@@ -143,7 +170,7 @@ refuses conflicting paths.
 - Bootstrap never runs `brew bundle cleanup`, uninstalls software, or rolls back
   earlier components after a later failure.
 
-Doctor checks the platform, commands, Homebrew state, selected RCM links, Mise
+Doctor checks the platform, commands, Homebrew or Linux package state, selected RCM links, Mise
 configuration and lockfile, pinned Git dependencies, Agent aliases, and selected
 configuration syntax. It does not repair the environment or claim to validate
 plugin trees and every editor link.

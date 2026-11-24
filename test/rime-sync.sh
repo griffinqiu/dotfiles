@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+if [[ $(uname -s) != Darwin ]]; then
+  echo '1..0 # SKIP rime-sync drives the macOS Squirrel input method'
+  exit 0
+fi
+
 repo_root=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 test_root=$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-rime-sync-test.XXXXXX")
 

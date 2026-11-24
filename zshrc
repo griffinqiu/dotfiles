@@ -16,10 +16,11 @@ export MISE_PYTHON_GITHUB_ATTESTATIONS=false
 command -v mise >/dev/null && eval "$(mise activate zsh)"
 
 # Must precede Oh My Zsh, which is what actually runs compinit. The Homebrew
-# prefix differs between Apple silicon and Intel.
+# prefix differs between Apple silicon and Intel; Linux has neither, which the
+# (N) qualifier turns into an empty element.
 brew_site_functions=/opt/homebrew/share/zsh/site-functions
 [[ -d $brew_site_functions ]] || brew_site_functions=/usr/local/share/zsh/site-functions
-fpath=($brew_site_functions $fpath)
+fpath=($brew_site_functions(N) $fpath)
 unset brew_site_functions
 
 export LANG="en_US.UTF-8"

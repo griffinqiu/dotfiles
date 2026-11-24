@@ -1,0 +1,33 @@
+# Core Linux system packages, one per row: the apt name, then the dnf name.
+# "-" means the package manager needs nothing for that row. CLI tools that the
+# distributions ship too old or not at all are pinned in config/mise instead.
+# Install with ./bin/dotfiles-bootstrap --only packages.
+#
+# apt              dnf
+bash               bash
+build-essential    gcc
+-                  gcc-c++
+-                  make
+ca-certificates    ca-certificates
+curl               curl
+diffutils          diffutils
+gawk               gawk
+git                git
+git-lfs            git-lfs
+jq                 jq
+less               less
+libatomic1         libatomic
+libreadline-dev    readline-devel
+locales            glibc-langpack-en
+perl               perl
+pkg-config         pkgconf-pkg-config
+rcm                rcm
+ripgrep            ripgrep
+shellcheck         ShellCheck
+tmux               tmux
+universal-ctags    ctags
+unzip              unzip
+vim                vim-enhanced
+xz-utils           xz
+zoxide             zoxide
+zsh                zsh

@@ -170,6 +170,7 @@ done
 case "$argument" in
   https://claude.ai/install.sh) agent_command=claude ;;
   https://chatgpt.com/codex/install.sh) agent_command=codex ;;
+  https://mise.run) agent_command=mise ;;
   *) exit 22 ;;
 esac
 cat >"$output" <<INSTALLER
@@ -219,6 +220,7 @@ run_bootstrap() {
     DOTFILES_MISE_BIN="$test_tmp/bin/mise" \
     DOTFILES_NVIM_PLUGIN_RUNNER="$test_tmp/bin/nvim-plugin-runner" \
     DOTFILES_TPM_PLUGIN_RUNNER="$test_tmp/bin/tpm-plugin-runner" \
+    DOTFILES_MACHINE_OS="${DOTFILES_MACHINE_OS:-Darwin}" \
     DOTFILES_MACHINE_ARCH="${DOTFILES_MACHINE_ARCH:-arm64}" \
     DOTFILES_BOOTSTRAP_SKIP_GIT_DEPS=1 \
     "$repo_root/bin/dotfiles-bootstrap" "$@"
@@ -237,6 +239,7 @@ run_bootstrap_home() {
     DOTFILES_MISE_BIN="$test_tmp/bin/mise" \
     DOTFILES_NVIM_PLUGIN_RUNNER="$test_tmp/bin/nvim-plugin-runner" \
     DOTFILES_TPM_PLUGIN_RUNNER="$test_tmp/bin/tpm-plugin-runner" \
+    DOTFILES_MACHINE_OS=Darwin \
     DOTFILES_MACHINE_ARCH=arm64 \
     DOTFILES_BOOTSTRAP_SKIP_GIT_DEPS=1 \
     "$repo_root/bin/dotfiles-bootstrap" "$@"
@@ -252,6 +255,7 @@ run_packages_with_git_deps() {
     DOTFILES_CURL_BIN="$test_tmp/bin/curl" \
     DOTFILES_GIT_BIN="$test_tmp/bin/git-deps" \
     TEST_GIT_DIRTY_PATH="${TEST_GIT_DIRTY_PATH:-}" \
+    DOTFILES_MACHINE_OS=Darwin \
     DOTFILES_MACHINE_ARCH=arm64 \
     DOTFILES_BOOTSTRAP_SKIP_GIT_DEPS=0 \
     "$repo_root/bin/dotfiles-bootstrap" --only packages "$@"
@@ -308,6 +312,7 @@ run_builtin_plugins() {
     DOTFILES_ROOT="$builtin_plugin_root" \
     DOTFILES_BREW_BIN="$test_tmp/bin/missing-brew" \
     DOTFILES_DOCTOR_BIN="$test_tmp/bin/missing-doctor" \
+    DOTFILES_MACHINE_OS=Darwin \
     DOTFILES_MACHINE_ARCH=arm64 \
     DOTFILES_NVIM_PLUGIN_RUNNER= \
     DOTFILES_TPM_PLUGIN_RUNNER= \
@@ -330,6 +335,7 @@ run_real_nvim_plugins() {
     DOTFILES_ROOT="$repo_root" \
     DOTFILES_BREW_BIN="$test_tmp/bin/missing-brew" \
     DOTFILES_DOCTOR_BIN="$test_tmp/bin/missing-doctor" \
+    DOTFILES_MACHINE_OS=Darwin \
     DOTFILES_MACHINE_ARCH=arm64 \
     DOTFILES_NVIM_PLUGIN_RUNNER= \
     DOTFILES_TPM_PLUGIN_RUNNER="$test_tmp/bin/tpm-plugin-runner" \
@@ -416,24 +422,30 @@ grep -Fqx \
 rmdir "$test_tmp/home/dotfiles-local"
 pass 'local dotfiles take precedence over repository links'
 
-prefix_rcup_home=$test_tmp/prefix-rcup-home
-mkdir -p "$prefix_rcup_home"
-: >"$test_log"
-HOME="$prefix_rcup_home" \
-  PATH=/usr/bin:/bin \
-  TEST_LOG="$test_log" \
-  TEST_RCM_PREFIX="$TEST_RCM_PREFIX" \
-  DOTFILES_ROOT="$repo_root" \
-  DOTFILES_BREW_BIN="$test_tmp/bin/brew-prefix" \
-  DOTFILES_RCUP_BIN= \
-  DOTFILES_MACHINE_ARCH=arm64 \
-  "$repo_root/bin/dotfiles-bootstrap" --only links >/dev/null
-grep -Fqx 'brew-prefix:--prefix rcm' "$test_log" || \
-  fail 'links must ask Homebrew for the rcm prefix when rcup is not on PATH'
-grep -Fqx \
-  "rcup-prefix:RCRC=$repo_root/rcrc args=-d $repo_root" "$test_log" || \
-  fail 'links must execute rcup resolved from the Homebrew rcm prefix'
-pass 'rcup resolves from Homebrew without relying on shell PATH refresh'
+# The scenario needs rcup off the system PATH, where Linux packages put it.
+if [ -x /usr/bin/rcup ] || [ -x /bin/rcup ]; then
+  skip 'rcup is on the system PATH, so the Homebrew prefix lookup is unused'
+else
+  prefix_rcup_home=$test_tmp/prefix-rcup-home
+  mkdir -p "$prefix_rcup_home"
+  : >"$test_log"
+  HOME="$prefix_rcup_home" \
+    PATH=/usr/bin:/bin \
+    TEST_LOG="$test_log" \
+    TEST_RCM_PREFIX="$TEST_RCM_PREFIX" \
+    DOTFILES_ROOT="$repo_root" \
+    DOTFILES_BREW_BIN="$test_tmp/bin/brew-prefix" \
+    DOTFILES_RCUP_BIN= \
+    DOTFILES_MACHINE_OS=Darwin \
+    DOTFILES_MACHINE_ARCH=arm64 \
+    "$repo_root/bin/dotfiles-bootstrap" --only links >/dev/null
+  grep -Fqx 'brew-prefix:--prefix rcm' "$test_log" || \
+    fail 'links must ask Homebrew for the rcm prefix when rcup is not on PATH'
+  grep -Fqx \
+    "rcup-prefix:RCRC=$repo_root/rcrc args=-d $repo_root" "$test_log" || \
+    fail 'links must execute rcup resolved from the Homebrew rcm prefix'
+  pass 'rcup resolves from Homebrew without relying on shell PATH refresh'
+fi
 
 # rcm never reclaims a link whose source was deleted, so the links component has
 # to, and it must leave live links and foreign targets alone.
@@ -942,6 +954,7 @@ HOME="$upgrade_home" \
   DOTFILES_NVIM_PLUGIN_RUNNER="$test_tmp/bin/nvim-plugin-runner" \
   DOTFILES_TPM_PLUGIN_RUNNER="$test_tmp/bin/tpm-plugin-runner" \
   DOTFILES_GIT_BIN="$test_tmp/bin/git-deps" \
+  DOTFILES_MACHINE_OS=Darwin \
   DOTFILES_MACHINE_ARCH=arm64 \
   "$repo_root/bin/dotfiles-bootstrap" --upgrade >/dev/null
 grep -Fq "git:$upgrade_home/.tmux/plugins/tpm:fetch:" "$test_log" ||
@@ -1016,6 +1029,104 @@ fi
 [ ! -s "$test_log" ] ||
   fail 'unsupported architecture must fail before package or link mutation'
 pass 'unsupported macOS architectures fail before mutation'
+
+cat >"$test_tmp/bin/linux-packages" <<'EOF'
+#!/bin/sh
+printf 'linux-packages:%s\n' "$*" >>"$TEST_LOG"
+EOF
+chmod +x "$test_tmp/bin/linux-packages"
+
+run_linux_bootstrap() {
+  linux_home=$1
+  shift
+  HOME="$linux_home" \
+    TEST_LOG="$test_log" \
+    DOTFILES_ROOT="$repo_root" \
+    DOTFILES_BREW_BIN="$test_tmp/bin/brew" \
+    DOTFILES_LINUX_PACKAGES_BIN="$test_tmp/bin/linux-packages" \
+    DOTFILES_CURL_BIN="$test_tmp/bin/curl" \
+    DOTFILES_RCUP_BIN="$test_tmp/bin/rcup" \
+    DOTFILES_DOCTOR_BIN="$test_tmp/bin/doctor" \
+    DOTFILES_MISE_BIN="$test_tmp/bin/mise" \
+    DOTFILES_NVIM_PLUGIN_RUNNER="$test_tmp/bin/nvim-plugin-runner" \
+    DOTFILES_TPM_PLUGIN_RUNNER="$test_tmp/bin/tpm-plugin-runner" \
+    DOTFILES_MACHINE_OS=Linux \
+    DOTFILES_MACHINE_ARCH=x86_64 \
+    DOTFILES_BOOTSTRAP_SKIP_GIT_DEPS=1 \
+    "$repo_root/bin/dotfiles-bootstrap" "$@"
+}
+
+log_line_of() {
+  grep -n "$1" "$test_log" | sed -n '1s/:.*//p'
+}
+
+linux_home=$test_tmp/linux-home
+mkdir -p "$linux_home"
+: >"$test_log"
+run_linux_bootstrap "$linux_home" >/dev/null ||
+  fail 'bootstrap must run every component on x86_64 Linux'
+grep -Fqx "linux-packages:install $repo_root/Linuxfile" "$test_log" ||
+  fail 'Linux packages must install the core Linuxfile'
+if grep -q '^brew' "$test_log"; then
+  fail 'Linux bootstrap must not call Homebrew'
+fi
+grep -Fqx "installer:mise:path=$linux_home/.local/bin:non-interactive=1" \
+  "$test_log" || fail 'Linux bootstrap must install the standalone Mise'
+grep -Eq '^curl:-fsSL -o .+/install\.sh https://mise\.run$' "$test_log" ||
+  fail 'Linux bootstrap must download the official Mise installer'
+grep -Fqx 'mise:install --locked -y' "$test_log" ||
+  fail 'Linux bootstrap must install the locked runtimes'
+packages_line=$(log_line_of '^linux-packages:')
+mise_installer_line=$(log_line_of '^installer:mise:')
+claude_installer_line=$(log_line_of '^installer:claude:')
+linux_rcup_line=$(log_line_of '^rcup:')
+linux_runtime_line=$(log_line_of '^mise:install')
+[ "$packages_line" -lt "$mise_installer_line" ] &&
+  [ "$mise_installer_line" -lt "$claude_installer_line" ] &&
+  [ "$claude_installer_line" -lt "$linux_rcup_line" ] &&
+  [ "$linux_rcup_line" -lt "$linux_runtime_line" ] ||
+  fail 'Linux order must be system packages, Mise, agents, links, runtimes'
+pass 'Linux bootstrap installs system packages, Mise, agents, links, and runtimes'
+
+: >"$test_log"
+run_linux_bootstrap "$linux_home" --only packages --optional --upgrade >/dev/null
+grep -Fqx \
+  "linux-packages:install --upgrade $repo_root/Linuxfile $repo_root/Linuxfile.optional" \
+  "$test_log" || fail 'Linux packages must pass --upgrade and the optional manifest'
+if grep -q '^installer:' "$test_log"; then
+  fail 'Linux bootstrap must leave existing self-updating installs alone'
+fi
+pass 'Linux packages forward upgrade and optional manifests'
+
+linux_mise_home=$test_tmp/linux-standalone-mise-home
+mkdir -p "$linux_mise_home/.local/bin"
+printf '%s\n' 'standalone mise' >"$linux_mise_home/.local/bin/mise"
+chmod +x "$linux_mise_home/.local/bin/mise"
+: >"$test_log"
+run_linux_bootstrap "$linux_mise_home" --only links >/dev/null ||
+  fail 'Linux links must accept the standalone Mise'
+grep -Fqx 'standalone mise' "$linux_mise_home/.local/bin/mise" ||
+  fail 'Linux links must keep the standalone Mise in place'
+[ ! -e "$linux_mise_home/.local/bin/mise.pre-dotfiles" ] ||
+  fail 'Linux links must not migrate the standalone Mise'
+pass 'Linux keeps the standalone Mise that macOS migrates away'
+
+for unsupported_platform in Linux:aarch64 FreeBSD:amd64; do
+  : >"$test_log"
+  if HOME="$linux_home" \
+    TEST_LOG="$test_log" \
+    DOTFILES_ROOT="$repo_root" \
+    DOTFILES_LINUX_PACKAGES_BIN="$test_tmp/bin/linux-packages" \
+    DOTFILES_BREW_BIN="$test_tmp/bin/brew" \
+    DOTFILES_MACHINE_OS=${unsupported_platform%%:*} \
+    DOTFILES_MACHINE_ARCH=${unsupported_platform#*:} \
+    "$repo_root/bin/dotfiles-bootstrap" >/dev/null 2>&1; then
+    fail "bootstrap must reject $unsupported_platform"
+  fi
+  [ ! -s "$test_log" ] ||
+    fail "$unsupported_platform must fail before package or link mutation"
+done
+pass 'unsupported Linux architectures and operating systems fail before mutation'
 
 nonempty_home=$test_tmp/nonempty-home
 mkdir -p "$nonempty_home/.codex"
@@ -1138,20 +1249,27 @@ grep -Fqx 'old standalone mise' \
 run_bootstrap_home "$standalone_mise_home" >/dev/null ||
   fail 'standalone Mise migration must be idempotent'
 
-homebrew_mise_link_home=$test_tmp/homebrew-mise-link-home
-mkdir -p "$homebrew_mise_link_home/.local/bin"
-ln -s /opt/homebrew/bin/mise "$homebrew_mise_link_home/.local/bin/mise"
-: >"$test_log"
-run_bootstrap_home "$homebrew_mise_link_home" >/dev/null ||
-  fail 'bootstrap must accept a standalone path delegating to Homebrew Mise'
-doctor_output=$(HOME="$homebrew_mise_link_home" \
-  PATH=/usr/bin:/bin \
-  DOTFILES_ROOT="$repo_root" \
-  "$repo_root/bin/dotfiles-doctor" 2>&1 || true)
-printf '%s\n' "$doctor_output" | grep -Fq \
-  '[ok]   standalone Mise path delegates to the Homebrew-owned command' ||
-  fail 'doctor must accept a standalone path delegating to Homebrew Mise'
-pass 'standalone Mise migration leaves Homebrew as the single owner'
+# Ownership is checked through the real Homebrew directory, so it must exist.
+if [ ! -d /opt/homebrew/bin ]; then
+  skip 'no /opt/homebrew/bin to delegate the standalone Mise path to'
+else
+  homebrew_mise_link_home=$test_tmp/homebrew-mise-link-home
+  mkdir -p "$homebrew_mise_link_home/.local/bin"
+  ln -s /opt/homebrew/bin/mise "$homebrew_mise_link_home/.local/bin/mise"
+  : >"$test_log"
+  run_bootstrap_home "$homebrew_mise_link_home" >/dev/null ||
+    fail 'bootstrap must accept a standalone path delegating to Homebrew Mise'
+  doctor_output=$(HOME="$homebrew_mise_link_home" \
+    PATH=/usr/bin:/bin \
+    DOTFILES_ROOT="$repo_root" \
+    DOTFILES_MACHINE_OS=Darwin \
+    DOTFILES_MACHINE_ARCH=arm64 \
+    "$repo_root/bin/dotfiles-doctor" 2>&1 || true)
+  printf '%s\n' "$doctor_output" | grep -Fq \
+    '[ok]   standalone Mise path delegates to the Homebrew-owned command' ||
+    fail 'doctor must accept a standalone path delegating to Homebrew Mise'
+  pass 'standalone Mise migration leaves Homebrew as the single owner'
+fi
 
 # rcm never reclaims a link whose source was deleted, so doctor has to notice.
 stale_link_home=$test_tmp/stale-link-home
@@ -1226,6 +1344,8 @@ pass 'retired symlink cleanup is exact and foreign instructions are preserved'
 if HOME="$test_tmp/home" \
   DOTFILES_ROOT="$repo_root" \
   DOTFILES_BREW_BIN="$test_tmp/bin/missing-brew" \
+  DOTFILES_MACHINE_OS=Darwin \
+  DOTFILES_MACHINE_ARCH=arm64 \
   DOTFILES_RCUP_BIN="$test_tmp/bin/rcup" \
   DOTFILES_DOCTOR_BIN="$test_tmp/bin/doctor" \
   DOTFILES_MISE_BIN="$test_tmp/bin/mise" \
@@ -1340,7 +1460,7 @@ for core_formula in \
   grep -Fq "brew \"$core_formula\"" "$repo_root/Brewfile" ||
     fail "core Brewfile must install $core_formula"
 done
-grep -Fq 'mise mvim nvim' "$repo_root/bin/dotfiles-doctor" ||
+grep -Fq "platform_commands='brew mvim'" "$repo_root/bin/dotfiles-doctor" ||
   fail 'doctor must check the mvim command'
 grep -Fq 'bundle check --no-upgrade' "$repo_root/bin/dotfiles-doctor" ||
   fail 'doctor must not require upgrades in default check mode'
@@ -1360,7 +1480,7 @@ pass 'Brewfiles contain the expected modern package boundary'
 
 if grep -Eq '=[[:space:]]*"(latest|stable|lts)"|cargo:bootmux' \
   "$repo_root/config/mise/config.toml"; then
-  fail 'mise config must use exact pins and leave Bootmux to Homebrew'
+  fail 'mise config must use exact pins and never build Bootmux with cargo'
 fi
 pass 'mise tools use exact pins'
 
@@ -1371,7 +1491,11 @@ if command -v mise >/dev/null 2>&1; then
     MISE_GLOBAL_CONFIG_FILE="$repo_root/config/mise/config.toml" \
     MISE_GLOBAL_CONFIG_ROOT="$repo_root/config/mise" \
     mise ls --current 2>/dev/null | grep -c .)
-  expected_tools=$(grep -cE '^"?[a-z][^ ]* = "' "$repo_root/config/mise/config.toml")
+  expected_tools=$(grep -cE '^"?[a-z][^ ]* = ["{]' "$repo_root/config/mise/config.toml")
+  if [ "$(uname -s)" != Linux ]; then
+    linux_only_tools=$(grep -cF 'os = ["linux"]' "$repo_root/config/mise/config.toml")
+    expected_tools=$((expected_tools - linux_only_tools))
+  fi
   [ "$resolved_tools" -eq "$expected_tools" ] ||
     fail "mise resolved $resolved_tools of $expected_tools pinned tools"
 

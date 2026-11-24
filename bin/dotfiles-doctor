@@ -12,7 +12,7 @@ usage() {
   cat <<'EOF'
 Usage: dotfiles-doctor [--optional] [--quiet]
 
-  --optional  Also check Brewfile.optional.
+  --optional  Also check Brewfile.optional (macOS) or Linuxfile.optional (Linux).
   --quiet     Print only warnings, failures, and the final summary.
 EOF
 }
@@ -153,20 +153,37 @@ repo_root=$(resolve_repo_root) || {
   exit 1
 }
 
-if [ "$(uname -s)" = Darwin ]; then
-  ok 'platform: macOS'
-else
-  fail 'platform: this configuration currently supports macOS only'
-fi
-if [ "$(uname -m)" = arm64 ]; then
-  ok 'architecture: Apple silicon'
-else
-  fail 'architecture: mise lock currently supports macos-arm64 only'
-fi
+machine_os=${DOTFILES_MACHINE_OS:-$(uname -s)}
+machine_arch=${DOTFILES_MACHINE_ARCH:-$(uname -m)}
+is_linux=false
+case "$machine_os" in
+  Darwin)
+    ok 'platform: macOS'
+    if [ "$machine_arch" = arm64 ]; then
+      ok 'architecture: Apple silicon'
+    else
+      fail 'architecture: the mise lock supports macos-arm64 only on macOS'
+    fi
+    ;;
+  Linux)
+    is_linux=true
+    ok 'platform: Linux'
+    if [ "$machine_arch" = x86_64 ]; then
+      ok 'architecture: x86_64'
+    else
+      fail 'architecture: the mise lock supports linux-x64 only on Linux'
+    fi
+    # mise rather than the distribution provides several required commands.
+    PATH=${MISE_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/mise}/shims:$HOME/.local/bin:$PATH
+    ;;
+  *) fail "platform: unsupported operating system: $machine_os" ;;
+esac
 
 for required_file in \
   Brewfile \
   Brewfile.optional \
+  Linuxfile \
+  Linuxfile.optional \
   rcrc \
   gitignore \
   config/mise/config.toml \
@@ -185,32 +202,53 @@ check_retired_path \
 check_retired_path \
   'ag configuration' "$HOME/.agrc" "$repo_root/agrc" false
 
+if $is_linux; then
+  platform_commands='vim zsh'
+else
+  platform_commands='brew mvim'
+fi
+# shellcheck disable=SC2086 # Both lists are space-separated command names.
 for required_command in \
-  brew git git-lfs rcup lsrc bash bun claude codex diff-so-fancy fd fzf gawk \
-  gh glab herdr jq lazygit mise mvim nvim rg shellcheck shfmt stylua tmux \
-  ctags uv bootmux op; do
+  git git-lfs rcup lsrc bash bun claude codex diff-so-fancy fd fzf gawk \
+  gh glab herdr jq lazygit mise nvim rg shellcheck shfmt stylua tmux \
+  ctags uv bootmux op $platform_commands; do
   check_command "$required_command"
 done
 
-# Ghostty ships as a GUI cask with no `binary` artifact, so its CLI reaches PATH
-# only through a symlink nothing manages. Check the bundle the cask installs.
-if [ -d /Applications/Ghostty.app ]; then
-  ok 'application: Ghostty'
-else
-  fail 'missing application: /Applications/Ghostty.app'
-fi
+if $is_linux; then
+  login_shell=$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f7)
+  if [ "${login_shell##*/}" = zsh ]; then
+    ok 'login shell: zsh'
+  else
+    warn "login shell is ${login_shell:-unknown}, not zsh"
+  fi
 
-if symlink_points_to_path "$HOME/.local/bin/mise" /opt/homebrew/bin/mise; then
-  ok 'standalone Mise path delegates to the Homebrew-owned command'
-elif [ -L "$HOME/.local/bin/mise" ] || [ -e "$HOME/.local/bin/mise" ]; then
-  fail 'standalone Mise still shadows the Homebrew-owned command: ~/.local/bin/mise'
+  if locale -a 2>/dev/null | grep -Eiq '^en_US\.utf-?8$'; then
+    ok 'locale: en_US.UTF-8'
+  else
+    fail 'missing locale: en_US.UTF-8 (run the packages component)'
+  fi
 else
-  ok 'Mise has no stale standalone command'
+  # Ghostty ships as a GUI cask with no `binary` artifact, so its CLI reaches
+  # PATH only through a symlink nothing manages. Check the bundle instead.
+  if [ -d /Applications/Ghostty.app ]; then
+    ok 'application: Ghostty'
+  else
+    fail 'missing application: /Applications/Ghostty.app'
+  fi
+
+  if symlink_points_to_path "$HOME/.local/bin/mise" /opt/homebrew/bin/mise; then
+    ok 'standalone Mise path delegates to the Homebrew-owned command'
+  elif [ -L "$HOME/.local/bin/mise" ] || [ -e "$HOME/.local/bin/mise" ]; then
+    fail 'standalone Mise still shadows the Homebrew-owned command: ~/.local/bin/mise'
+  else
+    ok 'Mise has no stale standalone command'
+  fi
 fi
 
 for helper in \
-  agentsync bundler-search dotfiles-prune-links git-default-branch mux \
-  replace; do
+  agentsync bundler-search dotfiles-linux-packages dotfiles-prune-links \
+  git-default-branch mux replace; do
   if [ -x "$repo_root/bin/$helper" ]; then
     ok "helper executable: bin/$helper"
   else
@@ -218,7 +256,21 @@ for helper in \
   fi
 done
 
-if command -v brew >/dev/null 2>&1; then
+check_linux_packages() {
+  manifest_name=$1
+  if missing_packages=$("$repo_root/bin/dotfiles-linux-packages" check \
+    "$repo_root/$manifest_name" 2>&1); then
+    ok "$manifest_name is satisfied"
+  else
+    fail "$manifest_name is not satisfied: $(printf '%s' "$missing_packages" |
+      sed 's/^missing package: //' | tr '\n' ' ')"
+  fi
+}
+
+if $is_linux; then
+  check_linux_packages Linuxfile
+  $optional && check_linux_packages Linuxfile.optional
+elif command -v brew >/dev/null 2>&1; then
   if HOMEBREW_NO_AUTO_UPDATE=1 \
     brew bundle check --no-upgrade --file "$repo_root/Brewfile" >/dev/null 2>&1; then
     ok 'core Brewfile is satisfied'
@@ -291,13 +343,13 @@ else
 fi
 
 if grep -q 'cargo:bootmux' "$repo_root/config/mise/config.toml" 2>/dev/null; then
-  fail 'Bootmux must have one owner (Homebrew), not a duplicate mise install'
+  fail 'Bootmux must have one owner per platform, not a cargo build through mise'
 else
   ok 'Bootmux has a single package owner'
 fi
 
 mise_bin=$(command -v mise 2>/dev/null || true)
-if command -v brew >/dev/null 2>&1; then
+if ! $is_linux && command -v brew >/dev/null 2>&1; then
   mise_prefix=$(brew --prefix mise 2>/dev/null || true)
   [ ! -x "$mise_prefix/bin/mise" ] || mise_bin=$mise_prefix/bin/mise
 fi
@@ -415,6 +467,7 @@ fi
 for shell_file in \
   "$repo_root/bin/dotfiles-bootstrap" \
   "$repo_root/bin/dotfiles-doctor" \
+  "$repo_root/bin/dotfiles-linux-packages" \
   "$repo_root/bin/dotfiles-prune-links" \
   "$repo_root/bin/ai-commit-suggest" \
   "$repo_root/bin/git-default-branch" \

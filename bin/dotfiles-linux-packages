@@ -1,0 +1,181 @@
+#!/bin/sh
+
+# Package names are single words and globbing is off (-f), so package lists
+# below expand unquoted on purpose.
+# shellcheck disable=SC2086
+set -efu
+
+REQUIRED_LOCALE=en_US.UTF-8
+
+usage() {
+  cat <<'EOF'
+Usage: dotfiles-linux-packages install [--upgrade] [MANIFEST...]
+       dotfiles-linux-packages check [MANIFEST...]
+
+Installs or checks Linux system packages through apt or dnf. Each MANIFEST row
+names the apt package, then the dnf package; "-" skips that package manager.
+MANIFEST defaults to the repository Linuxfile.
+
+  install    Install missing packages and the en_US.UTF-8 locale.
+  --upgrade  Also upgrade packages that are already installed.
+  check      Read-only: print each missing package and exit 1 if any is missing.
+
+DOTFILES_LINUX_PACKAGE_MANAGER=apt|dnf overrides package manager detection.
+EOF
+}
+
+die() {
+  printf 'dotfiles-linux-packages: %s\n' "$*" >&2
+  exit 2
+}
+
+resolve_repo_root() {
+  if [ -n "${DOTFILES_ROOT:-}" ]; then
+    CDPATH='' cd -P -- "$DOTFILES_ROOT" && pwd
+    return
+  fi
+
+  script_path=$0
+  while [ -L "$script_path" ]; do
+    script_dir=$(CDPATH='' cd -P -- "$(dirname -- "$script_path")" && pwd)
+    script_path=$(readlink "$script_path")
+    case "$script_path" in
+      /*) ;;
+      *) script_path=$script_dir/$script_path ;;
+    esac
+  done
+  CDPATH='' cd -P -- "$(dirname -- "$script_path")/.." && pwd
+}
+
+detect_package_manager() {
+  if [ -n "${DOTFILES_LINUX_PACKAGE_MANAGER:-}" ]; then
+    case "$DOTFILES_LINUX_PACKAGE_MANAGER" in
+      apt | dnf) printf '%s\n' "$DOTFILES_LINUX_PACKAGE_MANAGER" ;;
+      *) die "unsupported package manager: $DOTFILES_LINUX_PACKAGE_MANAGER" ;;
+    esac
+  elif command -v apt-get >/dev/null 2>&1; then
+    printf '%s\n' apt
+  elif command -v dnf >/dev/null 2>&1; then
+    printf '%s\n' dnf
+  else
+    die 'no supported package manager found (apt-get or dnf)'
+  fi
+}
+
+manifest_packages() {
+  case "$package_manager" in
+    apt) manifest_column=1 ;;
+    dnf) manifest_column=2 ;;
+  esac
+  awk -v column="$manifest_column" '
+    { sub(/#.*/, "") }
+    NF == 0 { next }
+    NF != 2 {
+      printf "malformed row %d in %s: expected 2 columns\n", FNR, FILENAME > "/dev/stderr"
+      failed = 1
+      exit
+    }
+    $column != "-" { print $column }
+    END { exit failed }
+  ' "$@"
+}
+
+package_is_installed() {
+  case "$package_manager" in
+    apt)
+      [ "$(dpkg-query -W -f='${Status}' "$1" 2>/dev/null)" = 'install ok installed' ]
+      ;;
+    # --whatprovides also accepts names that are only provided, such as wget.
+    dnf) rpm -q --quiet --whatprovides "$1" ;;
+  esac
+}
+
+run_as_root() {
+  if [ "$(id -u)" -eq 0 ]; then
+    "$@"
+  else
+    command -v sudo >/dev/null 2>&1 ||
+      die 'sudo is required to install system packages as a regular user'
+    sudo -- "$@"
+  fi
+}
+
+locale_is_available() {
+  locale -a 2>/dev/null | grep -Eiq '^en_US\.utf-?8$'
+}
+
+subcommand=${1:-}
+case "$subcommand" in
+  install | check) shift ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
+
+upgrade=false
+if [ "${1:-}" = --upgrade ]; then
+  [ "$subcommand" = install ] || die '--upgrade requires the install subcommand'
+  upgrade=true
+  shift
+fi
+
+for manifest do
+  case "$manifest" in
+    -*) die "unknown option: $manifest" ;;
+  esac
+  [ -f "$manifest" ] || die "missing manifest: $manifest"
+done
+if [ "$#" -eq 0 ]; then
+  repo_root=$(resolve_repo_root) || die 'cannot resolve repository root'
+  set -- "$repo_root/Linuxfile"
+  [ -f "$1" ] || die "missing manifest: $1"
+fi
+
+package_manager=$(detect_package_manager)
+listed_packages=$(manifest_packages "$@") || die 'cannot read package manifests'
+
+missing_packages=
+for package in $listed_packages; do
+  package_is_installed "$package" || missing_packages="$missing_packages $package"
+done
+
+if [ "$subcommand" = check ]; then
+  for package in $missing_packages; do
+    printf 'missing package: %s\n' "$package"
+  done
+  [ -z "$missing_packages" ]
+  exit
+fi
+
+case "$package_manager" in
+  apt)
+    install_targets=$missing_packages
+    $upgrade && install_targets=$listed_packages
+    if [ -n "$install_targets" ]; then
+      printf 'Installing apt packages:%s\n' "$(printf ' %s' $install_targets)"
+      run_as_root apt-get update
+      run_as_root env DEBIAN_FRONTEND=noninteractive \
+        apt-get install -y --no-install-recommends $install_targets
+    fi
+    ;;
+  dnf)
+    if [ -n "$missing_packages" ]; then
+      printf 'Installing dnf packages:%s\n' "$missing_packages"
+      run_as_root dnf install -y $missing_packages
+    fi
+    if $upgrade; then
+      printf '%s\n' 'Upgrading listed dnf packages ...'
+      run_as_root dnf upgrade -y $listed_packages
+    fi
+    ;;
+esac
+
+if ! locale_is_available; then
+  printf 'Generating the %s locale ...\n' "$REQUIRED_LOCALE"
+  run_as_root localedef -i en_US -f UTF-8 "$REQUIRED_LOCALE"
+fi
