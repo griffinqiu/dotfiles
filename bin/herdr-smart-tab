@@ -131,9 +131,16 @@ nc_bin="$(command -v nc || true)"
 lock_key="$(printf '%s' "$socket_path" | cksum | awk '{print $1}')"
 lock_root="${TMPDIR:-/tmp}"
 lock_file="${lock_root%/}/herdr-smart-tab-${lock_key}.lock"
+lock_timeout_seconds=5
 exec 9>"$lock_file"
-if ! /usr/bin/lockf -s -t 5 9; then
-  die "timed out waiting for another tab creation"
+if [ -x /usr/bin/lockf ]; then
+  /usr/bin/lockf -s -t "$lock_timeout_seconds" 9 ||
+    die "timed out waiting for another tab creation"
+elif command -v flock >/dev/null 2>&1; then
+  flock -w "$lock_timeout_seconds" 9 ||
+    die "timed out waiting for another tab creation"
+else
+  die "lockf or flock is required"
 fi
 
 # jq handles the multibyte suffix characters; the superscript and +N/-N
