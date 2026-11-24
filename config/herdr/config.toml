@@ -235,4 +235,4 @@ teal = "#83c092"
 peach = "#e69875"
 
 [ui.sound]
-enabled = true
+enabled = false
