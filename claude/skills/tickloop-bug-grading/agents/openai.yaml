@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tickloop Bug Grading"
+  short_description: "Report and grade Tickloop product bugs on five dimensions"
+  default_prompt: "Use $tickloop-bug-grading to report this bug with the standard template and five-dimension grades."

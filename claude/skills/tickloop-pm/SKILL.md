@@ -7,6 +7,18 @@ description: "Talk to the Tickloop PM through the `pm` command. Use when you are
 
 `pm` is a global command (`~/.local/bin/pm`). Every state change you make goes through it: the PM and the user's dashboard see only what `pm` records. The rules behind these commands are in `~/tickloopai/pm/RULES.md` (your brief gives the path on your machine); read it once per session. `pm <command> --help` is the authority on flags.
 
+## Terms
+
+- **PM**: dispatches tickets, schedules shared resources, accepts work and talks to the user; runs on the **PM host**.
+- **Coord** (short for coordinator; the name we use): one per ticket; splits the work, starts workers, merges and delivers.
+- **Worker**: an external agent a coord starts with `pm spawn`, on its own Herdr tab and derived worktree, tracked on the board and reaped by pm. Every code change, check run and review goes to a worker.
+- **Subagent**: an in-session helper any agent may start; not on the board, read-only research only. Anything that edits code is a worker, never a subagent.
+- **Machine**: any of the user's computers. The **PM host** keeps pm's state; **dev machines** (macmini, macmini2, pc, macbook2) run tickets. A machine is never called a worker.
+
+## Simple and complex bugs
+
+First find the root cause (reading code, reproducing and measuring are fine before judging), then judge the bug simple or complex; never judge before the root cause is known. Label each one in the report. Simple: clear root cause, local change (one or two modules), no change to behaviour contracts or data shapes, covered by a regression test that fails before and passes after; fix it. Complex (any of): an architectural or cross-service change; a data shape, migration or production data write; a change users notice; security or permissions; several fixes to choose between; more than a day or a risk to production. For a complex one, do not start: write a short plan (root cause, fix, impact, risk, effort) and `pm issue raise --title 'Complex: <one line>' ...`; the PM takes it to the user. Work on the simple ones meanwhile. A worker reports a complex one to its coord, which decides and raises it.
+
 ## Identity
 
 `pm` works out who you are from your Herdr pane, falling back to the worktree you run it in. Run it from your worktree. If it answers `run this inside a pm-managed agent pane`, the ticket commands (`check`, `ready`, `stage`, `ack`, `deploy`, `release`, `issue raise`) accept `--ticket <ticket-name>`; the rest need the pane or worktree. `pm whoami` shows your registry entry.
@@ -30,7 +42,7 @@ Claude Code recipients get messages during a turn, at the next tool boundary; ot
 
 The PM schedules shared resources and relays what only the user can decide. Message it only for:
 
-- Shared resources: DEV, PRE, and machine resources (load, disk, Docker/OrbStack, a quiet window for measurements).
+- PRE, and machine problems you cannot settle on your machine (Docker/OrbStack broken, disk still short after cleaning, coordinators on your machine cannot agree, a step your machine cannot do such as a browser or DEV). Day-to-day DEV and load on your machine are settled between its coordinators (user, 2026-11-25), see "Machine load and DEV".
 - Problems you cannot solve inside your ticket, or that touch another ticket or the user's own resources: `pm issue raise`.
 - Product decisions and anything else only the user can decide: `pm issue raise --kind product` or `needs-user`, with your recommendation.
 - Something the user told you to hand them for review; send the path of a file that has it all.
@@ -54,7 +66,7 @@ Any new commit makes both checks stale; redo them before `pm ready`.
 
 ## Environments
 
-Every machine has its own DEV; your ticket uses the DEV of the machine it runs on, and `pm` picks it for you. A ticket on macmini verifies DEV in macmini's own Chrome (the /chrome extension connected on macmini), never the macbook browser. On macmini never run large headless Playwright sweeps: only a few targeted specs, `--workers=1`, one run at a time. There is one PRE, deployed only from the PM's Mac.
+Every machine has its own DEV; your ticket uses the DEV of the machine it runs on, and `pm` picks it for you. Never borrow another machine's DEV (user, 2026-11-25); pc and macbook2 have none, so raise an issue and the PM arranges help on another machine. A ticket on macmini verifies DEV in macmini's own Chrome (the /chrome extension connected on macmini), never the macbook browser. On macmini never run large headless Playwright sweeps: only a few targeted specs, `--workers=1`, one run at a time. There is one PRE, deployed only from the PM's Mac.
 
 | Need | Command |
 | --- | --- |
@@ -67,14 +79,15 @@ Deploy only through `pm`; it checks the grant. Production and official releases 
 
 ## Workers (coordinators)
 
-- Every code change goes to an external worker; never start agents or create worktrees by hand with herdr or git, pm would not see them.
-- Code review goes to external workers too: one read-only review worker per review skill (`/code-review` and `/mattpocock-skills:code-review`, fixed point `origin/main`), never in your own session or an in-process subagent. A review worker does not edit or commit; another worker fixes what it finds, and you `pm reap` the review worker once its report is in.
+- Every code change goes to a worker (an external agent started with `pm spawn`, on its own tab and worktree); subagents (in-session helpers) only do read-only research; never start agents or create worktrees by hand with herdr or git, pm would not see them.
+- Code review goes to workers too: one read-only review worker per review skill (`/code-review` and `/mattpocock-skills:code-review`, fixed point `origin/main`), never in your own session or a subagent. A review worker does not edit or commit; another worker fixes what it finds, and you `pm reap` the review worker once its report is in.
 - Do not pass `--profile` to `pm spawn`: pm picks each worker's agent at random by the weights in `agents.toml` (now claudelb only: no codex workers, user 2026-11-09).
-- `pm spawn <word> --task-file <ticket.md>` starts an external worker in a new tab on worktree `<your-worktree>-<word>`; `<word>` is one lowercase word or abbreviation, letters only, at most 10.
+- `pm spawn <word> --task-file <ticket.md>` starts a worker in a new tab on worktree `<your-worktree>-<word>`; `<word>` is one lowercase word or abbreviation, letters only, at most 10.
 - `pm spawn <word> --repo <repo> --task-file <ticket.md>` does the same in another repo the ticket owns (your brief lists them), on worktree `<ticket>-<word>` derived from the ticket's worktree there.
 - Workers commit but do not push; merge a worker's local branch into your ticket branch (same local repository: a ticket's coordinator and workers always run on one machine) and push the ticket branch yourself.
 - Workers run only checks scoped to their change. You run the full `make check` once per ticket, after every task is done and merged, right before `pm check` / `pm ready` (never after a batch, a DEV deploy or a main merge; a blocker counts as done once merged with scoped checks passing). Send failures back with `pm send <worker>` and rerun only what failed; a message reopens a worker that already reported.
 - Before heavy work (a full `make check`, cargo tests, integration tests) run `pm heavy`. It is advice, never a gate. Exit 0 (`ok: macmini load 12 (limit 30)`) means go; exit 3 (`skip: ...`) means the machine is overloaded: do not wait. A worker skips the check and lists it with its exact command under `Skipped checks` in its report; a coordinator goes on with the steps that are not heavy and runs its deferred checks, plus every check its workers skipped, on the integration branch before `pm check` or `pm ready`, even if the load is still high then. `pm spawn` never checks the load.
+- **Machine load and DEV** (user, 2026-11-25): coordinators on the same machine settle these between themselves, not through the PM. One full `make check` per machine at a time: check `pm status` for the tickets on your machine, agree on the order with `pm send <their coordinator> '...'`, and tell the next one when yours ends. Under about 4G free memory stop starting builds and workers; under about 40G free disk clean your own targets (macmini under about 25G: also `~/.cargo/bin/kache clean --cache --yes`). Several tickets wanting DEV on one machine agree on the order themselves; the PM steps in only on a deadlock or when the user asks. Not absolute: when your machine lacks something (pc has no browser; pc and macbook2 have no DEV), raise an issue and the PM arranges a coordinator or worker on another machine.
 - After its merge and scoped checks pass: `pm reap <worker>` closes its tab and deletes its worktree and merged branch.
 - Merge main before you stop (user, 2026-11-18): every time before you stop (end your turn, report, wait on a worker, the user or acceptance), `git fetch origin main`; if it has new commits, merge them into the ticket branch, resolve conflicts, run the scoped checks and push without being asked. No full `make check` after it; redo review and E2E. Workers never merge main themselves.
 
